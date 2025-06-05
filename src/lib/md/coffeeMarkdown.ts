@@ -1,0 +1,245 @@
+export type CoffeeMarkdownStyles = {
+	h1?: string;
+	h2?: string;
+	h3?: string;
+	h4?: string;
+	h5?: string;
+	h6?: string;
+	p?: string;
+	a?: string;
+	ul?: string;
+	ol?: string;
+	li?: string;
+	blockquote?: string;
+	img?: string;
+	b?: string;
+	i?: string;
+	code?: string;
+	pre?: string;
+	bgc?: string;
+	custom?: string; // default style for <custom> tag (optional)
+};
+
+export const defaultStyles: Required<CoffeeMarkdownStyles> = {
+	h1: 'font-size:2rem;color:#3730a3;font-weight:600;margin:1.2em 0 0.6em 0;line-height:1.2;',
+	h2: 'font-size:1.5rem;color:#3730a3;font-weight:600;margin:1.2em 0 0.6em 0;line-height:1.2;',
+	h3: 'font-size:1.2rem;color:#3730a3;font-weight:600;margin:1.2em 0 0.6em 0;line-height:1.2;',
+	h4: 'font-size:1.1rem;color:#3730a3;font-weight:600;margin:1.2em 0 0.6em 0;line-height:1.2;',
+	h5: 'font-size:1rem;color:#3730a3;font-weight:600;margin:1.2em 0 0.6em 0;line-height:1.2;',
+	h6: 'font-size:0.95rem;color:#3730a3;font-weight:600;margin:1.2em 0 0.6em 0;line-height:1.2;',
+	p: 'margin:0.7em 0;color:#222;font-size:1.05rem;',
+	a: 'color:#4f46e5;text-decoration:underline;word-break:break-all;',
+	ul: 'margin:0.7em 0 0.7em 1.5em;',
+	ol: 'margin:0.7em 0 0.7em 1.5em;',
+	li: 'margin-bottom:0.3em;',
+	blockquote: 'border-left:4px solid #a5b4fc;background:#eef2ff;padding:0.7em 1em;margin:1em 0;color:#444;border-radius:6px;',
+	img: 'max-width:100%;display:block;margin:1em auto;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,0.06);',
+	b: 'font-weight:700;',
+	i: 'font-style:italic;',
+	code: 'background:#e0e7ff;color:#3730a3;padding:0.15em 0.4em;border-radius:4px;font-size:0.98em;',
+	pre: 'display:block;padding:1em;overflow-x:auto;background:#f3f4f6;border-radius:8px;',
+	bgc: 'padding:0.7em 1em;border-radius:8px;margin:1em 0;',
+	custom: '', // no default, user must provide
+};
+
+//background-image: url('https://wallpaperaccess.com/full/781336.jpg')
+
+export function coffeeMarkdown(md: string, styles: CoffeeMarkdownStyles = {}): string {
+	const mergedStyles = { ...defaultStyles, ...styles };
+
+	if (!md || typeof md !== 'string') {
+		console.error('Invalid markdown input:', md);
+		return '';
+	}
+
+	let html = escapeHtml(md);
+	html = handleBgc(html, mergedStyles);
+	html = handleCustom(html, mergedStyles); // <-- Add this line
+	html = handleCodeBlocks(html, mergedStyles);
+	html = handleInlineCode(html, mergedStyles);
+	html = handleHeadings(html, mergedStyles);
+	html = handleBlockquotes(html, mergedStyles);
+	html = handleImages(html, mergedStyles);
+	html = handleLinks(html, mergedStyles);
+	html = handleBold(html, mergedStyles);
+	html = handleUnderline(html);
+	html = handleItalic(html, mergedStyles);
+	html = handleUnorderedLists(html, mergedStyles);
+	html = handleOrderedLists(html, mergedStyles);
+	html = handleParagraphs(html, mergedStyles);
+	return html;
+}
+
+
+function escapeHtml(md: string): string {
+	const allowedTags = ['u', 'b', 'i', 'code', 'pre', 'custom', 'bgc', 'url'];
+
+	return md.replace(/<([^>]+)>/g, (match, tagContent) => {
+		const tagNameMatch = tagContent.match(/^\/?([a-zA-Z0-9\-]+)/);
+		if (tagNameMatch) {
+			const tagName = tagNameMatch[1].toLowerCase();
+			if (allowedTags.includes(tagName)) {
+    			return `<${tagContent}>`;
+			}
+		}
+		// Escape the entire tag
+		return `&lt;${tagContent.replace(/"/g, '&quot;').replace(/'/g, '&#39;')}&gt;`;
+	});
+}
+
+
+
+function handleBgc(html: string, mergedStyles: Required<CoffeeMarkdownStyles>): string {
+	return html.replace(
+		/<bgc(?:\s+([^>]*?))?>([\s\S]*?)<\/bgc>/gi,
+		(_, attrs = '', content) => {
+			attrs = attrs.trim();
+			let bg = '';
+			let text = '';
+			const bgMatch = attrs.match(/bg\s*:\s*([#\w\d(),.%]+)/i);
+			const textMatch = attrs.match(/text\s*:\s*([#\w\d(),.%]+)/i);
+			if (bgMatch) bg = bgMatch[1];
+			if (textMatch) text = textMatch[1];
+			const userStyle = [
+				bg ? `background:${bg};` : '',
+				text ? `color:${text};` : ''
+			].join('');
+			const style = `${mergedStyles.bgc}${userStyle}`;
+			return `<div style="${style}">${content}</div>`;
+		}
+	);
+}
+
+
+// Add this function for <custom style="...">...</custom>
+function handleCustom(html: string, mergedStyles: Required<CoffeeMarkdownStyles>): string {
+	return html.replace(
+		/&lt;custom\s+style=(["']|&quot;)([\s\S]*?)\1&gt;([\s\S]*?)&lt;\/custom&gt;/gi,
+		(_, _quote, userStyle, content) => {
+			const unescapedStyle = userStyle.replace(/&quot;/g, '"'); // just in case
+			const style = `${mergedStyles.custom || ''}${unescapedStyle}`.trim();
+			return `<span style="${style}">${content}</span>`;
+		}
+	);
+}
+
+
+function handleCodeBlocks(html: string, mergedStyles: Required<CoffeeMarkdownStyles>): string {
+	return html.replace(/```([\s\S]*?)```/g, (_, code) => {
+		return `<pre style="${mergedStyles.pre}"><code style="${mergedStyles.code}">${code.replace(/^\n+|\n+$/g, '')}</code></pre>`;
+	});
+}
+
+function handleInlineCode(html: string, mergedStyles: Required<CoffeeMarkdownStyles>): string {
+	return html.replace(/`([^`]+)`/g, `<code style="${mergedStyles.code}">$1</code>`);
+}
+
+function handleHeadings(html: string, mergedStyles: Required<CoffeeMarkdownStyles>): string {
+	return html
+		.replace(/^###### (.*)$/gm, `<h6 style="${mergedStyles.h6}">$1</h6>`)
+		.replace(/^##### (.*)$/gm, `<h5 style="${mergedStyles.h5}">$1</h5>`)
+		.replace(/^#### (.*)$/gm, `<h4 style="${mergedStyles.h4}">$1</h4>`)
+		.replace(/^### (.*)$/gm, `<h3 style="${mergedStyles.h3}">$1</h3>`)
+		.replace(/^## (.*)$/gm, `<h2 style="${mergedStyles.h2}">$1</h2>`)
+		.replace(/^# (.*)$/gm, `<h1 style="${mergedStyles.h1}">$1</h1>`);
+}
+
+function handleBlockquotes(html: string, mergedStyles: Required<CoffeeMarkdownStyles>): string {
+	return html.replace(/(^|\n)(>[^\n]*(?:\n>[^\n]*)*)/g, (match, sep, quoteBlock) => {
+		const lines = quoteBlock.split('\n').map((line: string) => line.replace(/^>\s?/, '').trim());
+		const content = lines.join(' ');
+		return `${sep}<blockquote style="${mergedStyles.blockquote}">${content}</blockquote>`;
+	});
+}
+
+
+function handleImages(html: string, mergedStyles: Required<CoffeeMarkdownStyles>): string {
+	return html.replace(
+		/!\[([^\]]*)\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g, // Only match up to whitespace or closing paren for the URL
+		(_, alt, url) => {
+			// Remove any accidental HTML tags from the URL (defensive)
+			url = url.replace(/<.*$/, '');
+			let src = url;
+			if (src.startsWith('img-proxy:')) {
+				const realUrl = src.replace(/^img-proxy:/, '');
+				if (realUrl.length < 6) {
+					src = '';
+				} else {
+					src = '/api/image-proxy?url=' + encodeURIComponent(realUrl);
+				}
+			}
+			return `<img src="${src}" alt="${alt}" style="${mergedStyles.img}" crossorigin="anonymous" />`;
+		}
+	);
+}
+
+function handleLinks(html: string, mergedStyles: Required<CoffeeMarkdownStyles>): string {
+	return html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, `<a href="$2" target="_blank" rel="noopener" style="${mergedStyles.a}">$1</a>`);
+}
+
+function handleBold(html: string, mergedStyles: Required<CoffeeMarkdownStyles>): string {
+	return html.replace(/\*\*([\s\S]+?)\*\*/g, `<b style="${mergedStyles.b}">$1</b>`);
+}
+
+function handleUnderline(html: string): string {
+  // Replace Markdown-style __text__ with styled <u>
+  html = html.replace(/__([\s\S]+?)__/g, `<u style="text-decoration:underline;">$1</u>`);
+
+  // Replace <u> tags even with whitespace or attributes
+  html = html.replace(/<u(?:\s[^>]*)?>([\s\S]*?)<\/u>/gi, `<u style="text-decoration:underline;">$1</u>`);
+
+  return html;
+}
+
+
+function handleItalic(html: string, mergedStyles: Required<CoffeeMarkdownStyles>): string {
+	html = html.replace(/\*([\s\S]+?)\*/g, `<i style="${mergedStyles.i}">$1</i>`);
+	html = html.replace(/_([\s\S]+?)_/g, `<i style="${mergedStyles.i}">$1</i>`);
+	return html;
+}
+
+function handleParagraphs(html: string, mergedStyles: Required<CoffeeMarkdownStyles>): string {
+	html = html.replace(/(?:\r?\n){2,}/g, '\n\n'); // Normalize blank lines
+	return html.replace(/(^|(?:\n{2,}))([^\n<][^\n]*)/g, (m, sep, line) => {
+		if (/^\s*<(h\d|ul|ol|li|pre|blockquote|img|p|code|div|u|b|i)/.test(line)) return m;
+		return `${sep}<p style="${mergedStyles.p}">${line.trim()}</p>`;
+	});
+}
+
+function processListItems(items: string[], isOrdered: boolean, mergedStyles: Required<CoffeeMarkdownStyles>, level = 0): string {
+	return items.map((item, idx) => {
+		const nestedUl = item.match(/(\n\s*[-*] .+)/g);
+		const nestedOl = item.match(/(\n\s*\d+\. .+)/g);
+		const content = item.replace(/\n[\s\S]*/g, '').trim();
+		let nested = '';
+		if (nestedUl) {
+			const nestedItems = nestedUl[0].trim().split(/\n\s*[-*] /).map((i, i2) => i2 === 0 ? i.replace(/^[-*] /, '') : i);
+			nested = `<ul style="${mergedStyles.ul}">${processListItems(nestedItems, false, mergedStyles, level + 1)}</ul>`;
+		} else if (nestedOl) {
+			const nestedItems = nestedOl[0].trim().split(/\n\s*\d+\. /).map((i, i2) => i2 === 0 ? i.replace(/^\d+\. /, '') : i);
+			nested = `<ol style="${mergedStyles.ol}">${processListItems(nestedItems, true, mergedStyles, level + 1)}</ol>`;
+		}
+		const bullet = isOrdered ? `<span style="margin-right:0.5em;color:#a5b4fc;">${idx + 1}.</span>` : `<span style="margin-right:0.5em;color:#a5b4fc;">•</span>`;
+		return `<li style="${mergedStyles.li}">${bullet}${content}${nested}</li>`;
+	}).join('');
+}
+
+function handleUnorderedLists(html: string, mergedStyles: Required<CoffeeMarkdownStyles>): string {
+	return html.replace(
+		/(^|\n)((?:\s*[-*] .*(?:\n|$))+)/g,
+		(match, sep, listBlock) => {
+			const items = listBlock.trim().split(/\n\s*[-*] /).map((item, i) => i === 0 ? item.replace(/^[-*] /, '') : item);
+			return `${sep}<ul style="${mergedStyles.ul}">${processListItems(items, false, mergedStyles)}</ul>`;
+		}
+	);
+}
+
+function handleOrderedLists(html: string, mergedStyles: Required<CoffeeMarkdownStyles>): string {
+	return html.replace(
+		/(^|\n)((?:\s*\d+\. .*(?:\n|$))+)/g,
+		(match, sep, listBlock) => {
+			const items = listBlock.trim().split(/\n\s*\d+\. /).map((item, i) => i === 0 ? item.replace(/^\d+\. /, '') : item);
+			return `${sep}<ol style="${mergedStyles.ol}">${processListItems(items, true, mergedStyles)}</ol>`;
+		}
+	);
+}

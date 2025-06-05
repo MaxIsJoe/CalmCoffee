@@ -1,0 +1,397 @@
+<script lang="ts">
+	export let profile;
+	export let stories = [];
+	export let userComments = [];
+
+	let latestBlog: BlogType | null = null;
+	let latestCharacters: any[] = [];
+
+	import MicroBlogItem from '$lib/comp/microblog/MicroBlogItem.svelte';
+	import type { BlogType } from '$lib/types/blog';
+	import { supabase } from '$lib/supabaseClient';
+	import { onMount } from 'svelte';
+
+	async function fetchMicroblogs() {
+		const { data, error: fetchError } = await supabase
+			.from('microblogs')
+			.select('*')
+			.eq('writer', profile?.account_id)
+			.order('created_at', { ascending: false })
+			.limit(1);
+		console.log('Fetched latest blog:', data);
+		if (fetchError) {
+			return null;
+		}
+		return data;
+	}
+
+	async function fetchLatestCharacters() {
+		const { data, error } = await supabase
+			.from('characters')
+			.select('id,character_name,character_avatar,character_type')
+			.eq('creator', profile?.account_id)
+			.order('created_at', { ascending: false })
+			.limit(6);
+		if (error) return [];
+		return data;
+	}
+
+	let stats = {
+		totalStories: 0,
+		totalCharacters: 0,
+		totalMicroblogs: 0,
+		totalComments: 0,
+		joined: ''
+	};
+
+	async function fetchStats() {
+		if (!profile?.account_id) return;
+		const [storiesRes, charsRes, blogsRes, commentsRes, profileRes] = await Promise.all([
+			supabase
+				.from('stories')
+				.select('*', { count: 'exact', head: true })
+				.eq('user_id', profile.account_id),
+			supabase
+				.from('characters')
+				.select('*', { count: 'exact', head: true })
+				.eq('creator', profile.account_id),
+			supabase
+				.from('microblogs')
+				.select('*', { count: 'exact', head: true })
+				.eq('writer', profile.account_id),
+			supabase
+				.from('story_block_comments')
+				.select('*', { count: 'exact', head: true })
+				.eq('commenter_id', profile.account_id),
+			supabase.from('profiles').select('created_at').eq('account_id', profile.account_id).single()
+		]);
+		stats.totalStories = storiesRes.count || 0;
+		stats.totalCharacters = charsRes.count || 0;
+		stats.totalMicroblogs = blogsRes.count || 0;
+		stats.totalComments = commentsRes.count || 0;
+		stats.joined = profileRes.data?.created_at
+			? new Date(profileRes.data.created_at).toLocaleDateString()
+			: '';
+	}
+
+	onMount(async () => {
+		if (profile) {
+			const latest = await fetchMicroblogs();
+			latestBlog = latest ? latest[0] : null;
+			latestCharacters = await fetchLatestCharacters();
+			await fetchStats();
+		}
+	});
+</script>
+
+<div class="overview-stats">
+	<h4>User Stats</h4>
+	<ul>
+		<li><strong>Stories:</strong> {stats.totalStories}</li>
+		<li><strong>Characters:</strong> {stats.totalCharacters}</li>
+		<li><strong>Microblogs:</strong> {stats.totalMicroblogs}</li>
+		<li><strong>Comments:</strong> {stats.totalComments}</li>
+		<li><strong>Joined:</strong> {stats.joined}</li>
+	</ul>
+</div>
+
+<div class="overview-grid">
+	<div class="overview-section overview-section-wide">
+		<h4>Recent Works</h4>
+		{#if stories.length > 0}
+			<ul class="overview-works-list">
+				{#each stories.slice(0, 2) as story}
+					<li class="overview-story-item">
+						<a href={'/read/' + story.id} class="overview-story-link">
+							<strong class="overview-story-title">{story.title}</strong>
+						</a>
+						{#if story.description}
+							<span class="overview-story-desc">{story.description}</span>
+						{/if}
+						<span class="overview-story-meta">
+							{#if story.created_at}
+								<span class="overview-story-date"
+									>{new Date(story.created_at).toLocaleDateString(undefined, {
+										year: 'numeric',
+										month: 'short',
+										day: 'numeric'
+									})}</span
+								>
+							{/if}
+							{#if story.updated_at && story.updated_at !== story.created_at}
+								<span class="overview-story-updated">
+									&nbsp;| Updated: {new Date(story.updated_at).toLocaleDateString(undefined, {
+										year: 'numeric',
+										month: 'short',
+										day: 'numeric'
+									})}
+								</span>
+							{/if}
+						</span>
+					</li>
+				{/each}
+			</ul>
+		{:else}
+			<p class="overview-empty">No works yet.</p>
+		{/if}
+	</div>
+
+	<div class="overview-section overview-section-wide">
+		<h4>Latest Characters</h4>
+		{#if latestCharacters.length > 0}
+			<ul class="overview-characters-list">
+				{#each latestCharacters as char}
+					<li class="overview-character-item">
+						<a href={'/characters/' + char.id} class="overview-character-link">
+							{#if char.character_avatar}
+								<img
+									src={char.character_avatar}
+									alt={char.character_name}
+									class="overview-character-avatar"
+								/>
+							{/if}
+							<span class="overview-character-name">{char.character_name}</span>
+							<span class="overview-character-type">{char.character_type}</span>
+						</a>
+					</li>
+				{/each}
+			</ul>
+		{:else}
+			<p class="overview-empty">No characters yet.</p>
+		{/if}
+	</div>
+
+	<div class="overview-row">
+		<div class="overview-section">
+			<h4>Latest Blog</h4>
+			{#key latestBlog}
+				{#if latestBlog !== null}
+					<ul class="overview-works-list">
+						<MicroBlogItem mb={latestBlog} {profile} />
+					</ul>
+				{:else}
+					<p class="overview-empty">This user hasn't posted any blogs yet.</p>
+				{/if}
+			{/key}
+		</div>
+
+		<div class="overview-section overview-comments-section">
+			<h4>Recent Comments</h4>
+			{#if userComments.length > 0}
+				<ul class="overview-comments-list">
+					{#each userComments.slice(0, 3) as c}
+						<li>
+							<span class="overview-comment-meta">
+								{#if c.story_id}
+									<a href={'/read/' + c.story_id} class="comment-story"
+										>{c.story_title || 'Story'}</a
+									>
+								{/if}
+								<span class="comment-date">{new Date(c.created_at).toLocaleString()}</span>
+							</span>
+							<span class="overview-comment-text">{c.comment}</span>
+						</li>
+					{/each}
+				</ul>
+			{:else}
+				<p class="overview-empty">No comments yet.</p>
+			{/if}
+		</div>
+	</div>
+</div>
+
+<style>
+	.overview-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+		gap: 2rem;
+		margin-top: 1.5em;
+	}
+	.overview-row {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 2rem;
+		grid-column: 1 / -1;
+	}
+	.overview-section {
+		background: #fff;
+		border-radius: 10px;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+		padding: 1.3em 1.2em 1.1em 1.2em;
+		display: flex;
+		flex-direction: column;
+	}
+	.overview-section-wide {
+		grid-column: span 2;
+	}
+	.overview-section h4 {
+		margin-top: 0;
+		margin-bottom: 1em;
+		font-size: 1.13em;
+		color: #3730a3;
+		font-weight: 600;
+		letter-spacing: -0.5px;
+	}
+	@media (max-width: 900px) {
+		.overview-grid {
+			grid-template-columns: 1fr;
+			gap: 1.2rem;
+		}
+		.overview-row {
+			grid-template-columns: 1fr;
+			gap: 1.2rem;
+		}
+		.overview-section-wide {
+			grid-column: auto;
+		}
+	}
+	.overview-works-list,
+	.overview-comments-list,
+	.overview-characters-list {
+		list-style: none;
+		padding: 0;
+		margin: 0.5em 0 0 0;
+	}
+	.overview-works-list li,
+	.overview-comments-list li,
+	.overview-character-item {
+		margin-bottom: 0.7em;
+		background: #f3f4f6;
+		border-radius: 7px;
+		padding: 0.7em 1em;
+	}
+	.overview-story-item {
+		margin-bottom: 0.7em;
+		background: #f8f5f2;
+		border-radius: 10px;
+		padding: 1em 1.2em 0.8em 1.2em;
+		box-shadow: 0 1px 6px #e0d7ce;
+		display: flex;
+		flex-direction: column;
+		gap: 0.3em;
+	}
+	.overview-story-link {
+		text-decoration: none;
+		color: #7c5e48;
+		transition: color 0.15s;
+	}
+	.overview-story-link:hover .overview-story-title {
+		color: #a67c52;
+		text-decoration: underline;
+	}
+	.overview-story-title {
+		font-size: 1.13em;
+		font-weight: 600;
+		letter-spacing: 0.01em;
+	}
+	.overview-story-meta {
+		color: #bfa07a;
+		font-size: 0.95em;
+		margin-top: 0.1em;
+	}
+	.overview-story-updated {
+		color: #a67c52;
+		font-size: 0.95em;
+		margin-left: 0.5em;
+	}
+	.overview-comment-meta {
+		display: flex;
+		gap: 1em;
+		align-items: center;
+		font-size: 0.97em;
+		margin-bottom: 0.2em;
+	}
+	.comment-story {
+		color: #4f46e5;
+		font-weight: 500;
+		text-decoration: none;
+	}
+	.comment-story:hover {
+		text-decoration: underline;
+	}
+	.comment-date {
+		color: #888;
+		font-size: 0.96em;
+	}
+	.overview-comment-text {
+		display: block;
+		color: #222;
+		margin-top: 0.1em;
+	}
+	.overview-empty {
+		color: #888;
+		font-size: 0.97em;
+		margin: 0.5em 0 0 0;
+	}
+	.overview-characters-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0.7em;
+	}
+	.overview-character-item {
+		display: flex;
+		align-items: center;
+		background: #f3f4f6;
+		border-radius: 7px;
+		padding: 0.7em 1em;
+	}
+	.overview-character-link {
+		display: flex;
+		align-items: center;
+		gap: 0.8em;
+		text-decoration: none;
+		color: #222;
+		width: 100%;
+	}
+	.overview-character-avatar {
+		width: 38px;
+		height: 38px;
+		border-radius: 50%;
+		object-fit: cover;
+		background: #e0e7ef;
+		border: 1.5px solid #e5e7eb;
+	}
+	.overview-character-name {
+		font-weight: 600;
+		font-size: 1.08em;
+	}
+	.overview-character-type {
+		margin-left: auto;
+		font-size: 0.98em;
+		color: #6366f1;
+		background: #eef2ff;
+		border-radius: 5px;
+		padding: 0.1em 0.7em;
+	}
+	.overview-stats {
+		background: #f8f5f2;
+		border-radius: 10px;
+		box-shadow: 0 1px 6px #e0d7ce;
+		padding: 1em 1.2em 0.8em 1.2em;
+		margin-bottom: 1.5em;
+		grid-column: span 2;
+	}
+	.overview-stats h4 {
+		margin-top: 0;
+		margin-bottom: 0.7em;
+		font-size: 1.13em;
+		color: #3730a3;
+		font-weight: 600;
+	}
+	.overview-stats ul {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 1.2em 2.5em;
+	}
+	.overview-stats li {
+		font-size: 1.05em;
+		color: #7c5e48;
+	}
+	.overview-stats strong {
+		color: #4f46e5;
+		font-weight: 600;
+	}
+</style>
