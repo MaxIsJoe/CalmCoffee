@@ -5,6 +5,7 @@
 	let storyCount: number | null = null;
 	let userCount: number | null = null;
 	let commentCount: number | null = null;
+	let characterCount: number | null = null;
 
 	onMount(async () => {
 		const { count: stories } = await supabase
@@ -21,6 +22,11 @@
 			.from('story_block_comments')
 			.select('*', { count: 'exact', head: true });
 		commentCount = comments ?? 0;
+
+		const { count: characters } = await supabase
+			.from('characters')
+			.select('*', { count: 'exact', head: true });
+		characterCount = characters ?? 0;
 	});
 </script>
 
@@ -29,7 +35,7 @@
 	<p class="subtitle">
 		Calm Coffee is a cozy, writing platform for stories.<br />
 		Write, share, and discover stories one block at a time. Don't feel pressured to write a whole book,
-		write your chapters in small, manageable pieces. Whether you're a seasoned author or just starting
+		write your chapters in small, manageable pieces.<br /> Whether you're a seasoned author or just starting
 		out, Calm Coffee is the perfect place to brew your creativity.
 	</p>
 	<ul class="features">
@@ -38,6 +44,7 @@
 		<li>💬 <b>Interact</b> with other readers and writers</li>
 		<li>🎨 <b>Style</b> your writing with Markdown and custom CSS</li>
 		<li>📓 <b>Blog</b> your thoughts and experiences</li>
+		<li>📇 <b>Catalogue</b> your OCs and Sonas</li>
 	</ul>
 	<div class="cta-buttons">
 		<a href="/read" class="cta">Discover Stories</a>
@@ -50,7 +57,8 @@
 		<p>
 			<b>{storyCount}</b> stories being written &nbsp;|&nbsp;
 			<b>{userCount}</b> users signed up &nbsp;|&nbsp;
-			<b>{commentCount}</b> comments shared
+			<b>{commentCount}</b> comments shared &nbsp;|&nbsp;
+			<b>{characterCount}</b> characters imagined
 		</p>
 	{:else}
 		<p>Loading community stats...</p>

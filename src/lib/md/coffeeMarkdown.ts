@@ -54,7 +54,7 @@ export function coffeeMarkdown(md: string, styles: CoffeeMarkdownStyles = {}): s
 
 	let html = escapeHtml(md);
 	html = handleBgc(html, mergedStyles);
-	html = handleCustom(html, mergedStyles); // <-- Add this line
+	html = handleCustom(html, mergedStyles);
 	html = handleCodeBlocks(html, mergedStyles);
 	html = handleInlineCode(html, mergedStyles);
 	html = handleHeadings(html, mergedStyles);
@@ -64,18 +64,18 @@ export function coffeeMarkdown(md: string, styles: CoffeeMarkdownStyles = {}): s
 	html = handleBold(html, mergedStyles);
 	html = handleUnderline(html);
 	html = handleItalic(html, mergedStyles);
+	html = handleEscapedNewlines(html);
 	html = handleUnorderedLists(html, mergedStyles);
 	html = handleOrderedLists(html, mergedStyles);
 	html = handleParagraphs(html, mergedStyles);
 	return html;
 }
 
-
 function escapeHtml(md: string): string {
-	const allowedTags = ['u', 'b', 'i', 'code', 'pre', 'custom', 'bgc', 'url'];
+	const allowedTags = ['u', 'b', 'i', 'code', 'pre', 'custom', 'bgc', 'url', 'br'];
 
 	return md.replace(/<([^>]+)>/g, (match, tagContent) => {
-		const tagNameMatch = tagContent.match(/^\/?([a-zA-Z0-9\-]+)/);
+		const tagNameMatch = tagContent.match(/^\/?([a-zA-Z0-9-]+)/);
 		if (tagNameMatch) {
 			const tagName = tagNameMatch[1].toLowerCase();
 			if (allowedTags.includes(tagName)) {
@@ -86,8 +86,6 @@ function escapeHtml(md: string): string {
 		return `&lt;${tagContent.replace(/"/g, '&quot;').replace(/'/g, '&#39;')}&gt;`;
 	});
 }
-
-
 
 function handleBgc(html: string, mergedStyles: Required<CoffeeMarkdownStyles>): string {
 	return html.replace(
@@ -110,8 +108,6 @@ function handleBgc(html: string, mergedStyles: Required<CoffeeMarkdownStyles>): 
 	);
 }
 
-
-// Add this function for <custom style="...">...</custom>
 function handleCustom(html: string, mergedStyles: Required<CoffeeMarkdownStyles>): string {
 	return html.replace(
 		/&lt;custom\s+style=(["']|&quot;)([\s\S]*?)\1&gt;([\s\S]*?)&lt;\/custom&gt;/gi,
@@ -122,7 +118,6 @@ function handleCustom(html: string, mergedStyles: Required<CoffeeMarkdownStyles>
 		}
 	);
 }
-
 
 function handleCodeBlocks(html: string, mergedStyles: Required<CoffeeMarkdownStyles>): string {
 	return html.replace(/```([\s\S]*?)```/g, (_, code) => {
@@ -151,7 +146,6 @@ function handleBlockquotes(html: string, mergedStyles: Required<CoffeeMarkdownSt
 		return `${sep}<blockquote style="${mergedStyles.blockquote}">${content}</blockquote>`;
 	});
 }
-
 
 function handleImages(html: string, mergedStyles: Required<CoffeeMarkdownStyles>): string {
 	return html.replace(
@@ -191,35 +185,56 @@ function handleUnderline(html: string): string {
   return html;
 }
 
-
 function handleItalic(html: string, mergedStyles: Required<CoffeeMarkdownStyles>): string {
 	html = html.replace(/\*([\s\S]+?)\*/g, `<i style="${mergedStyles.i}">$1</i>`);
 	html = html.replace(/_([\s\S]+?)_/g, `<i style="${mergedStyles.i}">$1</i>`);
 	return html;
 }
 
+function handleEscapedNewlines(html: string): string {
+	// Replace literal "\n" (backslash followed by n) with a <br> tag
+	// We use \\n in the regex to match the literal backslash.
+	return html.replace(/\\n/g, '<br>');
+}
+
 function handleParagraphs(html: string, mergedStyles: Required<CoffeeMarkdownStyles>): string {
-	html = html.replace(/(?:\r?\n){2,}/g, '\n\n'); // Normalize blank lines
-	return html.replace(/(^|(?:\n{2,}))([^\n<][^\n]*)/g, (m, sep, line) => {
-		if (/^\s*<(h\d|ul|ol|li|pre|blockquote|img|p|code|div|u|b|i)/.test(line)) return m;
-		return `${sep}<p style="${mergedStyles.p}">${line.trim()}</p>`;
+	// Normalize blank lines first
+	html = html.replace(/(?:\r?\n){2,}/g, '\n\n');
+
+	// Process paragraphs: look for blocks of text separated by two or more newlines, or at the start of the string.
+	// This regex captures the separator (if any) and the content of the "paragraph".
+	// The content ([^\n<][^\n]*) can contain single newlines.
+	return html.replace(/(^|(?:\n{2,}))([^\n<][^\n]*)/g, (m, sep, lineContent) => {
+		// If the "lineContent" starts with an already-processed HTML block tag,
+		// we don't want to wrap it in a <p> or process its newlines.
+		if (/^\s*<(h\d|ul|ol|li|pre|blockquote|img|p|code|div|u|b|i)/.test(lineContent)) {
+			return m;
+		}
+
+		// Within the lineContent (which is effectively a paragraph),
+		// replace single newlines with <br>.
+		// NOTE: This now handles PHYSICAL newlines. Literal \n was handled by handleEscapedNewlines.
+		const processedLineContent = lineContent.trim().replace(/\n/g, '<br>');
+
+		// Wrap the processed content in a paragraph tag.
+		return `${sep}<p style="${mergedStyles.p}">${processedLineContent}</p>`;
 	});
 }
 
 function processListItems(items: string[], isOrdered: boolean, mergedStyles: Required<CoffeeMarkdownStyles>, level = 0): string {
-	return items.map((item, idx) => {
+	return items.map((item: string, index: number) => {
 		const nestedUl = item.match(/(\n\s*[-*] .+)/g);
 		const nestedOl = item.match(/(\n\s*\d+\. .+)/g);
 		const content = item.replace(/\n[\s\S]*/g, '').trim();
 		let nested = '';
 		if (nestedUl) {
-			const nestedItems = nestedUl[0].trim().split(/\n\s*[-*] /).map((i, i2) => i2 === 0 ? i.replace(/^[-*] /, '') : i);
+			const nestedItems = nestedUl[0].trim().split(/\n\s*[-*] /).map((nestedItem: string, nestedIndex: number) => nestedIndex === 0 ? nestedItem.replace(/^[-*] /, '') : nestedItem);
 			nested = `<ul style="${mergedStyles.ul}">${processListItems(nestedItems, false, mergedStyles, level + 1)}</ul>`;
 		} else if (nestedOl) {
-			const nestedItems = nestedOl[0].trim().split(/\n\s*\d+\. /).map((i, i2) => i2 === 0 ? i.replace(/^\d+\. /, '') : i);
+			const nestedItems = nestedOl[0].trim().split(/\n\s*\d+\. /).map((nestedItem: string, nestedIndex: number) => nestedIndex === 0 ? nestedItem.replace(/^\d+\. /, '') : nestedItem);
 			nested = `<ol style="${mergedStyles.ol}">${processListItems(nestedItems, true, mergedStyles, level + 1)}</ol>`;
 		}
-		const bullet = isOrdered ? `<span style="margin-right:0.5em;color:#a5b4fc;">${idx + 1}.</span>` : `<span style="margin-right:0.5em;color:#a5b4fc;">•</span>`;
+		const bullet = isOrdered ? `<span style="margin-right:0.5em;color:#a5b4fc;">${index + 1}.</span>` : `<span style="margin-right:0.5em;color:#a5b4fc;">•</span>`;
 		return `<li style="${mergedStyles.li}">${bullet}${content}${nested}</li>`;
 	}).join('');
 }
@@ -228,7 +243,7 @@ function handleUnorderedLists(html: string, mergedStyles: Required<CoffeeMarkdow
 	return html.replace(
 		/(^|\n)((?:\s*[-*] .*(?:\n|$))+)/g,
 		(match, sep, listBlock) => {
-			const items = listBlock.trim().split(/\n\s*[-*] /).map((item, i) => i === 0 ? item.replace(/^[-*] /, '') : item);
+			const items = listBlock.trim().split(/\n\s*[-*] /).map((item: string, i: number) => i === 0 ? item.replace(/^[-*] /, '') : item);
 			return `${sep}<ul style="${mergedStyles.ul}">${processListItems(items, false, mergedStyles)}</ul>`;
 		}
 	);
@@ -238,7 +253,7 @@ function handleOrderedLists(html: string, mergedStyles: Required<CoffeeMarkdownS
 	return html.replace(
 		/(^|\n)((?:\s*\d+\. .*(?:\n|$))+)/g,
 		(match, sep, listBlock) => {
-			const items = listBlock.trim().split(/\n\s*\d+\. /).map((item, i) => i === 0 ? item.replace(/^\d+\. /, '') : item);
+			const items = listBlock.trim().split(/\n\s*\d+\. /).map((item: string, i: number) => i === 0 ? item.replace(/^\d+\. /, '') : item);
 			return `${sep}<ol style="${mergedStyles.ol}">${processListItems(items, true, mergedStyles)}</ol>`;
 		}
 	);
