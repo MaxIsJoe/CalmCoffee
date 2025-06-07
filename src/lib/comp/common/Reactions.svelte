@@ -1,0 +1,88 @@
+<script lang="ts">
+	import { createEventDispatcher } from 'svelte';
+
+	export const REACTIONS = [
+		{ emoji: '💖', value: '≡ƒÆû', label: 'Love' },
+		{ emoji: '👀', value: '≡ƒæÇ', label: 'Watch' },
+		{ emoji: '😐', value: '≡ƒÿÉ', label: 'Meh' },
+		{ emoji: '🗑️', value: '≡ƒùæ∩╕Å', label: 'Trash' }
+	];
+
+	// Props
+	export let userReaction: string | null = null;
+	export let reactionCounts: Record<string, number> = {};
+	export let loading = false;
+	export let errorMsg: string | null = null;
+
+	// Events
+	const dispatch = createEventDispatcher<{
+		react: { reaction: string };
+	}>();
+
+	function handleReaction(reaction: string) {
+		dispatch('react', { reaction });
+	}
+</script>
+
+{#if errorMsg}
+	<div class="reaction-error">{errorMsg}</div>
+{/if}
+<div class="microblog-reactions">
+	{#each REACTIONS as r}
+		<button
+			class="reaction-btn {userReaction === r.value ? 'active' : ''}"
+			aria-label={r.label}
+			disabled={loading}
+			on:click={() => handleReaction(r.value)}
+			type="button"
+		>
+			<span>{r.emoji}</span>
+			<span class="reaction-count">{reactionCounts[r.value] || 0}</span>
+		</button>
+	{/each}
+</div>
+
+<style>
+	.microblog-reactions {
+		display: flex;
+		gap: 0.5em;
+		margin: 0.5em 0 0.3em 0;
+	}
+	.reaction-btn {
+		background: #f3f4f6;
+		border: 1px solid #e5e7eb;
+		border-radius: 999px;
+		padding: 0.18em 0.7em;
+		font-size: 1.1em;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		gap: 0.3em;
+		transition:
+			background 0.15s,
+			border 0.15s;
+	}
+	.reaction-btn.active {
+		background: #ede9e3;
+		border-color: #a67c52;
+		color: #a67c52;
+		font-weight: 600;
+	}
+	.reaction-btn:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
+	}
+	.reaction-count {
+		font-size: 0.95em;
+		color: #7c5e48;
+	}
+	.reaction-error {
+		color: #dc2626;
+		background: #fef2f2;
+		border: 1px solid #fecaca;
+		border-radius: 6px;
+		padding: 0.3em 0.7em;
+		margin-bottom: 0.5em;
+		font-size: 0.97em;
+	}
+</style> 

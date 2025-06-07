@@ -18,7 +18,7 @@
 	let previewHtml = '';
 	let showStyles = false;
 
-	const ageRatings = ['Everyone', 'Teen', 'Mature', 'Adult'];
+	const ageRatings = ["Everyone", "Teens", "Mature", "Adult"]
 	let ageRating: string = ageRatings[0];
 
 	$: previewHtml = (() => {

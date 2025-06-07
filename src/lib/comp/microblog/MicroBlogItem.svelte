@@ -5,6 +5,7 @@
 	import { onMount } from 'svelte';
 	import { supabase } from '$lib/supabaseClient';
 	import { user } from '$lib/stores/user';
+	import Reactions from '$lib/comp/common/Reactions.svelte';
 
 	export let mb: BlogType;
 	export let profile: { username: string | null; avatar_url: string | null; } | null;
@@ -12,14 +13,6 @@
 	function goToTag(tag: string) {
 		window.location.href = `/search?tag=${encodeURIComponent(tag)}`;
 	}
-
-	// Reaction system
-	const REACTIONS = [
-		{ emoji: '💖', value: '≡ƒÆû', label: 'Love' },
-		{ emoji: '👀', value: '≡ƒæÇ', label: 'Watch' },
-		{ emoji: '😐', value: '≡ƒÿÉ', label: 'Meh' },
-		{ emoji: '🗑️', value: '≡ƒùæ∩╕Å', label: 'Trash' }
-	];
 
 	// Helper to encode reaction values as plain strings for Supabase
 	function encodeReactionValue(val: string) {
@@ -86,7 +79,7 @@
 		});
 	}
 
-	async function setReaction(reaction: string) {
+	async function handleReaction(event: CustomEvent<{ reaction: string }>) {
 		if (!mb?.post_id || !userId) return;
 		loading = true;
 		errorMsg = null;
@@ -99,11 +92,11 @@
 			loading = false;
 			return;
 		}
-		if (userReaction !== reaction) {
+		if (userReaction !== event.detail.reaction) {
 			const { error: insError } = await supabase.from('microblogs_reactions').insert({
 				user_id: userId,
 				react_to: mb.post_id,
-				reaction: encodeReactionValue(reaction)
+				reaction: encodeReactionValue(event.detail.reaction)
 			});
 			if (insError) {
 				errorMsg = insError.message || 'Could not update reaction.';
@@ -111,7 +104,7 @@
 				return;
 			}
 		}
-		userReaction = userReaction === reaction ? null : reaction;
+		userReaction = userReaction === event.detail.reaction ? null : event.detail.reaction;
 		await fetchReactions();
 		loading = false;
 	}
@@ -143,23 +136,13 @@
 		{/if}
 
 		{#if user}
-			{#if errorMsg}
-				<div class="reaction-error">{errorMsg}</div>
-			{/if}
-			<div class="microblog-reactions">
-				{#each REACTIONS as r}
-					<button
-						class="reaction-btn {userReaction === r.value ? 'active' : ''}"
-						aria-label={r.label}
-						disabled={loading}
-						on:click={() => setReaction(r.value)}
-						type="button"
-					>
-						<span>{r.emoji}</span>
-						<span class="reaction-count">{reactionCounts[r.value] || 0}</span>
-					</button>
-				{/each}
-			</div>
+			<Reactions
+				{userReaction}
+				{reactionCounts}
+				{loading}
+				{errorMsg}
+				on:react={handleReaction}
+			/>
 		{/if}
 
 		<small class="microblog-date">
@@ -243,47 +226,5 @@
 		background: #e0d7ce;
 		color: #a67c52;
 		outline: none;
-	}
-	.microblog-reactions {
-		display: flex;
-		gap: 0.5em;
-		margin: 0.5em 0 0.3em 0;
-	}
-	.reaction-btn {
-		background: #f3f4f6;
-		border: 1px solid #e5e7eb;
-		border-radius: 999px;
-		padding: 0.18em 0.7em;
-		font-size: 1.1em;
-		cursor: pointer;
-		display: flex;
-		align-items: center;
-		gap: 0.3em;
-		transition:
-			background 0.15s,
-			border 0.15s;
-	}
-	.reaction-btn.active {
-		background: #ede9e3;
-		border-color: #a67c52;
-		color: #a67c52;
-		font-weight: 600;
-	}
-	.reaction-btn:disabled {
-		opacity: 0.6;
-		cursor: not-allowed;
-	}
-	.reaction-count {
-		font-size: 0.95em;
-		color: #7c5e48;
-	}
-	.reaction-error {
-		color: #dc2626;
-		background: #fef2f2;
-		border: 1px solid #fecaca;
-		border-radius: 6px;
-		padding: 0.3em 0.7em;
-		margin-bottom: 0.5em;
-		font-size: 0.97em;
 	}
 </style>

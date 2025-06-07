@@ -18,6 +18,8 @@ export type CoffeeMarkdownStyles = {
 	pre?: string;
 	bgc?: string;
 	custom?: string; // default style for <custom> tag (optional)
+	align?: string; // Add this new style for alignment
+	section?: string; // New style for the overall section container
 };
 
 export const defaultStyles: Required<CoffeeMarkdownStyles> = {
@@ -40,6 +42,8 @@ export const defaultStyles: Required<CoffeeMarkdownStyles> = {
 	pre: 'display:block;padding:1em;overflow-x:auto;background:#f3f4f6;border-radius:8px;',
 	bgc: 'padding:0.7em 1em;border-radius:8px;margin:1em 0;',
 	custom: '', // no default, user must provide
+	align: 'text-align:center;', // Default alignment style
+	section: 'padding:1em; border:1px solid #eee; margin:1em 0; overflow:hidden; border-radius:6px; background:#f9f9f9;', // Default style for sections
 };
 
 //background-image: url('https://wallpaperaccess.com/full/781336.jpg')
@@ -53,26 +57,41 @@ export function coffeeMarkdown(md: string, styles: CoffeeMarkdownStyles = {}): s
 	}
 
 	let html = escapeHtml(md);
-	html = handleBgc(html, mergedStyles);
-	html = handleCustom(html, mergedStyles);
+
+	// Phase 1: Handle code blocks first to prevent markdown inside them from being processed
 	html = handleCodeBlocks(html, mergedStyles);
 	html = handleInlineCode(html, mergedStyles);
+
+	// Phase 2: Handle standard block-level elements
+	html = handleImages(html, mergedStyles);
 	html = handleHeadings(html, mergedStyles);
 	html = handleBlockquotes(html, mergedStyles);
-	html = handleImages(html, mergedStyles);
+	html = handleUnorderedLists(html, mergedStyles);
+	html = handleOrderedLists(html, mergedStyles);
+
+	// Phase 3: Handle inline elements within blocks (should be after block processing)
 	html = handleLinks(html, mergedStyles);
 	html = handleBold(html, mergedStyles);
 	html = handleUnderline(html);
 	html = handleItalic(html, mergedStyles);
-	html = handleEscapedNewlines(html);
-	html = handleUnorderedLists(html, mergedStyles);
-	html = handleOrderedLists(html, mergedStyles);
+	html = handleEscapedNewlines(html); // Handles explicit \n for line breaks
+
+	// Phase 4: Handle paragraphs for any remaining plain text.
+	// This must run before wrapper tags like <align> or <columns> so <p> tags are formed.
 	html = handleParagraphs(html, mergedStyles);
+
+	// Phase 5: Handle custom/wrapper block elements.
+	// These should wrap already formed HTML blocks (<p>, <h1>, <ul>, etc.)
+	html = handleColumns(html, mergedStyles);
+	html = handleBgc(html, mergedStyles);
+	html = handleCustom(html, mergedStyles);
+	html = handleAlignment(html, mergedStyles); // This should be processed last among block wrappers.
+
 	return html;
 }
 
 function escapeHtml(md: string): string {
-	const allowedTags = ['u', 'b', 'i', 'code', 'pre', 'custom', 'bgc', 'url', 'br'];
+	const allowedTags = ['u', 'b', 'i', 'code', 'pre', 'custom', 'bgc', 'url', 'br', 'align', 'columns'];
 
 	return md.replace(/<([^>]+)>/g, (match, tagContent) => {
 		const tagNameMatch = tagContent.match(/^\/?([a-zA-Z0-9-]+)/);
@@ -115,6 +134,35 @@ function handleCustom(html: string, mergedStyles: Required<CoffeeMarkdownStyles>
 			const unescapedStyle = userStyle.replace(/&quot;/g, '"'); // just in case
 			const style = `${mergedStyles.custom || ''}${unescapedStyle}`.trim();
 			return `<span style="${style}">${content}</span>`;
+		}
+	);
+}
+
+function handleAlignment(html: string, mergedStyles: Required<CoffeeMarkdownStyles>): string {
+	return html.replace(
+		/<align\s+([^>]+)>([\s\S]*?)<\/align>/gi,
+		(_, alignment, content) => {
+			const alignValue = alignment.trim().toLowerCase();
+			let style = '';
+			
+			switch(alignValue) {
+				case 'left':
+					style = 'text-align:left;';
+					break;
+				case 'right':
+					style = 'text-align:right;';
+					break;
+				case 'center':
+					style = 'text-align:center;';
+					break;
+				case 'justify':
+					style = 'text-align:justify; padding:0.8em; margin:1em 0;';
+					break;
+				default:
+					style = mergedStyles.align;
+			}
+			
+			return `<div style="${style}">${content}</div>`;
 		}
 	);
 }
@@ -255,6 +303,74 @@ function handleOrderedLists(html: string, mergedStyles: Required<CoffeeMarkdownS
 		(match, sep, listBlock) => {
 			const items = listBlock.trim().split(/\n\s*\d+\. /).map((item: string, i: number) => i === 0 ? item.replace(/^\d+\. /, '') : item);
 			return `${sep}<ol style="${mergedStyles.ol}">${processListItems(items, true, mergedStyles)}</ol>`;
+		}
+	);
+}
+
+// New internal helper function to recursively process markdown within a block
+// This function applies all parsing steps except `escapeHtml` and `handleColumns`
+// to avoid double-escaping and infinite recursion.
+function processMarkdownBlock(mdBlock: string, mergedStyles: Required<CoffeeMarkdownStyles>): string {
+    let htmlBlock = mdBlock; // Assume already escaped by the main escapeHtml call
+
+    htmlBlock = handleCodeBlocks(htmlBlock, mergedStyles);
+    htmlBlock = handleInlineCode(htmlBlock, mergedStyles);
+    htmlBlock = handleImages(htmlBlock, mergedStyles);
+    htmlBlock = handleHeadings(htmlBlock, mergedStyles);
+    htmlBlock = handleBlockquotes(htmlBlock, mergedStyles);
+    htmlBlock = handleUnorderedLists(htmlBlock, mergedStyles);
+    htmlBlock = handleOrderedLists(htmlBlock, mergedStyles);
+    htmlBlock = handleLinks(htmlBlock, mergedStyles);
+    htmlBlock = handleBold(htmlBlock, mergedStyles);
+    htmlBlock = handleUnderline(htmlBlock);
+    htmlBlock = handleItalic(htmlBlock, mergedStyles);
+    htmlBlock = handleEscapedNewlines(htmlBlock);
+    htmlBlock = handleParagraphs(htmlBlock, mergedStyles);
+    htmlBlock = handleBgc(htmlBlock, mergedStyles);
+    htmlBlock = handleCustom(htmlBlock, mergedStyles);
+    htmlBlock = handleAlignment(htmlBlock, mergedStyles);
+
+    return htmlBlock;
+}
+
+function handleColumns(html: string, mergedStyles: Required<CoffeeMarkdownStyles>): string {
+    // Regex for <columns float="left|right" width="X%">...</columns>
+    // Group 2: float direction (left|right)
+    // Group 3: width (optional)
+    // Group 4: entire content within <columns> tags
+	return html.replace(
+		/<columns\s+float=(["'])(left|right)\1(?:\s+width=(["'])(\d{1,2}(?:\.\d+)?%)\3)?>([\s\S]*?)<\/columns>/gi,
+		(_, _quote1, floatDirection, _quote2, floatWidth = '40%', innerContent) => {
+            const parts = innerContent.split(/(\n\s*---\s*\n)/); // Split by separator '---' on its own line
+
+            let floatBlockMarkdown = '';
+            let mainBlockMarkdown = '';
+
+            if (parts.length >= 3) {
+                // If separator found, first part is float content, rest is main content
+                floatBlockMarkdown = parts[0].trim();
+                mainBlockMarkdown = parts.slice(2).join('').trim();
+            } else {
+                // If no separator, treat entire content as mainBlock
+                mainBlockMarkdown = innerContent.trim();
+            }
+
+            // Recursively process markdown within each block
+            const processedFloatBlock = processMarkdownBlock(floatBlockMarkdown, mergedStyles);
+            const processedMainBlock = processMarkdownBlock(mainBlockMarkdown, mergedStyles);
+
+            const floatStyle = floatDirection === 'left' ? 'float:left; margin-right:1.5em;' : 'float:right; margin-left:1.5em;';
+            const floatContainerStyle = `width:${floatWidth}; ${floatStyle} margin-bottom:0.7em;`;
+
+			return `
+<div style="${mergedStyles.section}">
+    <div style="${floatContainerStyle}">
+        ${processedFloatBlock}
+    </div>
+    <div style="overflow:hidden;">
+        ${processedMainBlock}
+    </div>
+</div>`;
 		}
 	);
 }

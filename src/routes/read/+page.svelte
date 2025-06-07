@@ -5,8 +5,13 @@
 	import { user } from '$lib/stores/user';
 	import { coffeeMarkdown } from '$lib/md/coffeeMarkdown';
 	import { usernameCache } from '$lib/stores/username_cache';
+	import StoryReactions from '$lib/comp/story/StoryReactions.svelte';
 
-	let stories: Database['public']['Tables']['stories']['Row'][] = [];
+	type Story = Database['public']['Tables']['stories']['Row'] & {
+		tags?: string[];
+	};
+
+	let stories: Story[] = [];
 	let authors: Record<string, string> = {};
 	let loading = true;
 	let error = '';
@@ -16,7 +21,7 @@
 	let ageRating = '';
 	let sort = 'newest';
 
-	let filteredStories: typeof stories = [];
+	let filteredStories: Story[] = [];
 
 	let loadingStep = 'Fetching stories...';
 
@@ -40,7 +45,7 @@
 			error = fetchError.message;
 			stories = [];
 		} else {
-			stories = data || [];
+			stories = (data || []) as Story[];
 			loadingStep = 'Fetching author usernames...';
 			const userIds = Array.from(new Set(stories.map((s) => s.user_id).filter(Boolean)));
 			authors = {};
@@ -67,15 +72,15 @@
 		)
 		.sort((a, b) => {
 			if (sort === 'newest') {
-				return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+				return new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime();
 			}
 			if (sort === 'oldest') {
-				return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+				return new Date(a.created_at || '').getTime() - new Date(b.created_at || '').getTime();
 			}
 			if (sort === 'recently-updated') {
 				return (
-					new Date(b.updated_at || b.created_at).getTime() -
-					new Date(a.updated_at || a.created_at).getTime()
+					new Date(b.updated_at || b.created_at || '').getTime() -
+					new Date(a.updated_at || a.created_at || '').getTime()
 				);
 			}
 			return 0;
@@ -138,7 +143,7 @@
 			<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 			<li class="story-item" on:click={() => goToStory(story.id)} tabindex="0">
 				<h3>{story.title}</h3>
-				{#if authors[story.user_id]}
+				{#if story.user_id && authors[story.user_id]}
 					<p class="story-author">By <span>{authors[story.user_id]}</span></p>
 				{/if}
 				{#if story.description}
@@ -169,6 +174,9 @@
 						</span>
 					{/if}
 				</small>
+				<div class="story-reactions" on:click|stopPropagation>
+					<StoryReactions storyId={story.id} />
+				</div>
 			</li>
 		{/each}
 	</ul>
@@ -328,5 +336,8 @@
 	}
 	.manage-stories-btn:hover {
 		background: linear-gradient(90deg, #bfa07a 60%, #a67c52 100%);
+	}
+	.story-reactions {
+		margin-top: 0.8rem;
 	}
 </style>

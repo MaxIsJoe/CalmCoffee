@@ -4,6 +4,7 @@
 	import { page } from '$app/stores';
 	import { coffeeMarkdown } from '$lib/md/coffeeMarkdown';
 	import type { Database } from '$lib/types/database.types';
+	import StoryReactions from '$lib/comp/story/StoryReactions.svelte';
 
 	let story: Database['public']['Tables']['stories']['Row'] | null = null;
 	let chapters: Database['public']['Tables']['chapters']['Row'][] = [];
@@ -239,6 +240,7 @@
 		{#if story.description}
 			<p class="story-desc">{story.description}</p>
 		{/if}
+		<StoryReactions storyId={story.id} />
 		{#if selectedChapterId}
 			{#each chapters.filter((c) => c.id === selectedChapterId) as chapter}
 				<div class="chapter-block">
@@ -424,8 +426,10 @@
 		font-weight: 500;
 	}
 	.story-desc {
-		color: #444;
-		margin-bottom: 2rem;
+		margin: 1rem 0;
+		color: #666;
+		font-size: 1.1rem;
+		line-height: 1.6;
 	}
 	.chapter-block {
 		margin-bottom: 2.5rem;
