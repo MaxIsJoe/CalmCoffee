@@ -16,15 +16,50 @@
 
 	let search = '';
 	let typeFilter: string | null = null;
+	let sort = 'popular'; // Default to popular
+	let currentPage = 1;
+	let itemsPerPage = 10;
+	let totalItems = 0;
+	let totalPages = 1;
 
 	async function fetchCharacters() {
 		loading = true;
 		error = null;
+
+		// First get total count
+		let countQuery = supabase
+			.from('characters')
+			.select('id', { count: 'exact', head: true });
+
+		if (search.trim()) {
+			countQuery = countQuery.ilike('character_name', `%${search.trim()}%`);
+		}
+		if (typeFilter) {
+			countQuery = countQuery.eq('character_type', typeFilter);
+		}
+
+		const { count, error: countError } = await countQuery;
+		if (countError) {
+			error = countError.message;
+			characters = [];
+			loading = false;
+			return;
+		}
+
+		totalItems = count || 0;
+		totalPages = Math.ceil(totalItems / itemsPerPage);
+
+		// Then fetch the actual characters with reactions
 		let query = supabase
 			.from('characters')
-			.select('*,profiles:creator(username)')
-			.order('created_at', { ascending: false })
-			.limit(20);
+			.select(`
+				*,
+				profiles:creator(username),
+				characters_reactions (
+					reaction
+				)
+			`)
+			.range((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage - 1);
 
 		if (search.trim()) {
 			query = query.ilike('character_name', `%${search.trim()}%`);
@@ -33,14 +68,52 @@
 			query = query.eq('character_type', typeFilter);
 		}
 
+		// Apply sorting
+		if (sort === 'newest') {
+			query = query.order('created_at', { ascending: false });
+		} else if (sort === 'popular') {
+			// For popular sorting, we'll need to do it client-side since we need to count reactions
+			query = query.order('created_at', { ascending: false });
+		}
+
 		const { data, error: err } = await query;
 		if (err) {
 			error = err.message;
 			characters = [];
 		} else {
-			characters = data ?? [];
+			// Process the data to add reaction counts
+			characters = (data || []).map(char => {
+				const reactionCounts: Record<string, number> = {};
+				(char.characters_reactions || []).forEach((r: { reaction: string }) => {
+					reactionCounts[r.reaction] = (reactionCounts[r.reaction] || 0) + 1;
+				});
+				return {
+					...char,
+					reaction_counts: reactionCounts
+				};
+			});
+
+			// Sort by popularity if needed
+			if (sort === 'popular') {
+				characters.sort((a, b) => {
+					const aPositiveReactions = (a.reaction_counts?.['0'] || 0) + (a.reaction_counts?.['1'] || 0);
+					const bPositiveReactions = (b.reaction_counts?.['0'] || 0) + (b.reaction_counts?.['1'] || 0);
+					return bPositiveReactions - aPositiveReactions;
+				});
+			}
 		}
 		loading = false;
+	}
+
+	function goToPage(page: number) {
+		if (page < 1 || page > totalPages) return;
+		currentPage = page;
+		fetchCharacters();
+	}
+
+	$: if (search || typeFilter || sort) {
+		currentPage = 1; // Reset to first page when filters change
+		fetchCharacters();
 	}
 
 	let myCharacters: Character[] = [];
@@ -67,9 +140,6 @@
 		await fetchCharacters();
 		await fetchMyCharacters();
 	});
-
-	$: search, typeFilter, fetchCharacters();
-	$: if ($user) fetchMyCharacters();
 </script>
 
 <div class="characters-header">
@@ -81,6 +151,10 @@
 			{#each CHARACTER_TYPES as t}
 				<option value={t}>{t}</option>
 			{/each}
+		</select>
+		<select bind:value={sort} class="input">
+			<option value="popular">Most Popular</option>
+			<option value="newest">Newest</option>
 		</select>
 		{#if $user}
 			<a href="/characters/create" class="btn-primary">Create New Character</a>
@@ -117,6 +191,34 @@
 					</li>
 				{/each}
 			</ul>
+			{#if totalPages > 1}
+				<div class="pagination">
+					<button 
+						class="pagination-btn" 
+						on:click={() => goToPage(currentPage - 1)}
+						disabled={currentPage === 1}
+					>
+						Previous
+					</button>
+					<div class="page-numbers">
+						{#each Array(totalPages) as _, i}
+							<button 
+								class="page-number {currentPage === i + 1 ? 'active' : ''}"
+								on:click={() => goToPage(i + 1)}
+							>
+								{i + 1}
+							</button>
+						{/each}
+					</div>
+					<button 
+						class="pagination-btn" 
+						on:click={() => goToPage(currentPage + 1)}
+						disabled={currentPage === totalPages}
+					>
+						Next
+					</button>
+				</div>
+			{/if}
 		{/if}
 	</div>
 	{#if $user && myCharacters.length}
@@ -339,5 +441,61 @@
 		.my-characters-cards-grid {
 			grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
 		}
+	}
+	.pagination {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		gap: 1rem;
+		margin: 2rem 0;
+	}
+
+	.pagination-btn {
+		padding: 0.5rem 1rem;
+		border: 1px solid #cbd5e1;
+		border-radius: 6px;
+		background: white;
+		color: #4f46e5;
+		cursor: pointer;
+		transition: all 0.2s;
+	}
+
+	.pagination-btn:hover:not(:disabled) {
+		background: #4f46e5;
+		color: white;
+	}
+
+	.pagination-btn:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+
+	.page-numbers {
+		display: flex;
+		gap: 0.5rem;
+	}
+
+	.page-number {
+		width: 2.5rem;
+		height: 2.5rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border: 1px solid #cbd5e1;
+		border-radius: 6px;
+		background: white;
+		color: #4f46e5;
+		cursor: pointer;
+		transition: all 0.2s;
+	}
+
+	.page-number:hover:not(.active) {
+		background: #e0e7ff;
+	}
+
+	.page-number.active {
+		background: #4f46e5;
+		color: white;
+		border-color: #4f46e5;
 	}
 </style>

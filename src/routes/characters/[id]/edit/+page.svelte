@@ -9,6 +9,7 @@
 	import { coffeeMarkdown, defaultStyles } from '$lib/md/coffeeMarkdown';
 	import MarkdownToolbar from '$lib/comp/markdown/MarkdownToolbar.svelte';
 	import RelationshipGraphEditor from '$lib/comp/characters/RelationshipGraphEditor.svelte';
+	import { browser } from '$app/environment';
 
 	type Character = Database['public']['Tables']['characters']['Row'];
 
@@ -43,6 +44,40 @@
 	let tags: string[] = [];
 	let tagWarning = '';
 	const maxTags = 6;
+
+	let readingWidth = 400;
+	let resizing = false;
+	let startX = 0;
+	let startWidth = 0;
+
+	function startResize(e: MouseEvent) {
+		resizing = true;
+		startX = e.clientX;
+		startWidth = readingWidth;
+		document.body.style.cursor = 'ew-resize';
+	}
+
+	function onResize(e: MouseEvent) {
+		if (!resizing) return;
+		const dx = e.clientX - startX;
+		let newWidth = startWidth + dx * 2; // scale for both sides
+		newWidth = Math.max(400, Math.min(1200, newWidth));
+		readingWidth = newWidth;
+	}
+
+	function stopResize() {
+		resizing = false;
+		document.body.style.cursor = '';
+	}
+
+	// Attach/detach mousemove/mouseup listeners for resizing
+	$: if (browser && resizing) {
+		window.addEventListener('mousemove', onResize);
+		window.addEventListener('mouseup', stopResize);
+	} else if (browser) {
+		window.removeEventListener('mousemove', onResize);
+		window.removeEventListener('mouseup', stopResize);
+	}
 
 	onMount(async () => {
 		id = $page.params.id;
@@ -307,7 +342,11 @@
 				on:change={(e) => onRelationshipsChange(e.detail)}
 			/>
 		</div>
-		<div class="preview-section">
+		<div class="preview-section resizable" style="max-width:{readingWidth}px;width:100%;position:relative;">
+			<!-- svelte-ignore a11y_no_static_element_interactions -->
+			<div class="resize-handle left" on:mousedown={startResize}></div>
+			<!-- svelte-ignore a11y_no_static_element_interactions -->
+			<div class="resize-handle right" on:mousedown={startResize}></div>
 			<h2>Preview</h2>
 			<div class="character-profile">
 				{#if character_avatar}
@@ -469,9 +508,9 @@
 		text-align: center;
 	}
 	.preview-section {
-		width: 380px;
+		/* width: 380px;
 		min-width: 280px;
-		max-width: 420px;
+		max-width: 420px; */
 		margin-top: 2rem;
 	}
 	.preview-section h2 {
@@ -487,7 +526,8 @@
 		border-radius: 12px;
 		box-shadow: 0 2px 12px rgba(30, 34, 54, 0.07);
 		padding: 2rem 1.5rem;
-		max-width: 420px;
+		/* max-width: 420px; */
+		width: 100%; /* Ensure it fills the parent */
 		margin: 0 auto;
 		gap: 1.5rem;
 	}
@@ -643,6 +683,34 @@
 		margin-top: 0.3em;
 		font-size: 0.98em;
 	}
+	.preview-section.resizable {
+		resize: none;
+		transition: max-width 0.15s;
+	}
+	.resize-handle {
+		position: absolute;
+		top: 0;
+		width: 12px;
+		height: 100%;
+		cursor: ew-resize;
+		z-index: 10;
+	}
+	.resize-handle.left {
+		left: -6px;
+	}
+	.resize-handle.right {
+		right: -6px;
+	}
+	.resize-handle::after {
+		content: '';
+		display: block;
+		width: 4px;
+		height: 40px;
+		background: #c7d2fe;
+		border-radius: 2px;
+		margin: 0 auto;
+		margin-top: 40px;
+	}
 	@media (max-width: 900px) {
 		.edit-character-main {
 			flex-direction: column;
@@ -655,6 +723,9 @@
 		}
 		.character-profile {
 			max-width: 100vw;
+		}
+		.resize-handle {
+			display: none;
 		}
 	}
 </style>

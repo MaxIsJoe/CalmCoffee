@@ -13,6 +13,7 @@
 	import ProfileBlog from './ProfileBlog.svelte';
 	import type { ProfileType } from '$lib/types/profile';
 	import ProfileCharacters from './ProfileCharacters.svelte';
+	import ProfileLikes from './ProfileLikes.svelte';
 
 	let userComments: {
 		comment: string;
@@ -44,7 +45,8 @@
 		{ key: 'stories', label: 'Stories', component: ProfileStories },
 		{ key: 'characters', label: 'Characters', component: ProfileCharacters },
 		{ key: 'blog', label: 'Blog', component: ProfileBlog },
-		{ key: 'comments', label: 'Comments', component: ProfileComments }
+		{ key: 'comments', label: 'Comments', component: ProfileComments },
+		{ key: 'likes', label: 'Likes', component: ProfileLikes }
 	];
 	let selectedTab = 'overview';
 

@@ -43,7 +43,7 @@ export const defaultStyles: Required<CoffeeMarkdownStyles> = {
 	bgc: 'padding:0.7em 1em;border-radius:8px;margin:1em 0;',
 	custom: '', // no default, user must provide
 	align: 'text-align:center;', // Default alignment style
-	section: 'padding:1em; border:1px solid #eee; margin:1em 0; overflow:hidden; border-radius:6px; background:#f9f9f9;', // Default style for sections
+	section: 'margin:1em 0; overflow:hidden;', // Default style for sections
 };
 
 //background-image: url('https://wallpaperaccess.com/full/781336.jpg')

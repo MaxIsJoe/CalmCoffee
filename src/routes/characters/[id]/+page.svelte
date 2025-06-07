@@ -6,6 +6,7 @@
 	import type { Database } from '../../../../database.types';
 	import { usernameCache } from '$lib/stores/username_cache';
 	import RelationshipGraphEditor from '$lib/comp/characters/RelationshipGraphEditor.svelte';
+	import CharacterReactions from '$lib/comp/characters/CharacterReactions.svelte';
 
 	type Character = Database['public']['Tables']['characters']['Row'];
 
@@ -106,6 +107,9 @@
 						</div>
 					{/if}
 				</div>
+				<div class="character-reactions">
+					<CharacterReactions characterId={character.id} />
+				</div>
 			</div>
 			<!-- Relationships panel below info card -->
 			<div class="relationship-panel-left">
@@ -118,6 +122,7 @@
 					<h2 class="tag-panel-title">Tags</h2>
 					<div class="character-tags">
 						{#each character.tags as tag}
+							<!-- svelte-ignore a11y_click_events_have_key_events -->
 							<span
 								class="character-tag"
 								tabindex="0"
@@ -175,6 +180,7 @@
 		max-width: 340px;
 		margin-top: 29px;
 		margin-left: 12px;
+		padding-bottom: 50px;
 	}
 	.character-info-card {
 		display: flex;
@@ -425,5 +431,8 @@
 		background: #e0d7ce;
 		color: #a67c52;
 		outline: none;
+	}
+	.character-reactions {
+		margin: 1.5rem 0;
 	}
 </style>

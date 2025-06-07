@@ -2,10 +2,10 @@
 	import { createEventDispatcher } from 'svelte';
 
 	export const REACTIONS = [
-		{ emoji: '💖', value: '≡ƒÆû', label: 'Love' },
-		{ emoji: '👀', value: '≡ƒæÇ', label: 'Watch' },
-		{ emoji: '😐', value: '≡ƒÿÉ', label: 'Meh' },
-		{ emoji: '🗑️', value: '≡ƒùæ∩╕Å', label: 'Trash' }
+		{ emoji: '💖', value: '0', label: 'Love' },
+		{ emoji: '👀', value: '1', label: 'Watch' },
+		{ emoji: '😐', value: '2', label: 'Meh' },
+		{ emoji: '🗑️', value: '3', label: 'Trash' }
 	];
 
 	// Props

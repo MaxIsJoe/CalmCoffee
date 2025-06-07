@@ -9,6 +9,7 @@
 
 	type Story = Database['public']['Tables']['stories']['Row'] & {
 		tags?: string[];
+		reaction_counts?: Record<string, number>;
 	};
 
 	let stories: Story[] = [];
@@ -21,6 +22,12 @@
 	let ageRating = '';
 	let sort = 'newest';
 
+	// Pagination state
+	let currentPage = 1;
+	let itemsPerPage = 10;
+	let totalItems = 0;
+	let totalPages = 1;
+
 	let filteredStories: Story[] = [];
 
 	let loadingStep = 'Fetching stories...';
@@ -30,14 +37,58 @@
 	async function fetchStories() {
 		loading = true;
 		loadingStep = 'Fetching stories...';
+		
+		// First get total count
+		let countQuery = supabase
+			.from('stories')
+			.select('id', { count: 'exact', head: true })
+			.eq('is_published', true);
+
+		if (ageRating) {
+			countQuery = countQuery.eq('age_rating', ageRating);
+		}
+
+		const { count, error: countError } = await countQuery;
+		if (countError) {
+			error = countError.message;
+			stories = [];
+			loading = false;
+			return;
+		}
+
+		totalItems = count || 0;
+		totalPages = Math.ceil(totalItems / itemsPerPage);
+
+		// Then fetch the actual stories
 		let query = supabase
 			.from('stories')
-			.select('id, title, description, age_rating, created_at, user_id, tags, updated_at')
+			.select(`
+				id, 
+				title, 
+				description, 
+				age_rating, 
+				created_at, 
+				user_id, 
+				tags, 
+				updated_at,
+				stories_reactions (
+					reaction
+				)
+			`)
 			.eq('is_published', true)
-			.order('created_at', { ascending: false });
+			.range((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage - 1);
 
 		if (ageRating) {
 			query = query.eq('age_rating', ageRating);
+		}
+
+		// Apply sorting
+		if (sort === 'newest') {
+			query = query.order('created_at', { ascending: false });
+		} else if (sort === 'oldest') {
+			query = query.order('created_at', { ascending: true });
+		} else if (sort === 'recently-updated') {
+			query = query.order('updated_at', { ascending: false });
 		}
 
 		const { data, error: fetchError } = await query;
@@ -45,7 +96,17 @@
 			error = fetchError.message;
 			stories = [];
 		} else {
-			stories = (data || []) as Story[];
+			stories = (data || []).map(story => {
+				// Count reactions
+				const reactionCounts: Record<string, number> = {};
+				(story.stories_reactions || []).forEach((r: { reaction: string }) => {
+					reactionCounts[r.reaction] = (reactionCounts[r.reaction] || 0) + 1;
+				});
+				return {
+					...story,
+					reaction_counts: reactionCounts
+				};
+			}) as Story[];
 			loadingStep = 'Fetching author usernames...';
 			const userIds = Array.from(new Set(stories.map((s) => s.user_id).filter(Boolean)));
 			authors = {};
@@ -83,6 +144,11 @@
 					new Date(a.updated_at || a.created_at || '').getTime()
 				);
 			}
+			if (sort === 'popular') {
+				const aPositiveReactions = (a.reaction_counts?.['0'] || 0) + (a.reaction_counts?.['1'] || 0);
+				const bPositiveReactions = (b.reaction_counts?.['0'] || 0) + (b.reaction_counts?.['1'] || 0);
+				return bPositiveReactions - aPositiveReactions;
+			}
 			return 0;
 		});
 
@@ -90,7 +156,14 @@
 		window.location.href = `/read/${id}`;
 	}
 
-	function onFilterChange() {
+	function goToPage(page: number) {
+		if (page < 1 || page > totalPages) return;
+		currentPage = page;
+		fetchStories();
+	}
+
+	$: if (search || ageRating || sort) {
+		currentPage = 1; // Reset to first page when filters change
 		fetchStories();
 	}
 </script>
@@ -110,16 +183,17 @@
 		bind:value={search}
 		class="search-input"
 	/>
-	<select bind:value={ageRating} on:change={onFilterChange}>
+	<select bind:value={ageRating} on:change={() => { currentPage = 1; fetchStories(); }}>
 		<option value="">All Age Ratings</option>
 		{#each ageRatings as rating}
 			<option value={rating}>{rating}</option>
 		{/each}
 	</select>
-	<select bind:value={sort}>
+	<select bind:value={sort} on:change={() => { currentPage = 1; fetchStories(); }}>
 		<option value="newest">Newest</option>
 		<option value="oldest">Oldest</option>
 		<option value="recently-updated">Recently Updated</option>
+		<option value="popular">Most Popular</option>
 	</select>
 </div>
 
@@ -174,12 +248,42 @@
 						</span>
 					{/if}
 				</small>
+				<!-- svelte-ignore a11y_no_static_element_interactions -->
 				<div class="story-reactions" on:click|stopPropagation>
 					<StoryReactions storyId={story.id} />
 				</div>
 			</li>
 		{/each}
 	</ul>
+{/if}
+
+{#if !loading && !error && totalPages > 1}
+	<div class="pagination">
+		<button 
+			class="pagination-btn" 
+			on:click={() => goToPage(currentPage - 1)}
+			disabled={currentPage === 1}
+		>
+			Previous
+		</button>
+		<div class="page-numbers">
+			{#each Array(totalPages) as _, i}
+				<button 
+					class="page-number {currentPage === i + 1 ? 'active' : ''}"
+					on:click={() => goToPage(i + 1)}
+				>
+					{i + 1}
+				</button>
+			{/each}
+		</div>
+		<button 
+			class="pagination-btn" 
+			on:click={() => goToPage(currentPage + 1)}
+			disabled={currentPage === totalPages}
+		>
+			Next
+		</button>
+	</div>
 {/if}
 
 <style>
@@ -339,5 +443,61 @@
 	}
 	.story-reactions {
 		margin-top: 0.8rem;
+	}
+	.pagination {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		gap: 1rem;
+		margin: 2rem 0;
+	}
+
+	.pagination-btn {
+		padding: 0.5rem 1rem;
+		border: 1px solid #cbd5e1;
+		border-radius: 6px;
+		background: white;
+		color: #4f46e5;
+		cursor: pointer;
+		transition: all 0.2s;
+	}
+
+	.pagination-btn:hover:not(:disabled) {
+		background: #4f46e5;
+		color: white;
+	}
+
+	.pagination-btn:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+
+	.page-numbers {
+		display: flex;
+		gap: 0.5rem;
+	}
+
+	.page-number {
+		width: 2.5rem;
+		height: 2.5rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border: 1px solid #cbd5e1;
+		border-radius: 6px;
+		background: white;
+		color: #4f46e5;
+		cursor: pointer;
+		transition: all 0.2s;
+	}
+
+	.page-number:hover:not(.active) {
+		background: #e0e7ff;
+	}
+
+	.page-number.active {
+		background: #4f46e5;
+		color: white;
+		border-color: #4f46e5;
 	}
 </style>

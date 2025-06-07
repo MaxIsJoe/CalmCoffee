@@ -90,10 +90,18 @@
 		return blockOrder === 'oldest'
 			? arr
 					.slice()
-					.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+					.sort((a, b) => {
+						const dateA = a.created_at ? new Date(a.created_at).getTime() : Number.MAX_VALUE;
+						const dateB = b.created_at ? new Date(b.created_at).getTime() : Number.MAX_VALUE;
+						return dateA - dateB;
+					})
 			: arr
 					.slice()
-					.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+					.sort((a, b) => {
+						const dateA = a.created_at ? new Date(a.created_at).getTime() : Number.MIN_VALUE;
+						const dateB = b.created_at ? new Date(b.created_at).getTime() : Number.MIN_VALUE;
+						return dateB - dateA;
+					});
 	}
 
 	function startResize(e: MouseEvent) {
@@ -150,7 +158,7 @@
 					id: c.id,
 					commenter_id: c.commenter_id,
 					comment: c.comment,
-					username: c.profiles?.username
+					username: (c.profiles as { username: string }[])[0]?.username
 				});
 			}
 		}
@@ -269,7 +277,7 @@
 										{comments[block.id]?.length || 0}
 									</span>
 								</button>
-								{@html coffeeMarkdown(block.content, block.styles)}
+								{@html coffeeMarkdown(block.content, block.styles ?? undefined)}
 							</div>
 						</div>
 					{/each}
@@ -302,7 +310,7 @@
 										{comments[block.id]?.length || 0}
 									</span>
 								</button>
-								{@html coffeeMarkdown(block.content, block.styles)}
+								{@html coffeeMarkdown(block.content, block.styles ?? undefined)}
 							</div>
 						</div>
 					{/each}
@@ -332,7 +340,7 @@
 			{:else}
 				<p class="no-comments">No comments yet.</p>
 			{/if}
-			<form on:submit|preventDefault={() => submitComment(openCommentsBlockId)}>
+			<form on:submit|preventDefault={() => submitComment(openCommentsBlockId!)}>
 				<textarea
 					bind:value={commentInputs[openCommentsBlockId]}
 					maxlength="300"
