@@ -15,6 +15,10 @@
 	let showAllMicroblogs = false;
 	let showAllStories = false;
 
+	let isLoading = false;
+	let loadingSteps = [];
+	let currentStep = '';
+
 	let page = {
 		characters: 1,
 		microblogs: 1,
@@ -31,68 +35,102 @@
 			return;
 		}
 
-		// Fetch only the first 6 most recent items for each table
-		const [charData, blogData, storyData] = await Promise.all([
-			supabase
+		isLoading = true;
+		loadingSteps = [];
+		currentStep = 'Starting search...';
+
+		try {
+			// Fetch only the first 6 most recent items for each table
+			currentStep = 'Searching characters...';
+			const charData = await supabase
 				.from('characters')
 				.select('*')
 				.contains('tags', [searchTerm])
 				.order('created_at', { ascending: false })
-				.limit(ITEMS_PER_PAGE),
-			supabase
+				.limit(ITEMS_PER_PAGE);
+			loadingSteps.push('Found ' + (charData.data?.length || 0) + ' characters');
+
+			currentStep = 'Searching microblogs...';
+			const blogData = await supabase
 				.from('microblogs')
 				.select('*, profiles:writer(*)')
 				.contains('tags', [searchTerm])
 				.order('created_at', { ascending: false })
-				.limit(ITEMS_PER_PAGE),
-			supabase
+				.limit(ITEMS_PER_PAGE);
+			loadingSteps.push('Found ' + (blogData.data?.length || 0) + ' microblogs');
+
+			currentStep = 'Searching stories...';
+			const storyData = await supabase
 				.from('stories')
 				.select('*')
 				.contains('tags', [searchTerm])
 				.order('created_at', { ascending: false })
-				.limit(ITEMS_PER_PAGE)
-		]);
+				.limit(ITEMS_PER_PAGE);
+			loadingSteps.push('Found ' + (storyData.data?.length || 0) + ' stories');
 
-		characters = charData.data || [];
-		// Attach profile to microblog as 'profile'
-		microblogs = (blogData.data || []).map((mb) => ({
-			...mb,
-			profile: mb.profiles
-		}));
-		stories = storyData.data || [];
-
-		// Reset pagination and view all toggles
-		showAllCharacters = false;
-		showAllMicroblogs = false;
-		showAllStories = false;
-		page = { characters: 1, microblogs: 1, stories: 1 };
-	}
-
-	async function fetchAll(type) {
-		let fromTable = '';
-		let selectStr = '*';
-		if (type === 'characters') fromTable = 'characters';
-		if (type === 'microblogs') {
-			fromTable = 'microblogs';
-			selectStr = '*, profiles:writer(*)';
-		}
-		if (type === 'stories') fromTable = 'stories';
-
-		const { data } = await supabase
-			.from(fromTable)
-			.select(selectStr)
-			.contains('tags', [searchTerm])
-			.order('created_at', { ascending: false })
-			.range((page[type] - 1) * ITEMS_PER_PAGE, page[type] * ITEMS_PER_PAGE - 1);
-
-		if (type === 'characters') characters = data || [];
-		if (type === 'microblogs') {
-			microblogs = (data || []).map((mb) => ({
+			characters = charData.data || [];
+			// Attach profile to microblog as 'profile'
+			microblogs = (blogData.data || []).map((mb) => ({
 				...mb,
 				profile: mb.profiles
 			}));
+			stories = storyData.data || [];
+
+			// Reset pagination and view all toggles
+			showAllCharacters = false;
+			showAllMicroblogs = false;
+			showAllStories = false;
+			page = { characters: 1, microblogs: 1, stories: 1 };
+
+			currentStep = 'Search complete!';
+			loadingSteps.push('Search complete!');
+		} catch (error) {
+			currentStep = 'Error occurred during search';
+			loadingSteps.push('Error: ' + error.message);
+		} finally {
+			isLoading = false;
 		}
-		if (type === 'stories') stories = data || [];
+	}
+
+	async function fetchAll(type) {
+		isLoading = true;
+		currentStep = `Loading more ${type}...`;
+		loadingSteps.push(`Loading more ${type}...`);
+
+		try {
+			let fromTable = '';
+			let selectStr = '*';
+			if (type === 'characters') fromTable = 'characters';
+			if (type === 'microblogs') {
+				fromTable = 'microblogs';
+				selectStr = '*, profiles:writer(*)';
+			}
+			if (type === 'stories') fromTable = 'stories';
+
+			const { data } = await supabase
+				.from(fromTable)
+				.select(selectStr)
+				.contains('tags', [searchTerm])
+				.order('created_at', { ascending: false })
+				.range((page[type] - 1) * ITEMS_PER_PAGE, page[type] * ITEMS_PER_PAGE - 1);
+
+			if (type === 'characters') characters = data || [];
+			if (type === 'microblogs') {
+				microblogs = (data || []).map((mb) => ({
+					...mb,
+					profile: mb.profiles
+				}));
+			}
+			if (type === 'stories') stories = data || [];
+
+			loadingSteps.push(`Loaded ${data?.length || 0} ${type}`);
+			currentStep = `Loaded ${data?.length || 0} ${type}`;
+		} catch (error) {
+			currentStep = `Error loading ${type}`;
+			loadingSteps.push(`Error: ${error.message}`);
+		} finally {
+			isLoading = false;
+		}
 	}
 
 	function handleViewAll(type) {
@@ -160,8 +198,26 @@
 			if (e.key === 'Enter') searchByTag();
 		}}
 	/>
-	<button on:click={searchByTag}>Search</button>
+	<button on:click={searchByTag} disabled={isLoading}>
+		{#if isLoading}
+			Searching...
+		{:else}
+			Search
+		{/if}
+	</button>
 </div>
+
+{#if isLoading}
+	<div class="loading-indicator">
+		<div class="loading-spinner"></div>
+		<div class="loading-steps">
+			<p class="current-step">{currentStep}</p>
+			{#each loadingSteps as step}
+				<p class="step">{step}</p>
+			{/each}
+		</div>
+	</div>
+{/if}
 
 {#if characters.length || microblogs.length || stories.length}
 	<section>
@@ -696,6 +752,59 @@
 		.story-list {
 			flex-direction: column;
 			gap: 0.7em;
+		}
+	}
+
+	.loading-indicator {
+		display: flex;
+		align-items: flex-start;
+		gap: 1.5rem;
+		margin: 2rem auto;
+		padding: 1.5rem;
+		background: #fffdfa;
+		border-radius: 12px;
+		box-shadow: 0 4px 18px rgba(124, 94, 72, 0.08);
+		border: 1.5px solid #e0d7ce;
+		max-width: 600px;
+	}
+
+	.loading-spinner {
+		width: 40px;
+		height: 40px;
+		border: 3px solid #e0d7ce;
+		border-top: 3px solid #a67c52;
+		border-radius: 50%;
+		animation: spin 1s linear infinite;
+		flex-shrink: 0;
+	}
+
+	.loading-steps {
+		flex-grow: 1;
+	}
+
+	.current-step {
+		color: #a67c52;
+		font-weight: 500;
+		margin: 0 0 0.5rem 0;
+	}
+
+	.step {
+		color: #bfa07a;
+		margin: 0.3rem 0;
+		font-size: 0.95em;
+	}
+
+	@keyframes spin {
+		0% { transform: rotate(0deg); }
+		100% { transform: rotate(360deg); }
+	}
+
+	@media (max-width: 600px) {
+		.loading-indicator {
+			flex-direction: column;
+			align-items: center;
+			text-align: center;
+			padding: 1rem;
 		}
 	}
 </style>

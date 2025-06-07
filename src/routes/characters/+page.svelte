@@ -7,6 +7,8 @@
 
 	type Character = Database['public']['Tables']['characters']['Row'] & {
 		profiles: { username: string } | null;
+		characters_reactions: { reaction: string }[] | null;
+		reaction_counts: Record<string, number>;
 	};
 	const CHARACTER_TYPES = ['OC', 'SONA'];
 
@@ -82,7 +84,7 @@
 			characters = [];
 		} else {
 			// Process the data to add reaction counts
-			characters = (data || []).map(char => {
+			characters = (data || []).map((char: any) => {
 				const reactionCounts: Record<string, number> = {};
 				(char.characters_reactions || []).forEach((r: { reaction: string }) => {
 					reactionCounts[r.reaction] = (reactionCounts[r.reaction] || 0) + 1;
@@ -90,14 +92,14 @@
 				return {
 					...char,
 					reaction_counts: reactionCounts
-				};
+				} as Character; // Cast to Character to ensure type compatibility
 			});
 
 			// Sort by popularity if needed
 			if (sort === 'popular') {
 				characters.sort((a, b) => {
-					const aPositiveReactions = (a.reaction_counts?.['0'] || 0) + (a.reaction_counts?.['1'] || 0);
-					const bPositiveReactions = (b.reaction_counts?.['0'] || 0) + (b.reaction_counts?.['1'] || 0);
+					const aPositiveReactions = ((a.reaction_counts || {})['0'] || 0) + ((a.reaction_counts || {})['1'] || 0);
+					const bPositiveReactions = ((b.reaction_counts || {})['0'] || 0) + ((b.reaction_counts || {})['1'] || 0);
 					return bPositiveReactions - aPositiveReactions;
 				});
 			}
@@ -181,6 +183,14 @@
 							<div class="character-info">
 								<strong class="character-name">{char.character_name}</strong>
 								<span class="character-type">{char.character_type}</span>
+								{#if char.gender}
+									<span class="character-gender">Gender: {char.gender}</span>
+								{/if}
+								{#if char.reaction_counts}
+									<span class="character-popularity">
+										Likes: {(char.reaction_counts['0'] || 0) + (char.reaction_counts['1'] || 0)}
+									</span>
+								{/if}
 								{#if char.profiles && char.profiles.username}
 									<span class="character-creator">by {char.profiles.username}</span>
 								{:else if char.creator}
@@ -193,8 +203,8 @@
 			</ul>
 			{#if totalPages > 1}
 				<div class="pagination">
-					<button 
-						class="pagination-btn" 
+					<button
+						class="pagination-btn"
 						on:click={() => goToPage(currentPage - 1)}
 						disabled={currentPage === 1}
 					>
@@ -202,7 +212,7 @@
 					</button>
 					<div class="page-numbers">
 						{#each Array(totalPages) as _, i}
-							<button 
+							<button
 								class="page-number {currentPage === i + 1 ? 'active' : ''}"
 								on:click={() => goToPage(i + 1)}
 							>
@@ -210,8 +220,8 @@
 							</button>
 						{/each}
 					</div>
-					<button 
-						class="pagination-btn" 
+					<button
+						class="pagination-btn"
 						on:click={() => goToPage(currentPage + 1)}
 						disabled={currentPage === totalPages}
 					>
@@ -286,9 +296,9 @@
 		list-style: none;
 		padding: 0;
 		margin: 0;
-		display: flex;
-		flex-direction: column;
-		gap: 0.7rem;
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+		gap: 1.5rem;
 		padding: 0 1.5rem 1.5rem 1.5rem;
 	}
 	.character-item {
@@ -297,7 +307,9 @@
 		border-radius: 8px;
 		padding: 0.8rem 1.1rem;
 		display: flex;
+		flex-direction: column;
 		align-items: center;
+		text-align: center;
 		transition:
 			box-shadow 0.15s,
 			border 0.15s;
@@ -309,19 +321,21 @@
 	}
 	.character-link {
 		display: flex;
+		flex-direction: column;
 		align-items: center;
 		text-decoration: none;
 		color: inherit;
 		width: 100%;
-		gap: 1.1rem;
+		gap: 0.7rem;
 	}
 	.character-avatar {
-		width: 48px;
-		height: 48px;
+		width: 96px;
+		height: 96px;
 		border-radius: 50%;
 		object-fit: cover;
-		border: 2px solid #e5e7eb;
+		border: 3px solid #e5e7eb;
 		background: #f6f7fa;
+		margin-bottom: 0.5rem;
 	}
 	.character-info {
 		display: flex;
@@ -329,7 +343,7 @@
 		gap: 0.2rem;
 	}
 	.character-name {
-		font-size: 1.1rem;
+		font-size: 1.2rem;
 		font-weight: 600;
 	}
 	.character-type {
@@ -338,7 +352,13 @@
 		background: #f3f4f6;
 		border-radius: 4px;
 		padding: 0.1rem 0.5rem;
-		margin-left: 0.2rem;
+		/* margin-left: 0.2rem; */
+	}
+	.character-gender,
+	.character-popularity {
+		font-size: 0.9rem;
+		color: #8a8fa3;
+		margin-top: 0.1rem;
 	}
 	.character-creator {
 		font-size: 0.93rem;
