@@ -105,7 +105,8 @@
 			const { data: storiesData, error: storiesError } = await supabase
 				.from('stories')
 				.select('*')
-				.eq('user_id', profile.account_id);
+				.eq('user_id', profile.account_id)
+				.eq('is_published', true);
 
 			if (!storiesError && storiesData) {
 				stories = storiesData;

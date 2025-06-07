@@ -28,6 +28,7 @@
 		let query = supabase
 			.from('stories')
 			.select('id, title, description, age_rating, created_at, user_id, tags, updated_at')
+			.eq('is_published', true)
 			.order('created_at', { ascending: false });
 
 		if (ageRating) {

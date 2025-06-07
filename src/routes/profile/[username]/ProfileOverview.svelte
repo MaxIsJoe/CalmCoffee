@@ -1,6 +1,6 @@
 <script lang="ts">
-	export let profile;
-	export let stories = [];
+	export let profile: Database['public']['Tables']['profiles']['Row'] | null;
+	export let stories: Database['public']['Tables']['stories']['Row'][] = [];
 	export let userComments = [];
 
 	let latestBlog: BlogType | null = null;
@@ -10,6 +10,7 @@
 	import type { BlogType } from '$lib/types/blog';
 	import { supabase } from '$lib/supabaseClient';
 	import { onMount } from 'svelte';
+	import type { Database } from '../../../../database.types';
 
 	async function fetchMicroblogs() {
 		const { data, error: fetchError } = await supabase
@@ -50,7 +51,8 @@
 			supabase
 				.from('stories')
 				.select('*', { count: 'exact', head: true })
-				.eq('user_id', profile.account_id),
+				.eq('user_id', profile.account_id)
+				.eq('is_published', true),
 			supabase
 				.from('characters')
 				.select('*', { count: 'exact', head: true })
