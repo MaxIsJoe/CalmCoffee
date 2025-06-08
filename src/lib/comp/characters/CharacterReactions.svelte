@@ -3,6 +3,7 @@
 	import { supabase } from '$lib/supabaseClient';
 	import { user } from '$lib/stores/user';
 	import Reactions from '$lib/comp/common/Reactions.svelte';
+	import { createEventDispatcher } from 'svelte';
 
 	export let characterId: number;
 
@@ -10,6 +11,10 @@
 	let reactionCounts: Record<string, number> = {};
 	let loading = false;
 	let errorMsg: string | null = null;
+
+	const dispatch = createEventDispatcher<{
+		react: { reaction: string }
+	}>();
 
 	async function fetchReactions() {
 		if (!characterId) return;
@@ -44,60 +49,37 @@
 		}
 	}
 
-	async function handleReaction(reaction: string) {
-		if (!characterId) return;
-
-		const currentUser = $user;
-		if (!currentUser) {
-			errorMsg = 'You must be logged in to react';
-			return;
-		}
-
+	async function handleReaction(event: CustomEvent<{ reaction: string }>) {
+		if (!characterId || !$user?.usr?.id) return;
 		loading = true;
 		errorMsg = null;
-
-		try {
-			// If user already reacted with this reaction, remove it
-			if (userReaction === reaction) {
-				const { error: deleteError } = await supabase
-					.from('characters_reactions')
-					.delete()
-					.eq('react_to', characterId)
-					.eq('user_id', currentUser.usr?.id)
-					.eq('reaction', reaction);
-
-				if (deleteError) throw deleteError;
-				userReaction = null;
-			} else {
-				// If user had a different reaction, delete the old one and insert the new one
-				if (userReaction) {
-					const { error: deleteError } = await supabase
-						.from('characters_reactions')
-						.delete()
-						.eq('react_to', characterId)
-						.eq('user_id', currentUser.usr?.id);
-
-					if (deleteError) throw deleteError;
-				}
-
-				// Insert new reaction
-				const { error: insertError } = await supabase.from('characters_reactions').insert({
-					react_to: characterId,
-					reaction,
-					user_id: currentUser.usr?.id
-				});
-
-				if (insertError) throw insertError;
-				userReaction = reaction;
-			}
-
-			// Refresh reaction counts
-			await fetchReactions();
-		} catch (error) {
-			errorMsg = error instanceof Error ? error.message : 'Failed to update reaction';
-		} finally {
+		const { error: delError } = await supabase
+			.from('characters_reactions')
+			.delete()
+			.eq('react_to', characterId)
+			.eq('user_id', $user?.usr?.id);
+		if (delError) {
+			errorMsg = delError.message || 'Could not update reaction.';
 			loading = false;
+			return;
 		}
+		if (userReaction !== event.detail.reaction) {
+			const { error: insError } = await supabase.from('characters_reactions').insert({
+				react_to: characterId,
+				reaction: event.detail.reaction,
+				user_id: $user?.usr?.id
+			});
+			if (insError) {
+				errorMsg = insError.message || 'Could not update reaction.';
+				loading = false;
+				return;
+			}
+			// Dispatch the reaction event
+			dispatch('react', { reaction: event.detail.reaction });
+		}
+		userReaction = userReaction === event.detail.reaction ? null : event.detail.reaction;
+		await fetchReactions();
+		loading = false;
 	}
 
 	onMount(fetchReactions);
@@ -113,6 +95,6 @@
 		{reactionCounts}
 		{loading}
 		{errorMsg}
-		on:react={({ detail }) => handleReaction(detail.reaction)}
+		on:react={handleReaction}
 	/>
 {/if} 

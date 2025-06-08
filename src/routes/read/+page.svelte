@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { supabase } from '$lib/supabaseClient';
-	import type { Database } from '$lib/types/database.types';
+	import type { Database } from '../../../database.types';
 	import { user } from '$lib/stores/user';
 	import { coffeeMarkdown } from '$lib/md/coffeeMarkdown';
 	import { usernameCache } from '$lib/stores/username_cache';

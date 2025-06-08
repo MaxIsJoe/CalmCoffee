@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { coffeeMarkdown } from '$lib/md/coffeeMarkdown';
-	import type { ProfileType } from '$lib/types/profile';
 	import type { BlogType } from '$lib/types/blog';
 	import { onMount } from 'svelte';
 	import { supabase } from '$lib/supabaseClient';
 	import { user } from '$lib/stores/user';
 	import Reactions from '$lib/comp/common/Reactions.svelte';
+	import { sendLikeStoryNotification } from '$lib/notifications';
 
 	export let mb: BlogType;
 	export let profile: { username: string | null; avatar_url: string | null; } | null;
@@ -103,6 +103,23 @@
 				loading = false;
 				return;
 			}
+
+			// Send notification to the post author if it's not the current user
+			const { data: reactorProfile } = await supabase
+					.from('profiles')
+					.select('username')
+					.eq('account_id', userId)
+					.single();
+
+				if (reactorProfile?.username) {
+					await sendLikeStoryNotification({
+						userId: mb.writer,
+						reactorId: userId,
+						reactorUsername: reactorProfile.username,
+						storyTitle: mb.content.slice(0, 50) + (mb.content.length > 50 ? '...' : ''),
+						reaction: event.detail.reaction
+					});
+				}
 		}
 		userReaction = userReaction === event.detail.reaction ? null : event.detail.reaction;
 		await fetchReactions();

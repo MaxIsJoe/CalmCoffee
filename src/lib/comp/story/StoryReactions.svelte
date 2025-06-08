@@ -3,6 +3,7 @@
 	import { supabase } from '$lib/supabaseClient';
 	import { user } from '$lib/stores/user';
 	import Reactions from '$lib/comp/common/Reactions.svelte';
+	import { sendFollowNotification } from '$lib/notifications';
 
 	export let storyId: string;
 

@@ -3,8 +3,9 @@
 	import { supabase } from '$lib/supabaseClient';
 	import { page } from '$app/stores';
 	import { coffeeMarkdown } from '$lib/md/coffeeMarkdown';
-	import type { Database } from '$lib/types/database.types';
+	import type { Database } from '../../../../database.types';
 	import StoryReactions from '$lib/comp/story/StoryReactions.svelte';
+	import { sendCommentNotification } from '$lib/notifications';
 
 	let story: Database['public']['Tables']['stories']['Row'] | null = null;
 	let chapters: Database['public']['Tables']['chapters']['Row'][] = [];
@@ -186,14 +187,40 @@
 			submittingComment[blockId] = false;
 			return;
 		}
+
+		// Get the block to find its author
+		const block = blocks.find(b => b.id === blockId);
+		if (!block) {
+			commentErrors[blockId] = 'Block not found.';
+			submittingComment[blockId] = false;
+			return;
+		}
+
 		const { error } = await supabase
 			.from('story_block_comments')
 			.insert([{ id: blockId, commenter_id, comment: text }]);
+
 		if (error) {
 			commentErrors[blockId] = 'Failed to post comment.\n' + error.message;
 		} else {
 			commentInputs[blockId] = '';
 			await fetchCommentsForBlocks([blockId]);
+
+			// Send notification to the story author
+				const { data: commenterProfile } = await supabase
+					.from('profiles')
+					.select('username')
+					.eq('account_id', commenter_id)
+					.single();
+
+				if (commenterProfile?.username) {
+					await sendCommentNotification({
+						userId: story.user_id,
+						commenterId: commenter_id,
+						commenterUsername: commenterProfile.username,
+						storyTitle: story.title
+					});
+				}
 		}
 		submittingComment[blockId] = false;
 	}

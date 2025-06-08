@@ -7,6 +7,7 @@
 	import { usernameCache } from '$lib/stores/username_cache';
 	import RelationshipGraphEditor from '$lib/comp/characters/RelationshipGraphEditor.svelte';
 	import CharacterReactions from '$lib/comp/characters/CharacterReactions.svelte';
+	import { sendLikeStoryNotification } from '$lib/notifications';
 
 	type Character = Database['public']['Tables']['characters']['Row'];
 
@@ -61,6 +62,44 @@
 		loading = false;
 	});
 
+	// Add this function to handle reactions
+	async function handleCharacterReaction(event: CustomEvent<{ reaction: string }>) {
+		console.log("sending notification")
+		if (!character?.creator || !character.id) {
+			console.error(`STOP RIGHT HERE CRIMINAL SCUM. creator: ${character?.creator}, character: ${character}`)
+			return;
+		}
+		
+		const { data: { user } } = await supabase.auth.getUser();
+		if (!user) {
+			console.error("tried doing stuff without being logged in")
+			return;
+		}
+
+		const { data: reactorProfile, error: dbError } = await supabase
+				.from('profiles')
+				.select('username')
+				.eq('account_id', user.id)
+				.single();
+
+			if (dbError){
+				console.error(`${dbError}`)
+			}
+
+			if (reactorProfile?.username) {
+				if (event.detail.reaction === "0")
+				{
+					await sendLikeStoryNotification({
+					userId: character.creator,
+					reactorId: user.id,
+					reactorUsername: reactorProfile.username,
+					storyTitle: character.character_name,
+					reaction: event.detail.reaction
+				});
+				}
+			}
+	}
+
 	function GetGenderFlagAndText() {
 		if (!character) return '';
 		return character.gender + gender_flags[character.gender] || '❓';
@@ -108,7 +147,7 @@
 					{/if}
 				</div>
 				<div class="character-reactions">
-					<CharacterReactions characterId={character.id} />
+					<CharacterReactions characterId={character.id} on:react={handleCharacterReaction} />
 				</div>
 			</div>
 			<!-- Relationships panel below info card -->
