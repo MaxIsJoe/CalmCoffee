@@ -91,10 +91,17 @@
 
 	let editingDescription = false;
 	let editedDescription = '';
+	let editingTitle = false;
+	let editedTitle = '';
 
 	function startEditDescription() {
 		editedDescription = story?.description || '';
 		editingDescription = true;
+	}
+
+	function startEditTitle() {
+		editedTitle = story?.title || '';
+		editingTitle = true;
 	}
 
 	async function saveDescription() {
@@ -109,6 +116,20 @@
 		}
 		story = { ...story, description: editedDescription };
 		editingDescription = false;
+	}
+
+	async function saveTitle() {
+		if (!story || !editedTitle.trim()) return;
+		const { error: updateError } = await supabase
+			.from('stories')
+			.update({ title: editedTitle })
+			.eq('id', story.id);
+		if (updateError) {
+			error = updateError.message;
+			return;
+		}
+		story = { ...story, title: editedTitle };
+		editingTitle = false;
 	}
 
 	async function togglePublishStatus() {
@@ -169,10 +190,23 @@
 		<div class="left-panel">
 			<div class="panel-section">
 				<div class="project-header">
-					<h2>Edit Project: {story.title}</h2>
-					<button on:click={togglePublishStatus} class="publish-toggle-btn">
-						{story.is_published ? 'Unpublish' : 'Publish'}
-					</button>
+					{#if editingTitle}
+						<div class="edit-title-box">
+							<input type="text" bind:value={editedTitle} class="edit-title-input" />
+							<div class="edit-title-actions">
+								<button on:click={saveTitle}>Save</button>
+								<button on:click={() => (editingTitle = false)}>Cancel</button>
+							</div>
+						</div>
+					{:else}
+						<h2>{story.title}</h2>
+					{/if}
+					<div class="action-buttons">
+						<button class="edit-title-btn" on:click={startEditTitle}>Edit Title</button>
+						<button on:click={togglePublishStatus} class="publish-toggle-btn">
+							{story.is_published ? 'Unpublish' : 'Publish'}
+						</button>
+					</div>
 				</div>
 			</div>
 
@@ -364,9 +398,26 @@
 	/* Layout Sections */
 	.project-header {
 		display: flex;
-		flex-direction: column; /* Stack title and button on top of each other */
-		align-items: flex-start; /* Align contents to the left */
-		gap: 1rem; /* Space between title and button */
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 1rem;
+	}
+
+	.action-buttons {
+		display: flex;
+		gap: 1rem;
+		align-items: center;
+	}
+
+	.edit-title-btn {
+		background-color: #bca18c;
+		color: #fff;
+		padding: 0.6rem 1.4rem;
+		font-size: 1rem;
+	}
+
+	.edit-title-btn:hover {
+		background-color: #a1887f;
 	}
 
 	.edit-description-box {
@@ -569,5 +620,29 @@
 			padding: 1rem 1.5rem;
 			min-width: unset;
 		}
+	}
+
+	.edit-title-box {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.8rem;
+		width: 100%;
+	}
+
+	.edit-title-input {
+		width: 100%;
+		font-size: 2.2rem;
+		font-weight: 700;
+		color: #4b2e19;
+		padding: 0.5rem;
+		border: 2px solid #d4c2b8;
+		border-radius: 8px;
+		background-color: #fcf8f5;
+	}
+
+	.edit-title-actions {
+		display: flex;
+		gap: 1rem;
 	}
 </style>

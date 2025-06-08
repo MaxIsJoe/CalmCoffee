@@ -8,61 +8,124 @@
 <Navbar />
 {@render children()}
 
+<footer>
+	<div class="footer-content">
+		<div class="footer-section">
+			<h3>Calm Coffee</h3>
+			<p>A cozy space for writers and readers to share their stories.</p>
+		</div>
+		<div class="footer-section">
+			<h4>Quick Links</h4>
+			<ul>
+				<li><a href="/">Home</a></li>
+				<li><a href="/read">Read</a></li>
+				<li><a href="/rules">Community Rules</a></li>
+			</ul>
+		</div>
+		<div class="footer-section">
+			<h4>Connect</h4>
+			<ul>
+				<li><a href="https://github.com/maxisjoe/calm-coffee" target="_blank" rel="noopener">GitHub</a></li>
+				<li><a href="https://www.maxisjoe.xyz/maxfund">Donate</a></li>
+			</ul>
+		</div>
+	</div>
+	<div class="footer-bottom">
+		<p>&copy; {new Date().getFullYear()} MaxIsJoe. All rights reserved.</p>
+	</div>
+</footer>
+
 <style>
 	/* filepath: f:\projects\websites\CalmCaf\calm-coffee\src\routes\create\edit\[id]\+page.svelte */
 	:global(body) {
 		background: #fffdd0;
-	}
-	h2 {
-		text-align: center;
-		margin-top: 2rem;
-		color: #4b2e19;
-	}
-	h3 {
-		color: #6d4c41;
-		margin-top: 2rem;
-		margin-bottom: 1rem;
-		text-align: center;
-	}
-	ul {
-		list-style: none;
-		padding: 0;
-		max-width: 600px;
-		margin: 2rem auto 1rem auto;
-	}
-	li {
-		background: #fff;
-		border-radius: 8px;
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-		padding: 1.2rem 1.5rem;
-		margin-bottom: 1.2rem;
+		min-height: 100vh;
 		display: flex;
-		justify-content: space-between;
-		align-items: center;
+		flex-direction: column;
 	}
-	strong {
-		font-size: 1.1rem;
-		color: #3e2723;
-	}
-	button {
-		background: #a1887f;
-		color: #fff;
-		border: none;
-		border-radius: 4px;
-		padding: 0.5rem 1.2rem;
-		margin-left: 1rem;
-		cursor: pointer;
-		transition: background 0.2s;
-	}
-	button:hover {
-		background: #6d4c41;
-	}
+
 	@keyframes spin {
 		0% {
 			transform: rotate(0deg);
 		}
 		100% {
 			transform: rotate(360deg);
+		}
+	}
+
+	footer {
+		margin-top: auto;
+		background-color: #4b2e19;
+		color: #fffdd0;
+		padding: 2rem 0 0 0;
+	}
+
+	.footer-content {
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: 0 2rem;
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+		gap: 2rem;
+	}
+
+	.footer-section {
+		padding: 1rem;
+	}
+
+	.footer-section h3 {
+		color: #fffdd0;
+		font-size: 1.5rem;
+		margin-bottom: 1rem;
+	}
+
+	.footer-section h4 {
+		color: #fffdd0;
+		font-size: 1.2rem;
+		margin-bottom: 1rem;
+	}
+
+	.footer-section p {
+		color: #d4c2b8;
+		line-height: 1.6;
+	}
+
+	.footer-section ul {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+
+	.footer-section ul li {
+		margin-bottom: 0.5rem;
+	}
+
+	.footer-section ul li a {
+		color: #d4c2b8;
+		text-decoration: none;
+		transition: color 0.2s ease;
+	}
+
+	.footer-section ul li a:hover {
+		color: #fffdd0;
+	}
+
+	.footer-bottom {
+		text-align: center;
+		padding: 1.5rem;
+		margin-top: 2rem;
+		background-color: #3e2723;
+		color: #d4c2b8;
+	}
+
+	@media (max-width: 768px) {
+		.footer-content {
+			grid-template-columns: 1fr;
+			padding: 0 1rem;
+		}
+
+		.footer-section {
+			text-align: center;
 		}
 	}
 </style>
