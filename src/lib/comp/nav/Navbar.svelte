@@ -58,8 +58,9 @@
 			.from('notifications')
 			.select('*')
 			.eq('user_id', $userStore.usr.id)
+			.eq('read', false)
 			.order('created_at', { ascending: false })
-			.limit(5);
+			.limit(20);
 
 		if (error) {
 			console.error('Error fetching notifications:', error);

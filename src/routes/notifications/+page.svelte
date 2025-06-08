@@ -29,7 +29,30 @@
 
 	onMount(() => {
 		fetchNotifications();
+
+		markAllAsRead();
 	});
+
+	async function markAllAsRead() {
+		if (!$userStore?.usr) {
+            console.error("there's no logged in user to read their notifications")
+            return;
+        }
+
+		const { error } = await supabase
+			.from('notifications')
+			.update({ read: true })
+			.eq('user_id', $userStore.usr.id)
+			.eq('read', false);
+
+		if (error) {
+			console.error('Error marking notifications as read:', error);
+			return;
+		}
+
+		// Update local state
+		notifications = notifications.map(n => ({ ...n, read: true }));
+	}
 
 	function getNotificationIcon(type: string) {
 		switch (type) {
