@@ -134,7 +134,8 @@
 
 	@media (max-width: 768px) {
 		main {
-			padding: 0.8rem;
+			padding: 0;
+			max-width: 100%;
 		}
 
 		footer {
@@ -168,7 +169,8 @@
 
 	@media (max-width: 480px) {
 		main {
-			padding: 0.5rem;
+			padding: 0;
+			max-width: 100%;
 		}
 
 		.footer-content {
