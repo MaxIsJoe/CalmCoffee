@@ -4,6 +4,7 @@
 	import { goto } from '$app/navigation';
 	import { user as userStore } from '$lib/stores/user';
 	import type { Database } from '../../../../database.types';
+	import { slide } from 'svelte/transition';
 
 	type Notification = Database['public']['Tables']['notifications']['Row'];
 
@@ -196,7 +197,7 @@
 				<path d="M3 18H21" stroke="#3730a3" stroke-width="2" stroke-linecap="round"/>
 			</svg>
 		</button>
-		<a href="/" class="logo" data-sveltekit-reload>CalmCoffee</a>
+		<a href="/" class="logo desktop-logo" data-sveltekit-reload>CalmCoffee</a>
 		<div class="desktop-nav">
 			<a href="/read" data-sveltekit-reload>Stories</a>
 			<a href="/blog" data-sveltekit-reload>Microblogs</a>
@@ -326,12 +327,15 @@
 {#if mobileMenuOpen}
 	<div class="mobile-menu" transition:slide={{ duration: 200 }}>
 		<div class="mobile-menu-content">
+			<a href="/" class="mobile-menu-logo" on:click={closeMobileMenu}>CalmCoffee</a>
 			<a href="/read" on:click={closeMobileMenu} data-sveltekit-reload>Stories</a>
 			<a href="/blog" on:click={closeMobileMenu} data-sveltekit-reload>Microblogs</a>
 			<a href="/characters" on:click={closeMobileMenu} data-sveltekit-reload>Characters</a>
 			{#if $userStore}
-				<a href={`/profile/${username}`} on:click={closeMobileMenu}>Profile</a>
-				<a href="/settings" on:click={closeMobileMenu}>Settings</a>
+				<a href={`/profile/${username}`} class="mobile-menu-link" on:click={closeMobileMenu}
+					>Profile</a
+				>
+				<a href="/settings" class="mobile-menu-link" on:click={closeMobileMenu}>Settings</a>
 				<button class="mobile-logout" on:click={() => { closeMobileMenu(); logout(); }}>Logout</button>
 			{:else}
 				<a href="/account/login" on:click={closeMobileMenu} data-sveltekit-reload>Login</a>
@@ -349,12 +353,20 @@
 		background: #f5f5f5;
 		border-bottom: 1px solid #ddd;
 	}
-	.nav-left a.logo {
+
+	.nav-left {
+		display: flex;
+		align-items: center;
+		gap: 1.5rem; /* Adjust gap between logo/button and nav links */
+	}
+
+	.logo {
 		font-weight: bold;
-		margin-right: 1.5rem;
 		text-decoration: none;
 		color: #333;
+		white-space: nowrap; /* Prevent logo from wrapping */
 	}
+
 	.nav-left a,
 	.nav-right a {
 		margin-right: 1rem;
@@ -747,6 +759,10 @@
 		.dropdown-menu {
 			right: -1rem;
 		}
+
+		.desktop-logo {
+			display: none;
+		}
 	}
 	@media (max-width: 480px) {
 		.logo {
@@ -755,6 +771,10 @@
 		.notification-menu {
 			width: 280px;
 			right: -1rem;
+		}
+
+		.mobile-menu-logo {
+			font-size: 1.4rem;
 		}
 	}
 </style>
