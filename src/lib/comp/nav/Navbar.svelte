@@ -325,21 +325,25 @@
 </nav>
 
 {#if mobileMenuOpen}
-	<div class="mobile-menu" transition:slide={{ duration: 200 }}>
+	<div class="mobile-menu" transition:slide={{ duration: 200 }} on:click|self={closeMobileMenu}>
 		<div class="mobile-menu-content">
-			<a href="/" class="mobile-menu-logo" on:click={closeMobileMenu}>CalmCoffee</a>
-			<a href="/read" on:click={closeMobileMenu} data-sveltekit-reload>Stories</a>
-			<a href="/blog" on:click={closeMobileMenu} data-sveltekit-reload>Microblogs</a>
-			<a href="/characters" on:click={closeMobileMenu} data-sveltekit-reload>Characters</a>
-			{#if $userStore}
-				<a href={`/profile/${username}`} class="mobile-menu-link" on:click={closeMobileMenu}
-					>Profile</a
-				>
-				<a href="/settings" class="mobile-menu-link" on:click={closeMobileMenu}>Settings</a>
-				<button class="mobile-logout" on:click={() => { closeMobileMenu(); logout(); }}>Logout</button>
-			{:else}
-				<a href="/account/login" on:click={closeMobileMenu} data-sveltekit-reload>Login</a>
-			{/if}
+			<div class="mobile-menu-header">
+				<a href="/" class="mobile-menu-logo" on:click={closeMobileMenu}>CalmCoffee</a>
+			</div>
+			<div class="mobile-menu-links">
+				<a href="/read" on:click={closeMobileMenu} data-sveltekit-reload>Stories</a>
+				<a href="/blog" on:click={closeMobileMenu} data-sveltekit-reload>Microblogs</a>
+				<a href="/characters" on:click={closeMobileMenu} data-sveltekit-reload>Characters</a>
+				{#if $userStore}
+					<a href={`/profile/${username}`} class="mobile-menu-link" on:click={closeMobileMenu}
+						>Profile</a
+					>
+					<a href="/settings" class="mobile-menu-link" on:click={closeMobileMenu}>Settings</a>
+					<button class="mobile-logout" on:click={() => { closeMobileMenu(); logout(); }}>Logout</button>
+				{:else}
+					<a href="/account/login" on:click={closeMobileMenu} data-sveltekit-reload>Login</a>
+				{/if}
+			</div>
 		</div>
 	</div>
 {/if}
@@ -703,13 +707,29 @@
 		width: 80%;
 		max-width: 300px;
 		background: white;
-		padding: 2rem;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+	}
+	.mobile-menu-header {
+		padding: 1.5rem;
+		border-bottom: 1px solid #e0e7ff;
+		background: #f8fafc;
+	}
+	.mobile-menu-logo {
+		color: #3730a3;
+		text-decoration: none;
+		font-size: 1.4rem;
+		font-weight: bold;
+	}
+	.mobile-menu-links {
+		padding: 1.5rem;
 		display: flex;
 		flex-direction: column;
 		gap: 1rem;
-		box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
 	}
-	.mobile-menu-content a {
+	.mobile-menu-links a {
 		color: #3730a3;
 		text-decoration: none;
 		font-size: 1.1rem;
