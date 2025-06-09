@@ -5,6 +5,7 @@
 	import type { User } from '@supabase/supabase-js';
 	import type { Story } from '$lib/types/story';
 	import { usernameCache } from '$lib/stores/username_cache';
+	import { slide } from 'svelte/transition';
 
 	// Tab components
 	import ProfileOverview from './ProfileOverview.svelte';
@@ -407,15 +408,19 @@
 				{/each}
 			</div>
 			<div class="profile-tab-content">
-				<svelte:component
-					this={tabs.find((t) => t.key === selectedTab)?.component}
-					profile={profile!}
-					user={user!}
-					{stories}
-					{username}
-					{userComments}
-					{loadingComments}
-				/>
+				{#key selectedTab}
+					<div transition:slide>
+						<svelte:component
+							this={tabs.find((t) => t.key === selectedTab)?.component}
+							profile={profile!}
+							user={user!}
+							{stories}
+							{username}
+							{userComments}
+							{loadingComments}
+						/>
+					</div>
+				{/key}
 			</div>
 		</div>
 	</div>
