@@ -3,7 +3,8 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { coffeeMarkdown, defaultStyles } from '$lib/md/coffeeMarkdown';
-	import type { Database } from '$lib/types/database.types';
+	import type { Database } from '../../../../../../../database.types';
+	import ZenMarkdownEditor from '$lib/comp/markdown/ZenMarkdownEditor.svelte';
 
 	let blocks: Database['public']['Tables']['blocks']['Row'][] = [];
 	let error = '';
@@ -15,15 +16,30 @@
 	let chapterId = '';
 	$: chapterId = $page.params.chapterId;
 
-	let showBlocksList = true; // Collapsible blocks list, visible by default
-	let showPreview = true;
+	let showBlocksList = true; // Collapsible blocks list
 	let showEditor = true;
+
+	onMount(() => {
+		// Check if we're on mobile
+		const isMobile = window.matchMedia('(max-width: 900px)').matches;
+		if (isMobile) {
+			showBlocksList = false;
+		}
+
+		// Listen for screen size changes
+		const mediaQuery = window.matchMedia('(max-width: 900px)');
+		const handleResize = (e: MediaQueryListEvent) => {
+			showBlocksList = !e.matches;
+		};
+		mediaQuery.addEventListener('change', handleResize);
+
+		return () => {
+			mediaQuery.removeEventListener('change', handleResize);
+		};
+	});
 
 	function toggleBlocksList() {
 		showBlocksList = !showBlocksList;
-	}
-	function togglePreview() {
-		showPreview = !showPreview;
 	}
 	function toggleEditor() {
 		showEditor = !showEditor;
@@ -168,64 +184,25 @@
 		newBlockStyles = '{}';
 		canCreateBlock = false;
 	}
-	// Markdown toolbar actions
-	function insertAtCursor(before: string, after: string = '', placeholder: string = '') {
-		const textarea = document.querySelector('.modern-textarea');
-		if (!textarea) return;
-		const el = textarea as HTMLTextAreaElement;
-		const start = el.selectionStart;
-		const end = el.selectionEnd;
-		const selected = newBlockContent.slice(start, end) || placeholder;
-		const newText =
-			newBlockContent.slice(0, start) + before + selected + after + newBlockContent.slice(end);
-		newBlockContent = newText;
-		setTimeout(() => {
-			el.focus();
-			el.selectionStart = start + before.length;
-			el.selectionEnd = start + before.length + selected.length;
-		}, 0);
-	}
 
-	function addBold() {
-		insertAtCursor('**', '**', 'bold');
+	// Live preview variables
+	let previewHtml = '';
+	$: previewHtml = (() => {
+		try {
+			return coffeeMarkdown(newBlockContent, JSON.parse(newBlockStyles));
+		} catch {
+			return coffeeMarkdown(newBlockContent, undefined);
+		}
+	})();
+
+	let showStylesEditor = false; // for new block
+	let showEditStylesEditor = false; // for editing block
+
+	function toggleStylesEditor() {
+		showStylesEditor = !showStylesEditor;
 	}
-	function addItalic() {
-		insertAtCursor('*', '*', 'italic');
-	}
-	function addUnderline() {
-		insertAtCursor('<u>', '</u>', 'underline');
-	}
-	function addImage() {
-		insertAtCursor('![](img-proxy:', ')', 'img url)');
-	}
-	function addLink() {
-		insertAtCursor('[', '](https://)', 'link text');
-	}
-	function addCode() {
-		insertAtCursor('`', '`', 'code');
-	}
-	function addBlockquote() {
-		insertAtCursor('> ', '', 'quote');
-	}
-	function addList() {
-		insertAtCursor('- ', '', 'list item');
-	}
-	function addOrderedList() {
-		insertAtCursor('1. ', '', 'ordered item');
-	}
-	// Add bgc insert function
-	function addBgc() {
-		insertAtCursor('<bgc bg:white text:#222>\n', '\n</bgc>', 'background section');
-	}
-	function addHeading() {
-		insertAtCursor('# ', '', 'Heading');
-	}
-	function addCss() {
-		insertAtCursor(
-			'<custom style="padding:0.7em 1em;border-radius:8px;margin:1em 0;">\n',
-			'\n</custom>',
-			'/* Custom Styled Paragraph */'
-		);
+	function toggleEditStylesEditor() {
+		showEditStylesEditor = !showEditStylesEditor;
 	}
 
 	let editingBlockId: string | null = null;
@@ -309,26 +286,6 @@
 		editingStyles = '{}';
 		editLoading = false;
 	}
-
-	// Live preview variables
-	let previewHtml = '';
-	$: previewHtml = (() => {
-		try {
-			return coffeeMarkdown(newBlockContent, JSON.parse(newBlockStyles));
-		} catch {
-			return coffeeMarkdown(newBlockContent, undefined);
-		}
-	})();
-
-	let showStylesEditor = false; // for new block
-	let showEditStylesEditor = false; // for editing block
-
-	function toggleStylesEditor() {
-		showStylesEditor = !showStylesEditor;
-	}
-	function toggleEditStylesEditor() {
-		showEditStylesEditor = !showEditStylesEditor;
-	}
 </script>
 
 {#if loading}
@@ -348,18 +305,24 @@
 						{#each blocks as block}
 							<li class="block-item">
 								{#if editingBlockId === block.id}
-									<textarea
-										class="modern-textarea"
+									<ZenMarkdownEditor
 										bind:value={editingContent}
-										maxlength="1000"
-										autofocus
-										style="margin-bottom:0.5rem;"
-									></textarea>
+										maxLength={1000}
+										placeholder="Edit your block content..."
+										bind:showPreview={showEditStylesEditor}
+										customStyles={(() => {
+											try {
+												return JSON.parse(editingStyles);
+											} catch {
+												return defaultStyles;
+											}
+										})()}
+									/>
 									<button
 										class="styles-toggle-btn"
 										type="button"
 										on:click={toggleEditStylesEditor}
-										style="margin-bottom:0.5rem;"
+										style="margin:0.5rem 0;"
 									>
 										{showEditStylesEditor ? 'Hide Styles ▲' : 'Advanced Styles ▼'}
 									</button>
@@ -385,7 +348,7 @@
 									</div>
 								{:else}
 									<div class="block-content">
-										{@html coffeeMarkdown(block.content, block.styles)}
+										{@html coffeeMarkdown(block.content, block.styles === null ? undefined : (block.styles as any))}
 									</div>
 									<small class="block-date"
 										>{block.created_at ? new Date(block.created_at).toLocaleString() : ''}</small
@@ -409,45 +372,29 @@
 				<button on:click={toggleEditor} class="control-btn"
 					>{showEditor ? 'Hide' : 'Show'} Editor</button
 				>
-				<button on:click={togglePreview} class="control-btn"
-					>{showPreview ? 'Hide' : 'Show'} Preview</button
-				>
 				<button on:click={clearEditor} class="control-btn">Clear</button>
 				<button on:click={copyMarkdown} class="control-btn">Copy Markdown</button>
 			</div>
 			<div class="editor-main">
 				{#if showEditor}
 					<div class="editor-column">
-						<div class="markdown-toolbar">
-							<button type="button" title="Bold" on:click={addBold}><b>B</b></button>
-							<button type="button" title="Italic" on:click={addItalic}><i>I</i></button>
-							<button type="button" title="Underline" on:click={addUnderline}><u>U</u></button>
-							<button type="button" title="Heading" on:click={addHeading}>H</button>
-							<button type="button" title="List" on:click={addList}>• List</button>
-							<button type="button" title="Ordered List" on:click={addOrderedList}>1. List</button>
-							<button type="button" title="Blockquote" on:click={addBlockquote}>&gt;</button>
-							<button type="button" title="Code" on:click={addCode}><code>&lt;/&gt;</code></button>
-							<button type="button" title="Link" on:click={addLink}>🔗</button>
-							<button type="button" title="Image" on:click={addImage}>🖼️</button>
-							<button type="button" title="CSS" on:click={addCss}>CSS</button>
-							<!-- Add bgc button -->
-							<button type="button" title="Background Color Section" on:click={addBgc}>BG</button>
-						</div>
-						<textarea
+						<ZenMarkdownEditor
 							bind:value={newBlockContent}
-							maxlength="1000"
+							maxLength={1000}
 							placeholder="Write your next 1000 characters (markdown supported)"
-							class="modern-textarea large"
-						></textarea>
-						<!-- Character counter for new block -->
-						<div class="char-counter {newBlockContent.length > 900 ? 'warn' : ''}">
-							{newBlockContent.length} / 1000 characters
-						</div>
+							customStyles={(() => {
+								try {
+									return JSON.parse(newBlockStyles);
+								} catch {
+									return defaultStyles;
+								}
+							})()}
+						/>
 						<button
 							class="styles-toggle-btn"
 							type="button"
 							on:click={toggleStylesEditor}
-							style="margin-bottom:0.5rem;"
+							style="margin:0.5rem 0;"
 						>
 							{showStylesEditor ? 'Hide Styles ▲' : 'Advanced Styles ▼'}
 						</button>
@@ -459,14 +406,6 @@
 								style="margin-top:0.5rem;height:70px;font-size:0.95rem;"
 							></textarea>
 						{/if}
-					</div>
-				{/if}
-				{#if showPreview}
-					<div class="modern-preview collapsable-preview">
-						<h3>Preview</h3>
-						<div class="preview-content">
-							{@html previewHtml}
-						</div>
 					</div>
 				{/if}
 			</div>
@@ -595,28 +534,6 @@
 		resize: vertical;
 		margin-bottom: 0.5rem;
 	}
-	.modern-textarea.large {
-		width: 100%;
-		height: 350px;
-		font-size: 1.15rem;
-		padding: 1.2rem;
-		border-radius: 10px;
-		border: 1.5px solid #cbd5e1;
-		resize: vertical;
-		background: #f8fafc;
-		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
-	}
-	.modern-preview.collapsable-preview {
-		flex: 1;
-		background: #f3f4f6;
-		border-radius: 8px;
-		padding: 1rem 1.2rem;
-		margin-left: 0.5rem;
-		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
-		min-width: 250px;
-		max-width: 500px;
-		overflow-x: auto;
-	}
 	.preview-content {
 		font-size: 1.05rem;
 		color: #222;
@@ -654,26 +571,6 @@
 		color: #b91c1c;
 		margin-top: 3rem;
 	}
-	.markdown-toolbar {
-		display: flex;
-		gap: 0.5rem;
-		margin-bottom: 0.7rem;
-	}
-	.markdown-toolbar button {
-		background: #f3f4f6;
-		border: 1px solid #cbd5e1;
-		border-radius: 4px;
-		padding: 0.3rem 0.7rem;
-		font-size: 1rem;
-		cursor: pointer;
-		transition:
-			background 0.2s,
-			border 0.2s;
-	}
-	.markdown-toolbar button:hover {
-		background: #e0e7ff;
-		border-color: #4f46e5;
-	}
 	.block-content,
 	.preview-content {
 		/* existing styles for .block-content and .preview-content */
@@ -681,16 +578,6 @@
 		color: #222;
 		margin-bottom: 0.5rem;
 		word-break: break-word;
-	}
-	.char-counter {
-		font-size: 0.98rem;
-		color: #64748b;
-		margin-bottom: 0.5rem;
-		text-align: right;
-	}
-	.char-counter.warn {
-		color: #b91c1c;
-		font-weight: 600;
 	}
 	@media (max-width: 900px) {
 		.modern-block-editor {
@@ -705,6 +592,7 @@
 			width: 100%;
 		}
 		.modern-preview.collapsable-preview {
+			min-width: 500px;
 			margin-left: 0;
 			max-width: 100%;
 		}

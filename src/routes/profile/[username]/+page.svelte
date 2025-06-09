@@ -5,6 +5,7 @@
 	import type { User } from '@supabase/supabase-js';
 	import type { Story } from '$lib/types/story';
 	import { usernameCache } from '$lib/stores/username_cache';
+	import { slide } from 'svelte/transition';
 
 	// Tab components
 	import ProfileOverview from './ProfileOverview.svelte';
@@ -271,13 +272,13 @@
 							<!-- svelte-ignore a11y_img_redundant_alt -->
 							<img src={newAvatarUrl} alt="Profile picture" class="avatar-img" />
 						{:else}
-							<span>{profile.username.charAt(0).toUpperCase()}</span>
+							<span>{profile!.username.charAt(0).toUpperCase()}</span>
 						{/if}
-					{:else if profile.avatar_url}
+					{:else if profile!.avatar_url}
 						<!-- svelte-ignore a11y_img_redundant_alt -->
-						<img src={profile.avatar_url} alt="Profile picture" class="avatar-img" />
+						<img src={profile!.avatar_url} alt="Profile picture" class="avatar-img" />
 					{:else}
-						<span>{profile.username.charAt(0).toUpperCase()}</span>
+						<span>{profile!.username.charAt(0).toUpperCase()}</span>
 					{/if}
 				</div>
 				<div class="profile-info">
@@ -296,7 +297,7 @@
 							/>
 						</label>
 					{:else}
-						<h2>{profile.username}</h2>
+						<h2>{profile!.username}</h2>
 					{/if}
 					<div class="profile-age">
 						<strong>Age:</strong>
@@ -328,10 +329,10 @@
 								>
 							</div>
 						{:else}
-							<span>{profile.bio || 'No bio yet.'}</span>
+							<span>{profile!.bio || 'No bio yet.'}</span>
 						{/if}
 					</div>
-					{#if !editing && user && user.email === profile.email}
+					{#if !editing && user && user.email === profile!.email}
 						<button class="edit-btn" on:click={() => (editing = true)}>Edit</button>
 					{/if}
 				</div>
@@ -352,16 +353,16 @@
 								style="cursor:pointer;"
 							>
 								{interest}
-								{#if user && user.email === profile.email}
+								{#if user && user.email === profile!.email}
 									<button
 										class="remove-interest-btn"
 										on:click|stopPropagation={async () => {
-											const updated = profile.interests.filter((_, idx) => idx !== i);
+											const updated = profile!.interests.filter((_, idx) => idx !== i);
 											const { error: updateError } = await supabase
 												.from('profiles')
 												.update({ interests: updated })
-												.eq('account_id', profile.account_id);
-											if (!updateError) profile.interests = updated;
+												.eq('account_id', profile!.account_id);
+											if (!updateError) profile!.interests = updated;
 										}}
 										title="Remove">&times;</button
 									>
@@ -372,18 +373,18 @@
 				{:else}
 					<p class="no-interests">No interests listed.</p>
 				{/if}
-				{#if user && profile && user.email === profile.email}
+				{#if user && profile && user.email === profile!.email}
 					<form
 						class="add-interest-form"
 						on:submit|preventDefault={async () => {
 							if (!newInterest.trim()) return;
-							const updated = [...(profile.interests || []), newInterest.trim()];
+							const updated = [...(profile!.interests || []), newInterest.trim()];
 							const { error: updateError } = await supabase
 								.from('profiles')
 								.update({ interests: updated })
-								.eq('account_id', profile.account_id);
+								.eq('account_id', profile!.account_id);
 							if (!updateError) {
-								profile.interests = updated;
+								profile!.interests = updated;
 								newInterest = '';
 							}
 						}}
@@ -399,22 +400,27 @@
 			<div class="profile-tabs">
 				{#each tabs as tab}
 					<button
-						class:active={selectedTab === tab.key}
+						class="tab-button {selectedTab === tab.key ? 'active' : ''}"
 						on:click={() => (selectedTab = tab.key)}
-						type="button"
 					>
 						{tab.label}
 					</button>
 				{/each}
 			</div>
 			<div class="profile-tab-content">
-				<svelte:component
-					this={tabs.find((t) => t.key === selectedTab)?.component}
-					{profile}
-					{stories}
-					{userComments}
-					{loadingComments}
-				/>
+				{#key selectedTab}
+					<div transition:slide>
+						<svelte:component
+							this={tabs.find((t) => t.key === selectedTab)?.component}
+							profile={profile!}
+							user={user!}
+							{stories}
+							{username}
+							{userComments}
+							{loadingComments}
+						/>
+					</div>
+				{/key}
 			</div>
 		</div>
 	</div>
@@ -537,8 +543,7 @@
 		border: 1px solid #ccc;
 		font-size: 1rem;
 	}
-	button,
-	.edit-btn {
+	button {
 		background: #4f46e5;
 		color: #fff;
 		border: none;
@@ -548,14 +553,18 @@
 		cursor: pointer;
 		transition: background 0.2s;
 	}
-	button:hover,
-	.edit-btn:hover {
+	button:hover {
 		background: #3730a3;
 	}
 	.edit-btn {
+		background: #4f46e5;
+		color: #fff;
 		margin-left: 1rem;
 		padding: 0.3rem 0.9rem;
 		font-size: 0.95rem;
+	}
+	.edit-btn:hover {
+		background: #3730a3;
 	}
 	@media (max-width: 900px) {
 		.profile-main-container {
@@ -577,9 +586,20 @@
 	}
 	.profile-tabs {
 		display: flex;
-		gap: 1.2rem;
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+		border-bottom: 1px solid #e0d7ce;
+		margin-bottom: 1.5rem;
+		padding-bottom: 0.2rem;
+		max-width: 100%;
+		scrollbar-width: none;
 	}
-	.profile-tabs button {
+
+	.profile-tabs::-webkit-scrollbar {
+		display: none;
+	}
+
+	.tab-button {
 		background: #f3f4f6;
 		color: #3730a3;
 		border: none;
@@ -587,15 +607,36 @@
 		padding: 0.7em 1.5em;
 		font-size: 1.05rem;
 		cursor: pointer;
-		transition:
-			background 0.16s,
-			color 0.16s;
+		transition: background 0.16s, color 0.16s;
 		font-weight: 500;
+		white-space: nowrap;
+		flex-shrink: 0;
+		min-width: fit-content;
 	}
-	.profile-tabs button.active,
-	.profile-tabs button:hover {
+
+	.tab-button.active,
+	.tab-button:hover {
 		background: #e0e7ff;
 		color: #4f46e5;
+	}
+
+	@media (max-width: 768px) {
+		.profile-tabs {
+			padding-bottom: 0.1rem;
+			margin-bottom: 1rem;
+		}
+
+		.tab-button {
+			padding: 0.6rem 0.9rem;
+			font-size: 0.9em;
+		}
+	}
+
+	@media (max-width: 480px) {
+		.tab-button {
+			padding: 0.5rem 0.7rem;
+			font-size: 0.85em;
+		}
 	}
 	.profile-tab-content {
 		background: #fafafa;

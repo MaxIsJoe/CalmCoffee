@@ -312,7 +312,7 @@
 		flex-direction: row;
 		align-items: flex-start;
 		justify-content: center;
-		gap: 2.5rem;
+		gap: 1.7rem;
 		margin-top: 2.5rem;
 	}
 
@@ -323,6 +323,7 @@
 
 	.character-form {
 		max-width: 75%;
+		min-width: 560px;
 		margin: 0 auto;
 		background: #fff;
 		padding: 2rem 2.2rem 1.5rem 2.2rem;
@@ -403,12 +404,12 @@
 
 	.preview-section {
 		flex: 1 1 0;
-		max-width: 420px;
 		background: #f8fafc;
 		border-radius: 12px;
 		box-shadow: 0 2px 12px rgba(30, 34, 54, 0.07);
 		padding: 2rem 1.5rem 1.5rem 1.5rem;
 		margin-top: 0;
+		max-width: 760px;
 	}
 
 	.preview-section h2 {
@@ -418,23 +419,11 @@
 		text-align: center;
 	}
 
-	.preview_profile_layout,
-	.character_profile_layout {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 2.5rem;
-	}
-
 	.character-left-panel {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: 2rem;
-		min-width: 320px;
-		max-width: 340px;
-		margin-top: 29px;
-		margin-left: 12px;
+		margin: 0 auto;
 		background: none;
 		box-shadow: none;
 		padding: 0;
@@ -447,9 +436,7 @@
 		background: #f8fafc;
 		border-radius: 12px;
 		box-shadow: 0 2px 12px rgba(30, 34, 54, 0.07);
-		padding: 2rem 1.5rem;
 		width: 100%;
-		gap: 1.2rem;
 	}
 
 	.character-info-card .character-avatar {
@@ -461,6 +448,7 @@
 		background: #f6f7fa;
 		box-shadow: 0 2px 8px rgba(30, 34, 54, 0.09);
 		margin-bottom: 0.7rem;
+		margin-top: 0.07rem;
 	}
 
 	.info-fields {
@@ -490,23 +478,6 @@
 		color: #6366f1;
 		margin-right: 0.7rem;
 		letter-spacing: 0.01em;
-	}
-	.info-fields ul {
-		margin: 0.2rem 0 0 0.7rem;
-		padding: 0;
-	}
-	.info-fields li {
-		margin-bottom: 0.15rem;
-	}
-	.info-fields a {
-		color: #6366f1;
-		text-decoration: underline;
-		word-break: break-all;
-		transition: color 0.15s;
-	}
-	.info-fields a:hover {
-		color: #3730a3;
-		text-decoration: underline wavy;
 	}
 
 	.character-desc {
@@ -561,7 +532,6 @@
 	}
 
 	/* Make preview visually distinct */
-	.preview-section .character-profile,
 	.preview-section .character-info-card {
 		box-shadow: 0 1px 8px #0001;
 	}
@@ -570,15 +540,39 @@
 		.create-character-layout {
 			flex-direction: column;
 			gap: 1.5rem;
+			padding: 0;
+			max-width: 100%;
+			margin: 0;
+		}
+		.create-character-form-col {
+			max-width: 100%;
+			width: 100%;
+			margin: 0;
+		}
+		.character-form {
+			max-width: 100%;
+			width: 100%;
+			margin: 0;
+			box-sizing: border-box;
 		}
 		.preview-section {
-			max-width: 100vw;
+			max-width: 100%;
+			width: 100%;
 			margin-top: 1.5rem;
+			padding: 1.5rem 0;
+			box-sizing: border-box;
 		}
-		.preview_profile_layout,
-		.character_profile_layout {
-			flex-direction: column;
-			gap: 1.5rem;
+
+		.character-left-panel {
+			max-width: 100%;
+			margin: 0;
+			width: 100%;
+			box-sizing: border-box;
+		}
+		.character-info-card {
+			width: 100%;
+			box-sizing: border-box;
+			padding: 1.5rem 0;
 		}
 	}
 
@@ -589,17 +583,125 @@
 			align-items: stretch;
 		}
 		.character-left-panel {
-			max-width: 100vw;
+			max-width: 100%;
 			min-width: 0;
-			margin: 1.5rem 0;
-		}
-		.character-profile {
-			max-width: 100vw;
+			margin: 0 auto;
 		}
 		.art-gallery {
 			justify-content: flex-start;
 		}
 	}
+
+	@media (max-width: 768px) {
+		h1 {
+			margin-top: 1.5rem;
+			margin-bottom: 1.5rem;
+			font-size: 1.75rem;
+		}
+
+		.create-character-layout {
+			margin-top: 1.5rem;
+			padding: 0;
+		}
+
+		.create-character-form-col {
+			max-width: 100%;
+			width: 100%;
+		}
+
+		.character-form {
+			max-width: 100%;
+			width: 100%;
+			padding: 1.5rem 0.5rem;
+			border-radius: 8px;
+			box-sizing: border-box;
+		}
+
+		.preview-section {
+			max-width: 100%;
+			padding: 1.5rem 0.5rem;
+			border-radius: 8px;
+			box-sizing: border-box;
+		}
+
+		.character-info-card {
+			padding: 1.5rem 0.5rem;
+			box-sizing: border-box;
+		}
+
+		.info-fields {
+			padding: 0.75rem;
+			box-sizing: border-box;
+		}
+
+		.art-gallery {
+			justify-content: center;
+		}
+
+		.art-thumb-link {
+			max-width: 100px;
+			max-height: 100px;
+		}
+
+		.art-thumb {
+			width: 100px;
+			height: 100px;
+		}
+	}
+
+	@media (max-width: 480px) {
+		h1 {
+			font-size: 1.5rem;
+			margin-top: 1rem;
+			margin-bottom: 1rem;
+		}
+
+		.create-character-layout {
+			margin-top: 1rem;
+			padding: 0;
+		}
+
+		.character-form {
+			padding: 1.2rem 0.25rem;
+		}
+
+		.preview-section {
+			max-width: 100%;
+			padding: 1.2rem 0.25rem;
+		}
+
+		.character-info-card {
+			padding: 1.2rem 0.25rem;
+		}
+
+		.info-fields {
+			padding: 0.5rem;
+			font-size: 0.95rem;
+		}
+
+		.info-fields strong {
+			min-width: 90px;
+		}
+
+		.desc-content {
+			font-size: 0.95rem;
+		}
+
+		.art-gallery {
+			gap: 0.5rem;
+		}
+
+		.art-thumb-link {
+			max-width: 90px;
+			max-height: 90px;
+		}
+
+		.art-thumb {
+			width: 90px;
+			height: 90px;
+		}
+	}
+
 	.muted {
 		color: #888;
 		font-size: 1rem;

@@ -45,7 +45,7 @@
 	let tagWarning = '';
 	const maxTags = 6;
 
-	let readingWidth = 400;
+	let readingWidth = 500;
 	let resizing = false;
 	let startX = 0;
 	let startWidth = 0;
@@ -342,7 +342,7 @@
 				on:change={(e) => onRelationshipsChange(e.detail)}
 			/>
 		</div>
-		<div class="preview-section resizable" style="max-width:{readingWidth}px;width:100%;position:relative;">
+		<div class="preview-section resizable" style="max-width:{readingWidth}px;position:relative;">
 			<!-- svelte-ignore a11y_no_static_element_interactions -->
 			<div class="resize-handle left" on:mousedown={startResize}></div>
 			<!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -390,17 +390,19 @@
 <style>
 	.edit-character-main {
 		display: flex;
-		gap: 2.5rem;
 		align-items: flex-start;
-		justify-content: center;
+		width: 100%;
+		margin: 0 auto;
+		gap: 1rem;
 	}
 	.edit-character-container {
-		width: 70%;
 		margin: 2rem 0;
 		background: #fff;
 		border-radius: 12px;
 		box-shadow: 0 2px 12px rgba(30, 34, 54, 0.07);
 		padding: 2rem 2rem 1.5rem 2rem;
+		flex: 2;
+		flex-basis: 700px;
 	}
 	h1 {
 		font-size: 1.4rem;
@@ -508,10 +510,17 @@
 		text-align: center;
 	}
 	.preview-section {
-		/* width: 380px;
-		min-width: 280px;
-		max-width: 420px; */
-		margin-top: 2rem;
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		margin: 2rem 0;
+		padding: 2rem 1.5rem;
+		background: #fff;
+		border-radius: 12px;
+		box-shadow: 0 2px 12px rgba(30, 34, 54, 0.07);
+		box-sizing: border-box;
+		min-width: 300px;
+		flex-basis: 350px;
 	}
 	.preview-section h2 {
 		font-size: 1.1rem;
@@ -526,10 +535,9 @@
 		border-radius: 12px;
 		box-shadow: 0 2px 12px rgba(30, 34, 54, 0.07);
 		padding: 2rem 1.5rem;
-		/* max-width: 420px; */
-		width: 100%; /* Ensure it fills the parent */
 		margin: 0 auto;
 		gap: 1.5rem;
+		box-sizing: border-box;
 	}
 	.character-avatar {
 		width: 120px;
@@ -684,7 +692,8 @@
 		font-size: 0.98em;
 	}
 	.preview-section.resizable {
-		resize: none;
+		resize: horizontal;
+		overflow: auto;
 		transition: max-width 0.15s;
 	}
 	.resize-handle {
@@ -715,17 +724,172 @@
 		.edit-character-main {
 			flex-direction: column;
 			gap: 1.5rem;
+			padding: 0 1rem;
+		}
+		.edit-character-container {
+			width: 100%;
+			margin: 1.5rem 0;
+			padding: 1.5rem 1rem;
+			box-sizing: border-box;
+			flex: none;
+		}
+		.edit-character-form {
+			gap: 0.8rem;
+		}
+		.edit-character-form input,
+		.edit-character-form select,
+		.edit-character-form textarea {
+			padding: 0.4rem 0.8rem;
+			font-size: 0.95rem;
+		}
+		.edit-character-form .actions {
+			flex-direction: column;
+			gap: 0.8rem;
+			margin-top: 1rem;
+		}
+		.edit-character-form .btn-primary,
+		.edit-character-form .btn-secondary,
+		.edit-character-form .btn-danger {
+			width: 100%;
+			text-align: center;
+			margin-left: 0 !important;
 		}
 		.preview-section {
 			width: 100%;
-			max-width: 100vw;
 			margin-top: 1.5rem;
+			padding: 1.5rem 0.5rem;
+			box-sizing: border-box;
+			resize: none;
+			flex: none;
 		}
 		.character-profile {
-			max-width: 100vw;
+			max-width: 100%;
+			padding: 1.5rem 0.5rem;
+			box-sizing: border-box;
+			width: 100%;
+		}
+		.character-avatar {
+			width: 100px;
+			height: 100px;
+		}
+		.character-name {
+			font-size: 1.8rem;
+		}
+		.character-meta {
+			flex-direction: column;
+			gap: 0.5rem;
+		}
+		.character-desc {
+			padding: 0.8rem;
 		}
 		.resize-handle {
 			display: none;
+		}
+	}
+
+	@media (max-width: 768px) {
+		.edit-character-main {
+			gap: 1rem;
+			padding: 0 0.25rem;
+		}
+		.edit-character-container {
+			margin: 1rem 0;
+			padding: 1rem 0.5rem;
+		}
+		h1 {
+			font-size: 1.2rem;
+			margin-bottom: 1rem;
+		}
+		.preview-section {
+			margin-top: 1rem;
+			padding: 1rem 0.25rem;
+			max-width: 100%;
+			min-width: 500px;
+		}
+		.character-profile {
+			padding: 1rem 0.25rem;
+			width: 100%;
+		}
+		.character-avatar {
+			width: 80px;
+			height: 80px;
+		}
+		.character-name {
+			font-size: 1.5rem;
+		}
+		.character-meta {
+			font-size: 0.95rem;
+		}
+		.character-desc {
+			padding: 0.6rem;
+			font-size: 0.9rem;
+		}
+		.character-art h3 {
+			font-size: 1rem;
+		}
+	}
+
+	@media (max-width: 480px) {
+		.edit-character-main {
+			gap: 0.8rem;
+			padding: 0;
+		}
+		.edit-character-container {
+			margin: 0.8rem 0;
+			padding: 0.8rem 0.25rem;
+		}
+		h1 {
+			font-size: 1.1rem;
+			margin-bottom: 0.8rem;
+		}
+		.edit-character-form label {
+			font-size: 0.9rem;
+		}
+		.edit-character-form input,
+		.edit-character-form select,
+		.edit-character-form textarea {
+			padding: 0.3rem 0.6rem;
+			font-size: 0.85rem;
+		}
+		.edit-character-form .btn-primary,
+		.edit-character-form .btn-secondary,
+		.edit-character-form .btn-danger {
+			padding: 0.4rem 0.8rem;
+			font-size: 0.9rem;
+		}
+		.preview-section {
+			margin-top: 0.8rem;
+			padding: 0;
+			max-width: 100%;
+			min-width: 0;
+		}
+		.character-profile {
+			padding: 0;
+			width: 100%;
+		}
+		.character-avatar {
+			width: 70px;
+			height: 70px;
+		}
+		.character-name {
+			font-size: 1.3rem;
+		}
+		.character-meta {
+			font-size: 0.85rem;
+		}
+		.character-desc {
+			padding: 0.5rem;
+			font-size: 0.8rem;
+		}
+		.tag-input-container input[type=\'text\'] {
+			font-size: 0.9em;
+		}
+		.add-tag-btn {
+			font-size: 0.9em;
+			padding: 0.3em 0.8em;
+		}
+		.tag {
+			font-size: 0.85em;
 		}
 	}
 </style>

@@ -404,23 +404,155 @@
 		.character-profile-layout {
 			flex-direction: column;
 			align-items: stretch;
+			gap: 1.5rem;
+			padding: 0 1rem;
 		}
+
 		.character-left-panel {
-			max-width: 100vw;
+			max-width: 100%;
 			min-width: 0;
-			margin: 1.5rem 0;
+			margin: 1rem 0 0 0;
+			padding-bottom: 1rem;
 		}
+
+		.character-info-card {
+			padding: 1.5rem 1rem;
+		}
+
+		.character-info-card .character-avatar {
+			width: 80px;
+			height: 80px;
+		}
+
+		.info-fields {
+			font-size: 0.95rem;
+			padding: 0.8rem;
+		}
+
+		.info-fields strong {
+			min-width: 90px;
+			font-size: 0.9rem;
+		}
+
 		.character-profile {
-			max-width: 100vw;
+			max-width: 100%;
+			margin: 0;
+			padding: 1.5rem 1rem;
 		}
+
+		.character-name {
+			font-size: 1.7rem;
+		}
+
+		.character-desc {
+			padding: 0.8rem;
+		}
+
+		.desc-content {
+			font-size: 0.95rem;
+		}
+
 		.relationship-panel-left {
-			max-width: 100vw;
-			padding: 1.2rem 0.5rem;
+			max-width: 100%;
+			padding: 1rem 0.8rem;
 		}
+
+		.relationship-panel-left h2 {
+			font-size: 1.2rem;
+		}
+
+		.tag-panel {
+			padding: 1rem;
+		}
+
+		.character-tag {
+			font-size: 0.9rem;
+			padding: 0.15em 0.6em;
+		}
+
 		.art-gallery {
-			justify-content: flex-start;
+			justify-content: center;
+		}
+
+		.art-thumb-link {
+			max-width: 100px;
+			max-height: 100px;
+		}
+
+		.art-thumb {
+			width: 100px;
+			height: 100px;
 		}
 	}
+
+	@media (max-width: 480px) {
+		.character-profile-layout {
+			padding: 0 0.5rem;
+		}
+
+		.character-info-card {
+			padding: 1.2rem 0.8rem;
+		}
+
+		.character-info-card .character-avatar {
+			width: 70px;
+			height: 70px;
+		}
+
+		.info-fields {
+			font-size: 0.9rem;
+			padding: 0.7rem;
+		}
+
+		.info-fields strong {
+			min-width: 80px;
+			font-size: 0.85rem;
+		}
+
+		.character-profile {
+			padding: 1.2rem 0.8rem;
+		}
+
+		.character-name {
+			font-size: 1.5rem;
+		}
+
+		.character-desc {
+			padding: 0.7rem;
+		}
+
+		.desc-content {
+			font-size: 0.9rem;
+		}
+
+		.relationship-panel-left {
+			padding: 0.8rem 0.6rem;
+		}
+
+		.relationship-panel-left h2 {
+			font-size: 1.1rem;
+		}
+
+		.tag-panel {
+			padding: 0.8rem;
+		}
+
+		.character-tag {
+			font-size: 0.85rem;
+			padding: 0.12em 0.5em;
+		}
+
+		.art-thumb-link {
+			max-width: 90px;
+			max-height: 90px;
+		}
+
+		.art-thumb {
+			width: 90px;
+			height: 90px;
+		}
+	}
+
 	.muted {
 		color: #888;
 		font-size: 1rem;

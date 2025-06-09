@@ -4,6 +4,7 @@
 	import { goto } from '$app/navigation';
 	import { user as userStore } from '$lib/stores/user';
 	import type { Database } from '../../../../database.types';
+	import { slide } from 'svelte/transition';
 
 	type Notification = Database['public']['Tables']['notifications']['Row'];
 
@@ -14,6 +15,7 @@
 	let notificationDropdownOpen = false;
 	let notifications: Notification[] = [];
 	let unreadCount = 0;
+	let mobileMenuOpen = false;
 
 	/*
 	account_id: string
@@ -176,14 +178,31 @@
 				</svg>`;
 		}
 	}
+
+	function toggleMobileMenu() {
+		mobileMenuOpen = !mobileMenuOpen;
+	}
+
+	function closeMobileMenu() {
+		mobileMenuOpen = false;
+	}
 </script>
 
 <nav>
 	<div class="nav-left">
-		<a href="/" class="logo" data-sveltekit-reload>CalmCoffee</a>
-		<a href="/read" data-sveltekit-reload>Stories</a>
-		<a href="/blog" data-sveltekit-reload>Microblogs</a>
-		<a href="/characters" data-sveltekit-reload>Characters</a>
+		<button class="mobile-menu-btn" on:click={toggleMobileMenu} aria-label="Toggle menu">
+			<svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+				<path d="M3 12H21" stroke="#3730a3" stroke-width="2" stroke-linecap="round"/>
+				<path d="M3 6H21" stroke="#3730a3" stroke-width="2" stroke-linecap="round"/>
+				<path d="M3 18H21" stroke="#3730a3" stroke-width="2" stroke-linecap="round"/>
+			</svg>
+		</button>
+		<a href="/" class="logo desktop-logo" data-sveltekit-reload>CalmCoffee</a>
+		<div class="desktop-nav">
+			<a href="/read" data-sveltekit-reload>Stories</a>
+			<a href="/blog" data-sveltekit-reload>Microblogs</a>
+			<a href="/characters" data-sveltekit-reload>Characters</a>
+		</div>
 	</div>
 	<div class="nav-right">
 		<div class="nav-search-bar">
@@ -300,10 +319,34 @@
 				{/if}
 			</div>
 		{:else}
-			<a href="/account/login" data-sveltekit-reload>Login</a>
+			<a href="/account/login" class="login-btn" data-sveltekit-reload>Login</a>
 		{/if}
 	</div>
 </nav>
+
+{#if mobileMenuOpen}
+	<div class="mobile-menu" transition:slide={{ duration: 200 }} on:click|self={closeMobileMenu}>
+		<div class="mobile-menu-content">
+			<div class="mobile-menu-header">
+				<a href="/" class="mobile-menu-logo" on:click={closeMobileMenu}>CalmCoffee</a>
+			</div>
+			<div class="mobile-menu-links">
+				<a href="/read" on:click={closeMobileMenu} data-sveltekit-reload>Stories</a>
+				<a href="/blog" on:click={closeMobileMenu} data-sveltekit-reload>Microblogs</a>
+				<a href="/characters" on:click={closeMobileMenu} data-sveltekit-reload>Characters</a>
+				{#if $userStore}
+					<a href={`/profile/${username}`} class="mobile-menu-link" on:click={closeMobileMenu}
+						>Profile</a
+					>
+					<a href="/settings" class="mobile-menu-link" on:click={closeMobileMenu}>Settings</a>
+					<button class="mobile-logout" on:click={() => { closeMobileMenu(); logout(); }}>Logout</button>
+				{:else}
+					<a href="/account/login" on:click={closeMobileMenu} data-sveltekit-reload>Login</a>
+				{/if}
+			</div>
+		</div>
+	</div>
+{/if}
 
 <style>
 	nav {
@@ -314,12 +357,20 @@
 		background: #f5f5f5;
 		border-bottom: 1px solid #ddd;
 	}
-	.nav-left a.logo {
+
+	.nav-left {
+		display: flex;
+		align-items: center;
+		gap: 1.5rem; /* Adjust gap between logo/button and nav links */
+	}
+
+	.logo {
 		font-weight: bold;
-		margin-right: 1.5rem;
 		text-decoration: none;
 		color: #333;
+		white-space: nowrap; /* Prevent logo from wrapping */
 	}
+
 	.nav-left a,
 	.nav-right a {
 		margin-right: 1rem;
@@ -626,5 +677,124 @@
 	.notification-time {
 		color: #666;
 		font-size: 0.8rem;
+	}
+	.mobile-menu-btn {
+		display: none;
+		background: none;
+		border: none;
+		padding: 0.5rem;
+		cursor: pointer;
+		margin-right: 1rem;
+	}
+	.desktop-nav {
+		display: flex;
+		gap: 1rem;
+	}
+	.mobile-menu {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: rgba(0, 0, 0, 0.5);
+		z-index: 1000;
+	}
+	.mobile-menu-content {
+		position: fixed;
+		top: 0;
+		left: 0;
+		bottom: 0;
+		width: 80%;
+		max-width: 300px;
+		background: white;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+	}
+	.mobile-menu-header {
+		padding: 1.5rem;
+		border-bottom: 1px solid #e0e7ff;
+		background: #f8fafc;
+	}
+	.mobile-menu-logo {
+		color: #3730a3;
+		text-decoration: none;
+		font-size: 1.4rem;
+		font-weight: bold;
+	}
+	.mobile-menu-links {
+		padding: 1.5rem;
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+	.mobile-menu-links a {
+		color: #3730a3;
+		text-decoration: none;
+		font-size: 1.1rem;
+		padding: 0.5rem 0;
+	}
+	.mobile-logout {
+		background: none;
+		border: none;
+		color: #b91c1c;
+		text-align: left;
+		font-size: 1.1rem;
+		padding: 0.5rem 0;
+		cursor: pointer;
+	}
+	.login-btn {
+		padding: 0.5rem 1rem;
+		background: #f0d4a1;
+		color: #fff;
+		border-radius: 4px;
+		text-decoration: none;
+	}
+	@media (max-width: 768px) {
+		nav {
+			padding: 0.8rem 1rem;
+		}
+		.mobile-menu-btn {
+			display: block;
+		}
+		.desktop-nav {
+			display: none;
+		}
+		.nav-search-bar {
+			display: none;
+		}
+		.nav-right {
+			gap: 0.8em;
+		}
+		.notification-dropdown {
+			margin-right: 0.5rem;
+		}
+		.user-btn {
+			padding: 0.2rem 0.4rem 0.2rem 0.2rem;
+		}
+		.username {
+			display: none;
+		}
+		.dropdown-menu {
+			right: -1rem;
+		}
+
+		.desktop-logo {
+			display: none;
+		}
+	}
+	@media (max-width: 480px) {
+		.logo {
+			font-size: 1.1rem;
+		}
+		.notification-menu {
+			width: 280px;
+			right: -1rem;
+		}
+
+		.mobile-menu-logo {
+			font-size: 1.4rem;
+		}
 	}
 </style>
