@@ -1,12 +1,15 @@
 <script lang="ts">
 	import '../app.css';
 	import Navbar from '$lib/comp/nav/Navbar.svelte';
+	import { slide } from 'svelte/transition';
 
 	let { children } = $props();
 </script>
 
 <Navbar />
-{@render children()}
+<main>
+	{@render children()}
+</main>
 
 <footer>
 	<div class="footer-content">
@@ -42,6 +45,8 @@
 		min-height: 100vh;
 		display: flex;
 		flex-direction: column;
+		margin: 0;
+		padding: 0;
 	}
 
 	@keyframes spin {
@@ -51,6 +56,15 @@
 		100% {
 			transform: rotate(360deg);
 		}
+	}
+
+	main {
+		flex: 1;
+		width: 100%;
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: 1rem;
+		box-sizing: border-box;
 	}
 
 	footer {
@@ -119,13 +133,50 @@
 	}
 
 	@media (max-width: 768px) {
+		main {
+			padding: 0.8rem;
+		}
+
+		footer {
+			display: none;
+		}
+
 		.footer-content {
 			grid-template-columns: 1fr;
 			padding: 0 1rem;
+			gap: 1rem;
 		}
 
 		.footer-section {
 			text-align: center;
+			padding: 0.8rem;
+		}
+
+		.footer-section h3 {
+			font-size: 1.3rem;
+		}
+
+		.footer-section h4 {
+			font-size: 1.1rem;
+		}
+
+		.footer-bottom {
+			padding: 1rem;
+			margin-top: 1rem;
+		}
+	}
+
+	@media (max-width: 480px) {
+		main {
+			padding: 0.5rem;
+		}
+
+		.footer-content {
+			padding: 0 0.5rem;
+		}
+
+		.footer-section {
+			padding: 0.5rem;
 		}
 	}
 </style>
