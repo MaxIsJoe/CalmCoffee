@@ -4,9 +4,20 @@
 	import { slide } from 'svelte/transition';
 
 	let { children } = $props();
+	let showBanner = $state(true);
+
+	function dismissBanner() {
+		showBanner = false;
+	}
 </script>
 
 <Navbar />
+{#if showBanner}
+	<div class="banner" transition:slide>
+		<span>Calm Coffee is still in pre-alpha. Learn more <a href="/roadmap">here</a></span>
+		<button onclick={dismissBanner} aria-label="Dismiss banner">×</button>
+	</div>
+{/if}
 <main>
 	{@render children()}
 </main>
@@ -179,5 +190,32 @@
 		.footer-section {
 			padding: 0.5rem;
 		}
+	}
+
+	.banner {
+		background-color: #4b2e19;
+		color: #fffdd0;
+		padding: 0.75rem 1rem;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		position: relative;
+		text-align: center;
+	}
+
+	.banner button {
+		position: absolute;
+		right: 1rem;
+		background: none;
+		border: none;
+		color: #fffdd0;
+		font-size: 1.5rem;
+		cursor: pointer;
+		padding: 0 0.5rem;
+		line-height: 1;
+	}
+
+	.banner button:hover {
+		color: #d4c2b8;
 	}
 </style>
