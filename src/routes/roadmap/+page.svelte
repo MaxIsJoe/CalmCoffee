@@ -147,7 +147,7 @@
 
 <div class="roadmap-container">
 	<h1>Calm Coffee Roadmap</h1>
-	<p class="subtitle">Our journey to create the perfect space for writers and readers</p>
+	<p class="subtitle">The journey to create a cozy platform for writers and readers</p>
 
 	<div class="timeline-container">
 		{#each getSortedAndGroupedRoadmapItems(roadmapItems) as statusGroup}
