@@ -2,6 +2,7 @@
 	import '../app.css';
 	import Navbar from '$lib/comp/nav/Navbar.svelte';
 	import { slide } from 'svelte/transition';
+	import { env } from '$env/dynamic/public';
 
 	let { children } = $props();
 	let showBanner = $state(true);
@@ -46,6 +47,12 @@
 	</div>
 	<div class="footer-bottom">
 		<p>&copy; {new Date().getFullYear()} MaxIsJoe. All rights reserved.</p>
+		<p class="version-info">
+			Version: <a href={`https://github.com/maxisjoe/calm-coffee/commit/${env.PUBLIC_GIT_HASH}`} target="_blank" rel="noopener">{env.PUBLIC_GIT_HASH}</a>
+			- {env.PUBLIC_GIT_MESSAGE}
+			<br />
+			<span class="build-time">Built: {new Date(env.PUBLIC_BUILD_TIME).toLocaleString()}</span>
+		</p>
 	</div>
 </footer>
 
@@ -217,5 +224,25 @@
 
 	.banner button:hover {
 		color: #d4c2b8;
+	}
+
+	.version-info {
+		font-size: 0.8rem;
+		margin-top: 0.5rem;
+	}
+
+	.build-time {
+		font-size: 0.7rem;
+		color: #b39c8f;
+	}
+
+	.version-info a {
+		color: #d4c2b8;
+		text-decoration: none;
+	}
+
+	.version-info a:hover {
+		color: #fffdd0;
+		text-decoration: underline;
 	}
 </style>

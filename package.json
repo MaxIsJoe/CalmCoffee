@@ -12,7 +12,9 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"format": "prettier --write .",
 		"lint": "prettier --check . && eslint .",
-		"tauri": "tauri"
+		"tauri": "tauri",
+		"predev": "node scripts/generate-version.js",
+		"prebuild": "node scripts/generate-version.js"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.2.5",
