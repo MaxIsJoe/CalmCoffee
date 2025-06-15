@@ -187,6 +187,14 @@
 			</div>
 		</div>
 	</div>
+
+    <div class="note-section">
+        <div class="note-content">
+            <h3>Important Note</h3>
+            <p>Content with the <a href="/search?tag=debug">[debug]</a> tag will be automatically deleted in the future.</p>
+            <p>As Calm Coffee continues being developed, some of your published content may be removed or purged.</p>
+        </div>
+    </div>
 </div>
 
 <style>
@@ -395,6 +403,47 @@
 		}
 		.timeline-marker {
 			left: -20px;
+		}
+	}
+
+	.note-section {
+		margin-top: 3rem;
+		padding: 0 1rem;
+	}
+
+	.note-content {
+		background: #fff3e0;
+		border-left: 4px solid #f59e0b;
+		padding: 1.5rem;
+		border-radius: 0.5rem;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+	}
+
+	.note-content h3 {
+		color: #92400e;
+		margin: 0 0 0.75rem 0;
+		font-size: 1.1rem;
+		font-weight: 600;
+	}
+
+	.note-content p {
+		color: #78350f;
+		margin: 0.5rem 0;
+		font-size: 0.95rem;
+		line-height: 1.5;
+	}
+
+	.note-content p:last-child {
+		margin-bottom: 0;
+	}
+
+	@media (max-width: 768px) {
+		.note-section {
+			padding: 0 0.5rem;
+		}
+
+		.note-content {
+			padding: 1rem;
 		}
 	}
 </style>
