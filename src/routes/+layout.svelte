@@ -2,10 +2,20 @@
 	import '../app.css';
 	import Navbar from '$lib/comp/nav/Navbar.svelte';
 	import { slide } from 'svelte/transition';
-	import { env } from '$env/dynamic/public';
+	import { onMount } from 'svelte';
 
 	let { children } = $props();
 	let showBanner = $state(true);
+	let versionInfo = $state<{ hash: string; message: string; timestamp: string } | null>(null);
+
+	onMount(async () => {
+		try {
+			const response = await fetch('/version.json');
+			versionInfo = await response.json();
+		} catch (error) {
+			console.error('Failed to load version info:', error);
+		}
+	});
 
 	function dismissBanner() {
 		showBanner = false;
@@ -47,12 +57,14 @@
 	</div>
 	<div class="footer-bottom">
 		<p>&copy; {new Date().getFullYear()} MaxIsJoe. All rights reserved.</p>
-		<p class="version-info">
-			Version: <a href={`https://github.com/maxisjoe/calm-coffee/commit/${env.PUBLIC_GIT_HASH}`} target="_blank" rel="noopener">{env.PUBLIC_GIT_HASH}</a>
-			- {env.PUBLIC_GIT_MESSAGE}
-			<br />
-			<span class="build-time">Built: {new Date(env.PUBLIC_BUILD_TIME).toLocaleString()}</span>
-		</p>
+		{#if versionInfo}
+			<p class="version-info">
+				Version: <a href={`https://github.com/maxisjoe/calm-coffee/commit/${versionInfo.hash}`} target="_blank" rel="noopener">{versionInfo.hash}</a>
+				- {versionInfo.message}
+				<br />
+				<span class="build-time">Built: {new Date(versionInfo.timestamp).toLocaleString()}</span>
+			</p>
+		{/if}
 	</div>
 </footer>
 

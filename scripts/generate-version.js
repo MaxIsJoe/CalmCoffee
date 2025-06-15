@@ -12,9 +12,16 @@ try {
         timestamp: new Date().toISOString()
     };
 
-    // Create .env file with version info
-    const envContent = `PUBLIC_GIT_HASH=${hash}\nPUBLIC_GIT_MESSAGE="${message}"\nPUBLIC_BUILD_TIME="${versionInfo.timestamp}"`;
-    fs.writeFileSync(path.join(process.cwd(), '.env'), envContent);
+    // Create static/version.json
+    const staticDir = path.join(process.cwd(), 'static');
+    if (!fs.existsSync(staticDir)) {
+        fs.mkdirSync(staticDir);
+    }
+
+    fs.writeFileSync(
+        path.join(staticDir, 'version.json'),
+        JSON.stringify(versionInfo, null, 2)
+    );
 
     console.log('Version information generated successfully');
 } catch (error) {
