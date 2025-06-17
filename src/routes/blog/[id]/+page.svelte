@@ -5,10 +5,12 @@
 	import type { BlogType } from '$lib/types/blog';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
+	import { browser } from '$app/environment';
 
 	let blog: BlogType | null = $state(null);
 	let loading = $state(true);
 	let error = $state('');
+	let shareUrl = '';
 
 	onMount(async () => {
 		const blogId = $page.params.id;
@@ -16,6 +18,10 @@
 			error = 'Invalid blog ID';
 			loading = false;
 			return;
+		}
+
+		if (browser) {
+			shareUrl = `${window.location.origin}/blog/${blogId}`;
 		}
 
 		const { data, error: fetchError } = await supabase
@@ -33,6 +39,31 @@
 		loading = false;
 	});
 </script>
+
+<svelte:head>
+	{#if blog}
+		<title>{blog.profiles?.username}'s Blog Post - Calm Coffee</title>
+		<meta name="description" content={blog.content.slice(0, 160)} />
+		
+		<!-- Open Graph / Facebook -->
+		<meta property="og:type" content="article" />
+		<meta property="og:url" content={shareUrl} />
+		<meta property="og:title" content={`${blog.profiles?.username}'s Blog Post`} />
+		<meta property="og:description" content={blog.content.slice(0, 160)} />
+		{#if blog.profiles?.avatar_url}
+			<meta property="og:image" content={blog.profiles.avatar_url} />
+		{/if}
+		
+		<!-- Twitter -->
+		<meta name="twitter:card" content="summary" />
+		<meta name="twitter:url" content={shareUrl} />
+		<meta name="twitter:title" content={`${blog.profiles?.username}'s Blog Post`} />
+		<meta name="twitter:description" content={blog.content.slice(0, 160)} />
+		{#if blog.profiles?.avatar_url}
+			<meta name="twitter:image" content={blog.profiles.avatar_url} />
+		{/if}
+	{/if}
+</svelte:head>
 
 <div class="blog-page">
 	{#if loading}
