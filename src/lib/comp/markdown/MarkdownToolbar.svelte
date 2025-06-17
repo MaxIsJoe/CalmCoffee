@@ -1,6 +1,10 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
+	import ImageToolbar from './ImageToolbar.svelte';
+
 	const dispatch = createEventDispatcher();
+
+	export let useMarkdown = true;
 
 	function insert(before: string, after: string = '', placeholder: string = '') {
 		dispatch('insert', { before, after, placeholder });
@@ -40,7 +44,9 @@
 	<!-- Media & Links -->
 	<div class="toolbar-group">
 		<button type="button" title="Link" on:click={() => insert('[', '](https://)', 'link text')}>🔗</button>
-		<button type="button" title="Image" on:click={() => insert('![](img-proxy:', ')', 'img url')}>🖼️</button>
+		<ImageToolbar useMarkdown={useMarkdown} on:insert={(e: CustomEvent<{ before: string; after: string; placeholder: string }>) => 
+			insert(e.detail.before, e.detail.after, e.detail.placeholder)} 
+		/>
 	</div>
 
 	<!-- Blocks -->

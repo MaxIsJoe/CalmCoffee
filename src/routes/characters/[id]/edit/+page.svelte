@@ -11,6 +11,8 @@
 	import RelationshipGraphEditor from '$lib/comp/characters/RelationshipGraphEditor.svelte';
 	import { browser } from '$app/environment';
 	import CharacterProfile from '$lib/comp/characters/CharacterProfile.svelte';
+	import ZenMarkdownEditor from '$lib/comp/markdown/ZenMarkdownEditor.svelte';
+	import ArtUploadButton from '$lib/comp/characters/ArtUploadButton.svelte';
 
 	type Character = Database['public']['Tables']['characters']['Row'];
 
@@ -132,6 +134,11 @@
 		}
 	}
 
+	function handleArtInsert(event: CustomEvent<{ before: string; after: string; placeholder: string }>) {
+		const { placeholder } = event.detail;
+		art_links = art_links ? `${art_links}\n${placeholder}` : placeholder;
+	}
+
 	async function save() {
 		saving = true;
 		saveError = null;
@@ -220,14 +227,17 @@
 				</label>
 				<label>
 					Description:
-					<MarkdownToolbar
-						on:insert={(e) => insertAtCursor(e.detail.before, e.detail.after, e.detail.placeholder)}
-					/>
-					<textarea bind:this={descTextarea} bind:value={character_desc} rows="5"></textarea>
+					<ZenMarkdownEditor maxLength={12480} showPreview={false} bind:value={character_desc} placeholder="Write your character's description here..." />
 				</label>
 				<label>
 					Art Links (one per line):
-					<textarea bind:value={art_links} rows="3"></textarea>
+					<div class="art-upload-section">
+						<div class="art-upload-header">
+							<ArtUploadButton on:insert={handleArtInsert} />
+							<span class="art-upload-hint">- Upload or select already uploaded images on this account</span>
+						</div>
+						<textarea bind:value={art_links} rows="3" placeholder="Or paste image URLs here, one per line"></textarea>
+					</div>
 				</label>
 				<label>
 					Gender:
@@ -545,6 +555,34 @@
 		color: #bfa007;
 		margin-top: 0.3em;
 		font-size: 0.98em;
+	}
+	.art-upload-section {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+		margin-top: 0.5rem;
+	}
+	.art-upload-header {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+	.art-upload-hint {
+		color: #6b7280;
+		font-size: 0.9rem;
+	}
+	.art-upload-section textarea {
+		width: 100%;
+		padding: 0.5rem;
+		border: 1px solid #d3d6db;
+		border-radius: 6px;
+		font-size: 0.9rem;
+		background: #fafbfc;
+		resize: vertical;
+	}
+	.art-upload-section textarea:focus {
+		border-color: #a3a8b8;
+		outline: none;
 	}
 	@media (max-width: 1200px) {
 		.edit-character-main {

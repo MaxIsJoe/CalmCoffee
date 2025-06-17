@@ -6,9 +6,42 @@
 	import { user } from '$lib/stores/user';
 	import Reactions from '$lib/comp/common/Reactions.svelte';
 	import { sendLikeStoryNotification } from '$lib/notifications';
+	import { browser } from '$app/environment';
 
 	export let mb: BlogType;
 	export let profile: { username: string | null; avatar_url: string | null; } | null;
+
+	let shareUrl = '';
+	let showShareTooltip = false;
+	let shareTooltipText = 'Copy link';
+
+	function getShareUrl() {
+		if (!browser) return '';
+		const baseUrl = window.location.origin;
+		return `${baseUrl}/blog/${mb.post_id}`;
+	}
+
+	async function handleShare() {
+		if (!browser) return;
+		shareUrl = getShareUrl();
+		try {
+			await navigator.clipboard.writeText(shareUrl);
+			shareTooltipText = 'Copied!';
+			showShareTooltip = true;
+			setTimeout(() => {
+				showShareTooltip = false;
+				shareTooltipText = 'Copy link';
+			}, 2000);
+		} catch (err) {
+			console.error('Failed to copy:', err);
+			shareTooltipText = 'Failed to copy';
+			showShareTooltip = true;
+			setTimeout(() => {
+				showShareTooltip = false;
+				shareTooltipText = 'Copy link';
+			}, 2000);
+		}
+	}
 
 	function goToTag(tag: string) {
 		window.location.href = `/search?tag=${encodeURIComponent(tag)}`;
@@ -165,6 +198,16 @@
 		<small class="microblog-date">
 			{new Date(mb.created_at).toLocaleString()}
 			<span class="microblog-age-rating">| {mb.age_rating}</span>
+			<button class="share-btn" on:click={handleShare} title="Share this post">
+				<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+					<polyline points="16 6 12 2 8 6"></polyline>
+					<line x1="12" y1="2" x2="12" y2="15"></line>
+				</svg>
+				{#if showShareTooltip}
+					<span class="share-tooltip">{shareTooltipText}</span>
+				{/if}
+			</button>
 		</small>
 	</li>
 {:else}
@@ -243,5 +286,46 @@
 		background: #e0d7ce;
 		color: #a67c52;
 		outline: none;
+	}
+	.share-btn {
+		background: none;
+		border: none;
+		color: #6366f1;
+		cursor: pointer;
+		padding: 0.2rem;
+		margin-left: 0.7rem;
+		position: relative;
+		display: inline-flex;
+		align-items: center;
+		transition: color 0.2s;
+	}
+
+	.share-btn:hover {
+		color: #4f46e5;
+	}
+
+	.share-tooltip {
+		position: absolute;
+		bottom: 100%;
+		left: 50%;
+		transform: translateX(-50%);
+		background: #1e293b;
+		color: white;
+		padding: 0.3rem 0.6rem;
+		border-radius: 4px;
+		font-size: 0.85rem;
+		white-space: nowrap;
+		margin-bottom: 0.3rem;
+	}
+
+	.share-tooltip::after {
+		content: '';
+		position: absolute;
+		top: 100%;
+		left: 50%;
+		transform: translateX(-50%);
+		border-width: 4px;
+		border-style: solid;
+		border-color: #1e293b transparent transparent transparent;
 	}
 </style>

@@ -93,7 +93,7 @@
 
 	<div class="editor-main">
 		<div class="editor-column">
-			<MarkdownToolbar on:insert={e => insertAtCursor(e.detail.before, e.detail.after, e.detail.placeholder)} />
+			<MarkdownToolbar useMarkdown={true} on:insert={e => insertAtCursor(e.detail.before, e.detail.after, e.detail.placeholder)} />
 			<textarea
 				bind:this={textareaEl}
 				bind:value
