@@ -48,19 +48,22 @@
 		<!-- Open Graph / Facebook -->
 		<meta property="og:type" content="article" />
 		<meta property="og:url" content={shareUrl} />
-		<meta property="og:title" content={`${blog.profiles?.username}'s Blog Post`} />
+		<meta property="og:site_name" content="Calm Coffee" />
+		<meta property="og:title" content={`${blog.profiles?.username}'s Blog Post on Calm Coffee`} />
 		<meta property="og:description" content={blog.content.slice(0, 160)} />
 		{#if blog.profiles?.avatar_url}
 			<meta property="og:image" content={blog.profiles.avatar_url} />
+			<meta property="og:image:alt" content={`${blog.profiles.username}'s profile picture`} />
 		{/if}
 		
 		<!-- Twitter -->
 		<meta name="twitter:card" content="summary" />
 		<meta name="twitter:url" content={shareUrl} />
-		<meta name="twitter:title" content={`${blog.profiles?.username}'s Blog Post`} />
+		<meta name="twitter:title" content={`${blog.profiles?.username}'s Blog Post on Calm Coffee`} />
 		<meta name="twitter:description" content={blog.content.slice(0, 160)} />
 		{#if blog.profiles?.avatar_url}
 			<meta name="twitter:image" content={blog.profiles.avatar_url} />
+			<meta name="twitter:image:alt" content={`${blog.profiles.username}'s profile picture`} />
 		{/if}
 	{/if}
 </svelte:head>
