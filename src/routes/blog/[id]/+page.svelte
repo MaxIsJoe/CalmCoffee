@@ -46,18 +46,20 @@
 		<meta name="description" content={blog.content.slice(0, 160)} />
 		
 		<!-- Open Graph / Facebook -->
-		<meta property="og:type" content="article" />
+		<meta property="og:type" content="website" />
 		<meta property="og:url" content={shareUrl} />
 		<meta property="og:site_name" content="Calm Coffee" />
 		<meta property="og:title" content={`${blog.profiles?.username}'s Blog Post on Calm Coffee`} />
 		<meta property="og:description" content={blog.content.slice(0, 160)} />
 		{#if blog.profiles?.avatar_url}
 			<meta property="og:image" content={blog.profiles.avatar_url} />
+			<meta property="og:image:width" content="400" />
+			<meta property="og:image:height" content="400" />
 			<meta property="og:image:alt" content={`${blog.profiles.username}'s profile picture`} />
 		{/if}
 		
 		<!-- Twitter -->
-		<meta name="twitter:card" content="summary" />
+		<meta name="twitter:card" content="summary_large_image" />
 		<meta name="twitter:url" content={shareUrl} />
 		<meta name="twitter:title" content={`${blog.profiles?.username}'s Blog Post on Calm Coffee`} />
 		<meta name="twitter:description" content={blog.content.slice(0, 160)} />
@@ -65,6 +67,10 @@
 			<meta name="twitter:image" content={blog.profiles.avatar_url} />
 			<meta name="twitter:image:alt" content={`${blog.profiles.username}'s profile picture`} />
 		{/if}
+
+		<!-- Additional meta tags for better compatibility -->
+		<meta name="theme-color" content="#6366f1" />
+		<meta name="color-scheme" content="light" />
 	{/if}
 </svelte:head>
 
