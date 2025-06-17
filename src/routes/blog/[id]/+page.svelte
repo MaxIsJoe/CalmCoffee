@@ -80,6 +80,15 @@
 				</div>
 			{/if}
 			<div class="blog-content">{@html coffeeMarkdown(blog.content, blog.styles)}</div>
+			{#if data.images.length > 0}
+				<div class="blog-images">
+					{#each data.images as imageUrl}
+						<figure class="blog-image">
+							<img src={imageUrl} alt="Blog image" loading="lazy" />
+						</figure>
+					{/each}
+				</div>
+			{/if}
 			{#if blog.tags && blog.tags.length}
 				<div class="blog-tags">
 					{#each blog.tags as tag}
@@ -176,6 +185,28 @@
 		line-height: 1.6;
 		color: #1e293b;
 		margin-bottom: 1.5rem;
+	}
+
+	.blog-images {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+		gap: 1rem;
+		margin: 1.5rem 0;
+	}
+
+	.blog-image {
+		margin: 0;
+		border-radius: 8px;
+		overflow: hidden;
+		background: #f8fafc;
+		border: 1px solid #e2e8f0;
+	}
+
+	.blog-image img {
+		width: 100%;
+		height: auto;
+		display: block;
+		object-fit: cover;
 	}
 
 	.blog-tags {

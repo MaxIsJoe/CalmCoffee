@@ -2,6 +2,27 @@ import { error } from '@sveltejs/kit';
 import { supabase } from '$lib/supabaseClient';
 import type { PageServerLoad } from './$types';
 
+// Extract images from markdown content
+function extractImages(content: string): { content: string; images: string[] } {
+	const imageRegex = /!\[.*?\]\((.*?)\)/g;
+	const images: string[] = [];
+	let match;
+	let processedContent = content;
+
+	// Find all image matches
+	while ((match = imageRegex.exec(content)) !== null) {
+		images.push(match[1]);
+	}
+
+	// Remove image markdown from content
+	processedContent = processedContent.replace(imageRegex, '');
+
+	return {
+		content: processedContent.trim(),
+		images
+	};
+}
+
 export const load: PageServerLoad = async ({ params }) => {
 	const { data, error: fetchError } = await supabase
 		.from('microblogs')
@@ -23,12 +44,24 @@ export const load: PageServerLoad = async ({ params }) => {
 		avatarUrl = `https://calm-coffee.vercel.app${avatarUrl}`;
 	}
 
+	// Process content and extract images
+	const { content: processedContent, images } = extractImages(data.content);
+
+	// Ensure image URLs are absolute
+	const processedImages = images.map(img => 
+		img.startsWith('http') ? img : `https://calm-coffee.vercel.app${img}`
+	);
+
 	return {
-		blog: data,
+		blog: {
+			...data,
+			content: processedContent
+		},
+		images: processedImages,
 		avatarUrl,
 		meta: {
 			title: `${data.profiles?.username}'s Blog Post - Calm Coffee`,
-			description: data.content.slice(0, 160),
+			description: processedContent.slice(0, 160),
 			ogImage: avatarUrl
 		}
 	};
