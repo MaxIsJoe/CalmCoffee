@@ -1,77 +1,55 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { supabase } from '$lib/supabaseClient';
 	import { coffeeMarkdown } from '$lib/md/coffeeMarkdown';
 	import type { BlogType } from '$lib/types/blog';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { browser } from '$app/environment';
 
-	let blog: BlogType | null = $state(null);
-	let loading = $state(true);
+	let { data } = $props();
+	let blog: BlogType = data.blog;
+	let loading = $state(false);
 	let error = $state('');
 	let shareUrl = '';
 
-	onMount(async () => {
-		const blogId = $page.params.id;
-		if (!blogId) {
-			error = 'Invalid blog ID';
-			loading = false;
-			return;
-		}
-
+	onMount(() => {
 		if (browser) {
-			shareUrl = `${window.location.origin}/blog/${blogId}`;
+			shareUrl = `${window.location.origin}/blog/${$page.params.id}`;
 		}
-
-		const { data, error: fetchError } = await supabase
-			.from('microblogs')
-			.select('*, profiles:writer(username, avatar_url)')
-			.eq('post_id', blogId)
-			.single();
-
-		if (fetchError) {
-			error = fetchError.message;
-			blog = null;
-		} else {
-			blog = data;
-		}
-		loading = false;
 	});
 </script>
 
 <svelte:head>
-	{#if blog}
-		<title>{blog.profiles?.username}'s Blog Post - Calm Coffee</title>
-		<meta name="description" content={blog.content.slice(0, 160)} />
-		
-		<!-- Open Graph / Facebook -->
-		<meta property="og:type" content="website" />
-		<meta property="og:url" content={shareUrl} />
-		<meta property="og:site_name" content="Calm Coffee" />
-		<meta property="og:title" content={`${blog.profiles?.username}'s Blog Post on Calm Coffee`} />
-		<meta property="og:description" content={blog.content.slice(0, 160)} />
-		{#if blog.profiles?.avatar_url}
-			<meta property="og:image" content={blog.profiles.avatar_url} />
-			<meta property="og:image:width" content="400" />
-			<meta property="og:image:height" content="400" />
-			<meta property="og:image:alt" content={`${blog.profiles.username}'s profile picture`} />
-		{/if}
-		
-		<!-- Twitter -->
-		<meta name="twitter:card" content="summary_large_image" />
-		<meta name="twitter:url" content={shareUrl} />
-		<meta name="twitter:title" content={`${blog.profiles?.username}'s Blog Post on Calm Coffee`} />
-		<meta name="twitter:description" content={blog.content.slice(0, 160)} />
-		{#if blog.profiles?.avatar_url}
-			<meta name="twitter:image" content={blog.profiles.avatar_url} />
-			<meta name="twitter:image:alt" content={`${blog.profiles.username}'s profile picture`} />
-		{/if}
-
-		<!-- Additional meta tags for better compatibility -->
-		<meta name="theme-color" content="#6366f1" />
-		<meta name="color-scheme" content="light" />
+	<title>{data.meta.title}</title>
+	<meta name="title" content={data.meta.title} />
+	<meta name="description" content={data.meta.description} />
+	
+	<!-- Open Graph / Facebook -->
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content={shareUrl} />
+	<meta property="og:site_name" content="Calm Coffee" />
+	<meta property="og:title" content={data.meta.title} />
+	<meta property="og:description" content={data.meta.description} />
+	{#if data.meta.ogImage}
+		<meta property="og:image" content={data.meta.ogImage} />
+		<meta property="og:image:width" content="1200" />
+		<meta property="og:image:height" content="628" />
+		<meta property="og:image:alt" content={`${blog.profiles?.username}'s profile picture`} />
 	{/if}
+	
+	<!-- Twitter -->
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:url" content={shareUrl} />
+	<meta name="twitter:title" content={data.meta.title} />
+	<meta name="twitter:description" content={data.meta.description} />
+	{#if data.meta.ogImage}
+		<meta name="twitter:image" content={data.meta.ogImage} />
+		<meta name="twitter:image:alt" content={`${blog.profiles?.username}'s profile picture`} />
+	{/if}
+
+	<!-- Additional meta tags for better compatibility -->
+	<meta name="theme-color" content="#6366f1" />
+	<meta name="color-scheme" content="light" />
 </svelte:head>
 
 <div class="blog-page">
