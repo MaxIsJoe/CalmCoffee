@@ -30,11 +30,16 @@
 	<meta property="og:site_name" content="Calm Coffee" />
 	<meta property="og:title" content={data.meta.title} />
 	<meta property="og:description" content={data.meta.description} />
-	{#if data.meta.ogImage}
-		<meta property="og:image" content={data.meta.ogImage} />
+	{#if data.images.length > 0}
+		<meta property="og:image" content={data.images[0]} />
 		<meta property="og:image:width" content="1200" />
 		<meta property="og:image:height" content="628" />
-		<meta property="og:image:alt" content={`${blog.profiles?.username}'s profile picture`} />
+		<meta property="og:image:alt" content="Blog post image" />
+	{:else if blog.profiles?.avatar_url}
+		<meta property="og:image" content={blog.profiles.avatar_url} />
+		<meta property="og:image:width" content="1200" />
+		<meta property="og:image:height" content="628" />
+		<meta property="og:image:alt" content={`${blog.profiles.username}'s profile picture`} />
 	{/if}
 	
 	<!-- Twitter -->
@@ -42,9 +47,12 @@
 	<meta name="twitter:url" content={shareUrl} />
 	<meta name="twitter:title" content={data.meta.title} />
 	<meta name="twitter:description" content={data.meta.description} />
-	{#if data.meta.ogImage}
-		<meta name="twitter:image" content={data.meta.ogImage} />
-		<meta name="twitter:image:alt" content={`${blog.profiles?.username}'s profile picture`} />
+	{#if data.images.length > 0}
+		<meta name="twitter:image" content={data.images[0]} />
+		<meta name="twitter:image:alt" content="Blog post image" />
+	{:else if blog.profiles?.avatar_url}
+		<meta name="twitter:image" content={blog.profiles.avatar_url} />
+		<meta name="twitter:image:alt" content={`${blog.profiles.username}'s profile picture`} />
 	{/if}
 
 	<!-- Additional meta tags for better compatibility -->
