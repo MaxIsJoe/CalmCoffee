@@ -56,36 +56,34 @@ export function coffeeMarkdown(md: string, styles: CoffeeMarkdownStyles = {}): s
 		return '';
 	}
 
+	md = md.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
 	let html = escapeHtml(md);
 
-	// Phase 1: Handle code blocks first to prevent markdown inside them from being processed
+		// 1. Custom block containers
+	html = handleColumns(html, mergedStyles);
+	html = handleBgc(html, mergedStyles);
+	html = handleCustom(html, mergedStyles);
+	html = handleAlignment(html, mergedStyles);
+
+	// 2. Standard block elements
 	html = handleCodeBlocks(html, mergedStyles);
 	html = handleInlineCode(html, mergedStyles);
-
-	// Phase 2: Handle standard block-level elements
 	html = handleImages(html, mergedStyles);
 	html = handleHeadings(html, mergedStyles);
 	html = handleBlockquotes(html, mergedStyles);
 	html = handleUnorderedLists(html, mergedStyles);
 	html = handleOrderedLists(html, mergedStyles);
 
-	// Phase 3: Handle inline elements within blocks (should be after block processing)
+	// 3. Inline elements
 	html = handleLinks(html, mergedStyles);
 	html = handleBold(html, mergedStyles);
 	html = handleUnderline(html);
 	html = handleItalic(html, mergedStyles);
-	html = handleEscapedNewlines(html); // Handles explicit \n for line breaks
+	html = handleEscapedNewlines(html);
 
-	// Phase 4: Handle paragraphs for any remaining plain text.
-	// This must run before wrapper tags like <align> or <columns> so <p> tags are formed.
+	// 4. Paragraphs last
 	html = handleParagraphs(html, mergedStyles);
-
-	// Phase 5: Handle custom/wrapper block elements.
-	// These should wrap already formed HTML blocks (<p>, <h1>, <ul>, etc.)
-	html = handleColumns(html, mergedStyles);
-	html = handleBgc(html, mergedStyles);
-	html = handleCustom(html, mergedStyles);
-	html = handleAlignment(html, mergedStyles); // This should be processed last among block wrappers.
 
 	return html;
 }
