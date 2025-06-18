@@ -56,7 +56,7 @@
 								{comments[block.id]?.length || 0}
 							</span>
 						</button>
-						{@html coffeeMarkdown(block.content, block.styles ?? undefined)}
+						{@html coffeeMarkdown(block.content, block.styles ? (block.styles as import('$lib/md/coffeeMarkdown').CoffeeMarkdownStyles) : undefined)}
 					</div>
 				</div>
 			{/each}
@@ -89,7 +89,7 @@
 								{comments[block.id]?.length || 0}
 							</span>
 						</button>
-						{@html coffeeMarkdown(block.content, block.styles ?? undefined)}
+						{@html coffeeMarkdown(block.content, block.styles ? (block.styles as import('$lib/md/coffeeMarkdown').CoffeeMarkdownStyles) : undefined)}
 					</div>
 				</div>
 			{/each}
@@ -111,7 +111,7 @@
 
 	.chapter-block h2 {
 		margin-bottom: 1rem;
-		color: #3730a3;
+		color: var(--color-link);
 		font-size: 1.3rem;
 	}
 
@@ -121,13 +121,13 @@
 	}
 
 	.block-content {
-		background: #f3f4f6;
+		background: var(--color-bg-alt);
 		border-radius: 8px;
 		padding: 2.2rem 1.2rem 1rem 1.2rem;
 		margin-bottom: 1.1rem;
 		font-size: 1.08rem;
-		color: #222;
-		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+		color: var(--color-text);
+		box-shadow: 0 1px 4px var(--color-card-shadow);
 		overflow-wrap: break-word;
 		position: relative;
 	}
@@ -150,7 +150,7 @@
 
 	.comments-icon-btn:hover,
 	.comments-icon-btn:focus {
-		background: #e0e7ff;
+		background: var(--color-link-hover);
 	}
 
 	.comments-icon-btn svg {
@@ -159,8 +159,8 @@
 
 	.comments-count {
 		font-size: 0.98em;
-		color: #6366f1;
-		background: #e0e7ff;
+		color: var(--color-link);
+		background: var(--color-link-hover);
 		border-radius: 1em;
 		padding: 0.1em 0.7em;
 		margin-left: 0.1em;

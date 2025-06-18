@@ -23,24 +23,24 @@ export type CoffeeMarkdownStyles = {
 };
 
 export const defaultStyles: Required<CoffeeMarkdownStyles> = {
-	h1: 'font-size:2rem;color:#3730a3;font-weight:600;margin:1.2em 0 0.6em 0;line-height:1.2;',
-	h2: 'font-size:1.5rem;color:#3730a3;font-weight:600;margin:1.2em 0 0.6em 0;line-height:1.2;',
-	h3: 'font-size:1.2rem;color:#3730a3;font-weight:600;margin:1.2em 0 0.6em 0;line-height:1.2;',
-	h4: 'font-size:1.1rem;color:#3730a3;font-weight:600;margin:1.2em 0 0.6em 0;line-height:1.2;',
-	h5: 'font-size:1rem;color:#3730a3;font-weight:600;margin:1.2em 0 0.6em 0;line-height:1.2;',
-	h6: 'font-size:0.95rem;color:#3730a3;font-weight:600;margin:1.2em 0 0.6em 0;line-height:1.2;',
-	p: 'margin:0.7em 0;color:#222;font-size:1.05rem;',
-	a: 'color:#4f46e5;text-decoration:underline;word-break:break-all;',
+	h1: 'font-size:2rem;color:var(--color-link);font-weight:600;margin:1.2em 0 0.6em 0;line-height:1.2;',
+	h2: 'font-size:1.5rem;color:var(--color-link);font-weight:600;margin:1.2em 0 0.6em 0;line-height:1.2;',
+	h3: 'font-size:1.2rem;color:var(--color-link);font-weight:600;margin:1.2em 0 0.6em 0;line-height:1.2;',
+	h4: 'font-size:1.1rem;color:var(--color-link);font-weight:600;margin:1.2em 0 0.6em 0;line-height:1.2;',
+	h5: 'font-size:1rem;color:var(--color-link);font-weight:600;margin:1.2em 0 0.6em 0;line-height:1.2;',
+	h6: 'font-size:0.95rem;color:var(--color-link);font-weight:600;margin:1.2em 0 0.6em 0;line-height:1.2;',
+	p: 'margin:0.7em 0;color:var(--color-text);font-size:1.05rem;',
+	a: 'color:var(--color-link);text-decoration:underline;word-break:break-all;',
 	ul: 'margin:0.7em 0 0.7em 1.5em;',
 	ol: 'margin:0.7em 0 0.7em 1.5em;',
 	li: 'margin-bottom:0.3em;',
-	blockquote: 'border-left:4px solid #a5b4fc;background:#eef2ff;padding:0.7em 1em;margin:1em 0;color:#444;border-radius:6px;',
-	img: 'max-width:100%;display:block;margin:1em auto;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,0.06);',
+	blockquote: 'border-left:4px solid var(--color-link);background:var(--color-bg-alt);padding:0.7em 1em;margin:1em 0;color:var(--color-text);border-radius:6px;',
+	img: 'max-width:100%;display:block;margin:1em auto;border-radius:6px;box-shadow:0 1px 4px var(--color-card-shadow);',
 	b: 'font-weight:700;',
 	i: 'font-style:italic;',
-	code: 'background:#e0e7ff;color:#3730a3;padding:0.15em 0.4em;border-radius:4px;font-size:0.98em;',
-	pre: 'display:block;padding:1em;overflow-x:auto;background:#f3f4f6;border-radius:8px;',
-	bgc: 'padding:0.7em 1em;border-radius:8px;margin:1em 0;',
+	code: 'background:var(--color-secondary);color:var(--color-link);padding:0.15em 0.4em;border-radius:4px;font-size:0.98em;',
+	pre: 'display:block;padding:1em;overflow-x:auto;background:var(--color-bg-alt);border-radius:8px;',
+	bgc: 'padding:0.7em 1em;border-radius:8px;margin:1em 0;background:var(--color-bg-alt);color:var(--color-text);',
 	custom: '', // no default, user must provide
 	align: 'text-align:center;', // Default alignment style
 	section: 'margin:1em 0; overflow:hidden;', // Default style for sections

@@ -242,27 +242,28 @@
 
 <style>
 	.microblog-editor {
-		background: #ebecec;
+		background: var(--color-microblog-bg, var(--color-bg-alt));
 		border-radius: 10px;
-		box-shadow: 0 2px 8px rgba(60, 60, 90, 0.06);
+		box-shadow: 0 2px 8px var(--color-microblog-shadow, var(--color-card-shadow));
 		padding: 1.5rem 1.2rem 1.2rem 1.2rem;
 		margin-bottom: 2rem;
-		border: 1px solid #e5e7eb;
+		border: 1px solid var(--color-microblog-border, var(--color-border));
 	}
 	.microblog-textarea {
 		width: 100%;
 		height: 90px;
 		margin-bottom: 0.5rem;
 		border-radius: 6px;
-		border: 1px solid #cbd5e1;
+		border: 1px solid var(--color-microblog-textarea-border, var(--color-border));
 		padding: 0.7rem;
 		font-size: 1.07rem;
-		background: #fff;
+		background: var(--color-microblog-textarea-bg, var(--color-card-bg));
 		resize: vertical;
 		transition: border-color 0.15s;
+		color: var(--color-microblog-text, var(--color-text));
 	}
 	.microblog-textarea:focus {
-		border-color: #6366f1;
+		border-color: var(--color-microblog-focus, var(--color-link));
 		outline: none;
 	}
 	.editor-row {
@@ -274,39 +275,39 @@
 	.toggle-styles-btn {
 		background: none;
 		border: none;
-		color: #6366f1;
+		color: var(--color-microblog-toggle, var(--color-link));
 		font-size: 0.98rem;
 		cursor: pointer;
 		padding: 0.1rem 0.3rem;
 		transition: color 0.15s;
 	}
 	.toggle-styles-btn:hover {
-		color: #1e293b;
+		color: var(--color-microblog-toggle-hover, var(--color-link-hover));
 		text-decoration: underline;
 	}
 	.microblog-styles {
 		width: 100%;
 		border-radius: 6px;
-		border: 1px solid #cbd5e1;
+		border: 1px solid var(--color-microblog-styles-border, var(--color-border));
 		padding: 0.5rem;
-		background: #f9fafb;
+		background: var(--color-microblog-styles-bg, var(--color-bg-alt));
 		font-family: 'Fira Mono', 'Consolas', monospace;
 		resize: vertical;
 		transition: border-color 0.15s;
 	}
 	.microblog-styles:focus {
-		border-color: #6366f1;
+		border-color: var(--color-microblog-focus, var(--color-link));
 		outline: none;
 	}
 	.char-counter {
 		font-size: 0.97rem;
-		color: #64748b;
+		color: var(--color-microblog-counter, var(--color-secondary));
 		text-align: right;
 	}
 	.post-btn {
 		margin-top: 0.7rem;
-		background: linear-gradient(90deg, #6366f1 60%, #818cf8 100%);
-		color: #fff;
+		background: var(--color-microblog-post-bg, linear-gradient(90deg, var(--color-link) 60%, var(--color-accent) 100%));
+		color: var(--color-microblog-post-text, var(--color-primary-alt));
 		border: none;
 		border-radius: 6px;
 		padding: 0.55rem 1.3rem;
@@ -316,36 +317,36 @@
 		transition:
 			background 0.18s,
 			box-shadow 0.18s;
-		box-shadow: 0 1px 4px rgba(60, 60, 90, 0.07);
+		box-shadow: 0 1px 4px var(--color-microblog-shadow, var(--color-card-shadow));
 	}
 	.post-btn:disabled {
-		background: #c7d2fe;
-		color: #fff;
+		background: var(--color-microblog-post-disabled-bg, #c7d2fe);
+		color: var(--color-microblog-post-disabled-text, #fff);
 		cursor: not-allowed;
 	}
 	.post-btn:hover:enabled {
-		background: linear-gradient(90deg, #4f46e5 60%, #6366f1 100%);
+		background: var(--color-microblog-post-hover-bg, linear-gradient(90deg, var(--color-link-hover) 60%, var(--color-link) 100%));
 	}
 	.microblog-error {
-		color: #b91c1c;
+		color: var(--color-microblog-error, var(--color-danger));
 		margin-top: 0.7rem;
 		font-size: 1.01rem;
 	}
 	.microblog-warning {
-		color: #bfa007;
+		color: var(--color-microblog-warning, #bfa007);
 		margin-top: 0.7rem;
 		font-size: 1.01rem;
 	}
 	.microblog-preview {
-		background: #f3f4f6;
+		background: var(--color-microblog-preview-bg, #f3f4f6);
 		border-radius: 8px;
 		padding: 0.9em 1.2em;
 		margin-top: 1.2em;
-		border: 1px solid #e5e7eb;
+		border: 1px solid var(--color-microblog-preview-border, #e5e7eb);
 	}
 	.preview-content {
 		font-size: 1.04rem;
-		color: #222;
+		color: var(--color-microblog-preview-text, #222);
 	}
 	.age-rating-row {
 		display: flex;
@@ -355,19 +356,19 @@
 	}
 	.age-rating-row label {
 		font-size: 1rem;
-		color: #334155;
+		color: var(--color-microblog-label, #334155);
 	}
 	.age-rating-row select {
 		border-radius: 5px;
-		border: 1px solid #cbd5e1;
+		border: 1px solid var(--color-microblog-select-border, #cbd5e1);
 		padding: 0.25rem 0.7rem;
 		font-size: 1rem;
-		background: #fff;
-		color: #222;
+		background: var(--color-microblog-select-bg, #fff);
+		color: var(--color-microblog-select-text, #222);
 		transition: border-color 0.15s;
 	}
 	.age-rating-row select:focus {
-		border-color: #6366f1;
+		border-color: var(--color-microblog-focus, var(--color-link));
 		outline: none;
 	}
 	.tag-row {
@@ -382,18 +383,18 @@
 		flex: 1;
 		padding: 0.4em 0.7em;
 		border-radius: 5px;
-		border: 1px solid #cbd5e1;
+		border: 1px solid var(--color-microblog-tag-input-border, #cbd5e1);
 		font-size: 1em;
-		background: #fff;
+		background: var(--color-microblog-tag-input-bg, #fff);
 		transition: border-color 0.15s;
 	}
 	.tag-input-container input[type='text']:focus {
-		border-color: #6366f1;
+		border-color: var(--color-microblog-focus, var(--color-link));
 		outline: none;
 	}
 	.add-tag-btn {
-		background: #a67c52;
-		color: #fff;
+		background: var(--color-microblog-add-tag-bg, #a67c52);
+		color: var(--color-microblog-add-tag-text, #fff);
 		border: none;
 		border-radius: 5px;
 		padding: 0.35em 1em;
@@ -402,12 +403,12 @@
 		transition: background 0.15s;
 	}
 	.add-tag-btn:disabled {
-		background: #e0d7ce;
-		color: #bfa07a;
+		background: var(--color-microblog-add-tag-disabled-bg, #e0d7ce);
+		color: var(--color-microblog-add-tag-disabled-text, #bfa07a);
 		cursor: not-allowed;
 	}
 	.add-tag-btn:hover:not(:disabled) {
-		background: #7c5e48;
+		background: var(--color-microblog-add-tag-hover-bg, #7c5e48);
 	}
 	.tag-list {
 		display: flex;
@@ -415,21 +416,21 @@
 		gap: 0.5em;
 	}
 	.tag {
-		background: #ede9e3;
-		color: #7c5e48;
+		background: var(--color-microblog-tag-bg, #ede9e3);
+		color: var(--color-microblog-tag-text, #7c5e48);
 		font-size: 0.97em;
 		padding: 0.18em 0.7em;
 		border-radius: 999px;
 		font-weight: 500;
 		letter-spacing: 0.01em;
-		border: 1px solid #e0d7ce;
+		border: 1px solid var(--color-microblog-tag-border, #e0d7ce);
 		display: flex;
 		align-items: center;
 	}
 	.remove-tag-btn {
 		background: none;
 		border: none;
-		color: #a67c52;
+		color: var(--color-microblog-remove-tag, #a67c52);
 		font-size: 1.1em;
 		margin-left: 0.3em;
 		cursor: pointer;
@@ -437,7 +438,7 @@
 		line-height: 1;
 	}
 	.remove-tag-btn:hover {
-		color: #b91c1c;
+		color: var(--color-microblog-remove-tag-hover, #b91c1c);
 	}
 	.confirm-btn,
 	.cancel-btn {
@@ -451,23 +452,23 @@
 		border: none;
 	}
 	.confirm-btn {
-		background: #a67c52;
-		color: #fff;
+		background: var(--color-microblog-confirm-bg, #a67c52);
+		color: var(--color-microblog-confirm-text, #fff);
 	}
 	.confirm-btn:disabled {
-		background: #e0d7ce;
-		color: #bfa07a;
+		background: var(--color-microblog-confirm-disabled-bg, #e0d7ce);
+		color: var(--color-microblog-confirm-disabled-text, #bfa07a);
 		cursor: not-allowed;
 	}
 	.confirm-btn:hover:not(:disabled) {
-		background: #7c5e48;
+		background: var(--color-microblog-confirm-hover-bg, #7c5e48);
 	}
 	.cancel-btn {
-		background: #e0d7ce;
-		color: #7c5e48;
+		background: var(--color-microblog-cancel-bg, #e0d7ce);
+		color: var(--color-microblog-cancel-text, #7c5e48);
 	}
 	.cancel-btn:hover {
-		background: #bfa07a;
-		color: #fff;
+		background: var(--color-microblog-cancel-hover-bg, #bfa07a);
+		color: var(--color-microblog-cancel-hover-text, #fff);
 	}
 </style>

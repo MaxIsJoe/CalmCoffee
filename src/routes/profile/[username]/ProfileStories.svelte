@@ -40,16 +40,16 @@
 		display: flex;
 		align-items: flex-start;
 		gap: 1rem;
-		background: #fff;
+		background: var(--color-card-bg);
 		border-radius: 8px;
 		padding: 1rem;
-		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+		box-shadow: 0 1px 4px var(--color-card-shadow);
 	}
 	.work-info {
 		flex: 1;
 	}
 	.work-info a {
-		color: #4f46e5;
+		color: var(--color-link);
 		text-decoration: none;
 		font-size: 1.1rem;
 	}
@@ -58,22 +58,22 @@
 	}
 	.work-info p {
 		margin: 0.3rem 0 0.2rem 0;
-		color: #444;
+		color: var(--color-text);
 	}
 	.work-info small {
-		color: #888;
+		color: var(--color-secondary);
 	}
 	.story-dates {
 		margin-top: 0.2em;
 	}
 	.story-dates small {
-		color: #888;
+		color: var(--color-secondary);
 		font-size: 0.97em;
 	}
 	h3 {
 		margin-top: 0;
 		margin-bottom: 1rem;
 		font-size: 1.3rem;
-		color: #3730a3;
+		color: var(--color-link);
 	}
 </style>

@@ -85,8 +85,8 @@
 
 <style>
 	.image-btn {
-		background: #f3f4f6;
-		border: 1px solid #cbd5e1;
+		background: var(--color-bg-alt);
+		border: 1px solid var(--color-border);
 		border-radius: 4px;
 		padding: 0.2rem 0.5rem;
 		font-size: 0.9rem;
@@ -98,8 +98,8 @@
 	}
 
 	.image-btn:hover {
-		background: #e0e7ff;
-		border-color: #4f46e5;
+		background: var(--color-link-hover);
+		border-color: var(--color-link);
 		transform: translateY(-1px);
 	}
 
@@ -117,8 +117,8 @@
 	}
 
 	.image-uploader-container {
-		background: white;
-		border: 1px solid #e2e8f0;
+		background: var(--color-card-bg);
+		border: 1px solid var(--color-border);
 		border-radius: 8px;
 		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 		width: 90%;
@@ -138,21 +138,21 @@
 	.uploader-header h3 {
 		margin: 0;
 		font-size: 1.1rem;
-		color: #1e293b;
+		color: var(--color-primary);
 	}
 
 	.close-btn {
 		background: none;
 		border: none;
 		font-size: 1.5rem;
-		color: #64748b;
+		color: var(--color-secondary);
 		cursor: pointer;
 		padding: 0.2rem 0.5rem;
 		line-height: 1;
 	}
 
 	.close-btn:hover {
-		color: #1e293b;
+		color: var(--color-primary);
 	}
 
 	.uploader-content {
@@ -168,12 +168,12 @@
 	.option h4 {
 		margin: 0 0 0.5rem 0;
 		font-size: 1rem;
-		color: #475569;
+		color: var(--color-primary);
 	}
 
 	.url-btn {
-		background: #4f46e5;
-		color: white;
+		background: var(--color-link);
+		color: var(--color-primary-alt);
 		border: none;
 		padding: 0.5rem 1rem;
 		border-radius: 6px;
@@ -184,6 +184,6 @@
 	}
 
 	.url-btn:hover {
-		background: #3730a3;
+		background: var(--color-link-hover);
 	}
 </style> 

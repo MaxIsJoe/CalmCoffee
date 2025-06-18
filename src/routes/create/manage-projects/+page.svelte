@@ -62,7 +62,7 @@
 	h2 {
 		text-align: center;
 		margin-top: 2rem;
-		color: #4b2e19;
+		color: var(--color-primary);
 	}
 	ul {
 		list-style: none;
@@ -71,22 +71,22 @@
 		margin: 2rem auto;
 	}
 	li {
-		background: #fff;
+		background: var(--color-card-bg);
 		border-radius: 8px;
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+		box-shadow: 0 2px 8px var(--color-card-shadow);
 		padding: 1.2rem 1.5rem;
 		margin-bottom: 1.2rem;
 	}
 	strong {
 		font-size: 1.1rem;
-		color: #3e2723;
+		color: var(--color-text);
 	}
 	small {
-		color: #6d4c41;
+		color: var(--color-primary);
 	}
 	button {
-		background: #a1887f;
-		color: #fff;
+		background: var(--color-accent);
+		color: var(--color-primary-alt);
 		border: none;
 		border-radius: 4px;
 		padding: 0.5rem 1.2rem;
@@ -95,7 +95,7 @@
 		transition: background 0.2s;
 	}
 	button:hover {
-		background: #6d4c41;
+		background: var(--color-primary);
 	}
 	p[style*='color:red'] {
 		text-align: center;
@@ -105,10 +105,10 @@
 		text-align: center;
 	}
 	a {
-		color: #795548;
+		color: var(--color-link);
 		text-decoration: underline;
 	}
 	a:hover {
-		color: #3e2723;
+		color: var(--color-primary);
 	}
 </style>

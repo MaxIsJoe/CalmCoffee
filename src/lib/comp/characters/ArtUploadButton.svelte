@@ -20,8 +20,8 @@
 
 <style>
 	:global(.image-btn) {
-		background: #f3f4f6;
-		border: 1px solid #cbd5e1;
+		background: var(--color-bg-alt);
+		border: 1px solid var(--color-border);
 		border-radius: 4px;
 		padding: 0.2rem 0.5rem;
 		font-size: 1.2rem;
@@ -30,8 +30,8 @@
 	}
 
 	:global(.image-btn:hover) {
-		background: #e0e7ff;
-		border-color: #4f46e5;
+		background: var(--color-link-hover);
+		border-color: var(--color-link);
 		transform: translateY(-1px);
 	}
 </style> 

@@ -41,13 +41,13 @@
 
 <style>
 	.muted {
-		color: #888;
+		color: var(--color-muted);
 		font-size: 1rem;
 		margin: 2rem 0;
 		text-align: center;
 	}
 	.error {
-		color: #c00;
+		color: var(--color-error);
 		font-weight: 500;
 		margin: 2rem 0;
 		text-align: center;

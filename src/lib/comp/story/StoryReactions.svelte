@@ -114,4 +114,30 @@
 		{errorMsg}
 		on:react={handleReaction}
 	/>
-{/if} 
+{/if}
+
+<style>
+	.story-reactions {
+		background: var(--color-bg-alt);
+		border: 1px solid var(--color-border);
+		border-radius: 8px;
+		box-shadow: 0 1px 4px var(--color-card-shadow);
+	}
+	.reaction-btn {
+		background: var(--color-bg-alt);
+		border: 1px solid var(--color-border);
+		color: var(--color-link);
+	}
+	.reaction-btn.active {
+		background: var(--color-secondary);
+		color: var(--color-accent);
+		border-color: var(--color-accent);
+	}
+	.reaction-btn:hover {
+		background: var(--color-link-hover);
+		color: var(--color-primary-alt);
+	}
+	.reaction-count {
+		color: var(--color-accent);
+	}
+</style> 

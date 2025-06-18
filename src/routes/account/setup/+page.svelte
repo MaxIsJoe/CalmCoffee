@@ -89,15 +89,13 @@
 	}
 
 	button:disabled {
-		background-color: #ccc;
-		cursor: not-allowed;
+		background-color: var(--color-border);
 	}
 
 	p {
 		margin: 0.5rem 0;
 	}
 	input:focus {
-		border-color: #007bff;
-		outline: none;
+		border-color: var(--color-accent);
 	}
 </style>

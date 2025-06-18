@@ -263,18 +263,18 @@
 	}
 
 	.drop-zone {
-		border: 2px dashed #cbd5e1;
+		border: 2px dashed var(--color-border);
 		border-radius: 8px;
 		padding: 2rem;
 		text-align: center;
-		background: #f8fafc;
+		background: var(--color-bg-alt);
 		transition: all 0.2s ease;
 		cursor: pointer;
 	}
 
 	.drop-zone.drag-over {
-		border-color: #4f46e5;
-		background: #eef2ff;
+		border-color: var(--color-link);
+		background: var(--color-link-hover);
 	}
 
 	.drop-zone input[type='file'] {
@@ -292,12 +292,12 @@
 
 	.upload-hint {
 		font-size: 0.9rem;
-		color: #64748b;
+		color: var(--color-secondary);
 		margin-top: 0.5rem;
 	}
 
 	.error {
-		color: #dc2626;
+		color: var(--color-danger);
 		margin: 1rem 0;
 		text-align: center;
 	}
@@ -317,14 +317,14 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		background: #f1f5f9;
+		background: var(--color-bg-alt);
 		padding: 0.5rem 1rem;
 		border-radius: 6px;
 	}
 
 	.file-name {
 		font-size: 0.9rem;
-		color: #475569;
+		color: var(--color-secondary);
 	}
 
 	.remove-btn {
@@ -337,12 +337,12 @@
 	}
 
 	.remove-btn:hover {
-		color: #dc2626;
+		color: var(--color-danger);
 	}
 
 	.upload-btn {
-		background: #4f46e5;
-		color: white;
+		background: var(--color-link);
+		color: var(--color-primary-alt);
 		border: none;
 		padding: 0.5rem 1rem;
 		border-radius: 6px;
@@ -352,12 +352,12 @@
 	}
 
 	.upload-btn:disabled {
-		background: #a5b4fc;
+		background: var(--color-secondary);
 		cursor: not-allowed;
 	}
 
 	.upload-btn:hover:not(:disabled) {
-		background: #3730a3;
+		background: var(--color-link-hover);
 	}
 
 	.uploaded-images {
@@ -418,12 +418,12 @@
 	}
 
 	.delete-btn:hover {
-		color: #ef4444;
+		color: var(--color-danger);
 	}
 
 	h3 {
 		font-size: 1.1rem;
-		color: #1e293b;
+		color: var(--color-primary);
 		margin: 0;
 	}
 

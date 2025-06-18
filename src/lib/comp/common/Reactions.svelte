@@ -49,8 +49,8 @@
 		margin: 0.5em 0 0.3em 0;
 	}
 	.reaction-btn {
-		background: #f3f4f6;
-		border: 1px solid #e5e7eb;
+		background: var(--color-bg-alt);
+		border: 1px solid var(--color-border);
 		border-radius: 999px;
 		padding: 0.18em 0.7em;
 		font-size: 1.1em;
@@ -63,9 +63,9 @@
 			border 0.15s;
 	}
 	.reaction-btn.active {
-		background: #ede9e3;
-		border-color: #a67c52;
-		color: #a67c52;
+		background: var(--color-secondary);
+		border-color: var(--color-accent);
+		color: var(--color-accent);
 		font-weight: 600;
 	}
 	.reaction-btn:disabled {
@@ -74,12 +74,12 @@
 	}
 	.reaction-count {
 		font-size: 0.95em;
-		color: #7c5e48;
+		color: var(--color-accent);
 	}
 	.reaction-error {
-		color: #dc2626;
-		background: #fef2f2;
-		border: 1px solid #fecaca;
+		color: var(--color-danger);
+		background: var(--color-danger-bg, #fef2f2);
+		border: 1px solid var(--color-danger-hover);
 		border-radius: 6px;
 		padding: 0.3em 0.7em;
 		margin-bottom: 0.5em;

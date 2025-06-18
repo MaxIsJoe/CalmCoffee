@@ -71,7 +71,7 @@
 
 	.read-controls label {
 		font-size: 1rem;
-		color: #3730a3;
+		color: var(--color-link);
 		display: flex;
 		align-items: center;
 		gap: 0.5em;
@@ -81,18 +81,18 @@
 		font-size: 1rem;
 		padding: 0.2em 0.7em;
 		border-radius: 6px;
-		border: 1px solid #cbd5e1;
-		background: #f3f4f6;
-		color: #3730a3;
+		border: 1px solid var(--color-border);
+		background: var(--color-bg-alt);
+		color: var(--color-link);
 	}
 
 	.layout-toggle {
-		background: #f3f4f6;
-		border: 1px solid #cbd5e1;
+		background: var(--color-bg-alt);
+		border: 1px solid var(--color-border);
 		border-radius: 6px;
 		padding: 0.4em;
 		cursor: pointer;
-		color: #3730a3;
+		color: var(--color-link);
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -100,25 +100,25 @@
 	}
 
 	.layout-toggle:hover {
-		background: #e0e7ff;
+		background: var(--color-link-hover);
 	}
 
 	.back-to-overview {
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
-		background: #f3f4f6;
-		border: 1px solid #cbd5e1;
+		background: var(--color-bg-alt);
+		border: 1px solid var(--color-border);
 		border-radius: 6px;
 		padding: 0.4em 0.8em;
 		cursor: pointer;
-		color: #3730a3;
+		color: var(--color-link);
 		font-size: 0.95rem;
 		transition: all 0.2s;
 	}
 
 	.back-to-overview:hover {
-		background: #e0e7ff;
+		background: var(--color-link-hover);
 	}
 
 	.back-to-overview svg {

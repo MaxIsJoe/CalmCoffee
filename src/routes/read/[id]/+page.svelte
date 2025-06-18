@@ -259,16 +259,16 @@
 		display: block;
 		width: 4px;
 		height: 40px;
-		background: #c7d2fe;
+		background: var(--color-link-hover);
 		border-radius: 2px;
 		margin: 0 auto;
 		margin-top: 40px;
 	}
 
 	.read-story-container {
-		background: #fff;
+		background: var(--color-card-bg);
 		border-radius: 16px;
-		box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+		box-shadow: 0 4px 24px var(--color-card-shadow);
 		padding: 2.5rem 2.5rem 2rem 2.5rem;
 		margin: 2rem auto;
 		overflow-x: auto;
@@ -283,8 +283,8 @@
 	}
 
 	.loader {
-		border: 4px solid #e0e7ff;
-		border-top: 4px solid #6366f1;
+		border: 4px solid var(--color-secondary);
+		border-top: 4px solid var(--color-link);
 		border-radius: 50%;
 		width: 38px;
 		height: 38px;

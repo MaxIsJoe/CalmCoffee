@@ -30,6 +30,12 @@
 			status: 'In Progress'
 		},
 		{
+			title: 'Site Wide Theming Support',
+			description: 'Allow users to create their own themes and avoid the default light them.',
+			priority: 'high',
+			status: 'In Progress'
+		},
+		{
 			title: 'Mobile Layout Support',
 			description: 'Provide better layout/functionality support for mobiles.',
 			priority: 'medium',

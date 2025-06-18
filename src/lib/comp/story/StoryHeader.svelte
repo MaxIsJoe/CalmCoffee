@@ -85,14 +85,14 @@
 	}
 
 	.story-tag {
-		background: #ede9e3;
-		color: #7c5e48;
+		background: var(--color-bg-alt);
+		color: var(--color-accent);
 		font-size: 0.93em;
 		padding: 0.18em 0.7em;
 		border-radius: 999px;
 		font-weight: 500;
 		letter-spacing: 0.01em;
-		border: 1px solid #e0d7ce;
+		border: 1px solid var(--color-border);
 		cursor: pointer;
 		transition:
 			background 0.15s,
@@ -101,8 +101,8 @@
 
 	.story-tag:hover,
 	.story-tag:focus {
-		background: #e0d7ce;
-		color: #a67c52;
+		background: var(--color-border);
+		color: var(--color-accent);
 		outline: none;
 	}
 </style> 

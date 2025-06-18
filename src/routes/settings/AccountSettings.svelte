@@ -173,4 +173,35 @@
 		margin: 2rem 0 1.5rem 0;
 		border-radius: 2px;
 	}
+	.account-settings {
+		background: var(--color-card-bg);
+		color: var(--color-text);
+	}
+	input,
+	select {
+		background: var(--color-bg-alt);
+		color: var(--color-text);
+		border: 1px solid var(--color-border);
+	}
+	input:focus,
+	select:focus {
+		border-color: var(--color-link);
+	}
+	.button-primary {
+		background: var(--color-link);
+		color: var(--color-primary-alt);
+	}
+	.button-primary:hover {
+		background: var(--color-link-hover);
+	}
+	.button-danger {
+		background: var(--color-danger, #dc2626);
+		color: var(--color-primary-alt);
+	}
+	.button-danger:hover {
+		background: var(--color-danger-hover, #b91c1c);
+	}
+	.button-success {
+		color: var(--color-success, #059669);
+	}
 </style>

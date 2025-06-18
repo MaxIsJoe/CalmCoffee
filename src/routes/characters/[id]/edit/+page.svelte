@@ -360,24 +360,24 @@
 		padding-bottom: 20px;
 	}
 	.edit-character-container {
-		background: #fff;
+		background: var(--color-card-bg);
 		border-radius: 12px;
-		box-shadow: 0 2px 12px rgba(30, 34, 54, 0.07);
+		box-shadow: 0 2px 12px var(--color-card-shadow);
 		padding: 2rem;
 		width: 100%;
 		margin: 0 auto;
 	}
 	.preview-section {
-		background: #fff;
+		background: var(--color-card-bg);
 		border-radius: 12px;
-		box-shadow: 0 2px 12px rgba(30, 34, 54, 0.07);
+		box-shadow: 0 2px 12px var(--color-card-shadow);
 		padding: 2rem;
 		width: 100%;
 	}
 	.preview-section h2 {
 		font-size: 1.4rem;
 		margin-bottom: 1.2rem;
-		color: #4b4f6b;
+		color: var(--color-link);
 		text-align: center;
 	}
 	.edit-character-form {
@@ -389,7 +389,7 @@
 		display: flex;
 		flex-direction: column;
 		font-weight: 500;
-		color: #353857;
+		color: var(--color-text);
 		gap: 0.3rem;
 	}
 	.edit-character-form input[type='text'],
@@ -398,17 +398,18 @@
 	.edit-character-form select,
 	.edit-character-form textarea {
 		padding: 0.5rem 0.9rem;
-		border: 1px solid #d3d6db;
+		border: 1px solid var(--color-border);
 		border-radius: 6px;
 		font-size: 1rem;
-		background: #fafbfc;
+		background: var(--color-bg-alt);
+		color: var(--color-text);
 		transition: border 0.2s;
 		width: 100%;
 	}
 	.edit-character-form input:focus,
 	.edit-character-form select:focus,
 	.edit-character-form textarea:focus {
-		border-color: #a3a8b8;
+		border-color: var(--color-accent);
 		outline: none;
 	}
 	.edit-character-form textarea {
@@ -422,8 +423,8 @@
 		margin-top: 0.5rem;
 	}
 	.edit-character-form .btn-primary {
-		background: #4f46e5;
-		color: #fff;
+		background: var(--color-primary);
+		color: var(--color-primary-alt);
 		padding: 0.5rem 1.2rem;
 		border-radius: 6px;
 		font-weight: 500;
@@ -432,15 +433,15 @@
 		transition: background 0.2s;
 	}
 	.edit-character-form .btn-primary:disabled {
-		background: #a5b4fc;
+		background: var(--color-secondary);
 		cursor: not-allowed;
 	}
 	.edit-character-form .btn-primary:hover:enabled {
-		background: #3730a3;
+		background: var(--color-accent);
 	}
 	.edit-character-form .btn-secondary {
-		background: #f3f4f6;
-		color: #3730a3;
+		background: var(--color-bg-alt);
+		color: var(--color-link);
 		padding: 0.5rem 1.2rem;
 		border-radius: 6px;
 		font-weight: 500;
@@ -449,11 +450,11 @@
 		transition: background 0.2s;
 	}
 	.edit-character-form .btn-secondary:hover {
-		background: #e0e7ff;
+		background: var(--color-link-hover);
 	}
 	.edit-character-form .btn-danger {
-		background: #e53e3e;
-		color: #fff;
+		background: var(--color-danger);
+		color: var(--color-primary-alt);
 		padding: 0.5rem 1.2rem;
 		border-radius: 6px;
 		font-weight: 500;
@@ -463,20 +464,20 @@
 		margin-left: auto;
 	}
 	.edit-character-form .btn-danger:disabled {
-		background: #fca5a5;
+		background: var(--color-danger-hover);
 		cursor: not-allowed;
 	}
 	.edit-character-form .btn-danger:hover:enabled {
-		background: #b91c1c;
+		background: var(--color-danger-hover);
 	}
 	.error {
-		color: #c00;
+		color: var(--color-error);
 		font-weight: 500;
 		margin: 0.5rem 0 0 0;
 		text-align: center;
 	}
 	.muted {
-		color: #888;
+		color: var(--color-muted);
 		font-size: 1rem;
 		margin: 2rem 0;
 		text-align: center;
@@ -491,18 +492,18 @@
 		flex: 1;
 		padding: 0.4em 0.7em;
 		border-radius: 5px;
-		border: 1px solid #cbd5e1;
+		border: 1px solid var(--color-border);
 		font-size: 1em;
-		background: #fff;
+		background: var(--color-bg-alt);
 		transition: border-color 0.15s;
 	}
 	.tag-input-container input[type='text']:focus {
-		border-color: #6366f1;
+		border-color: var(--color-link);
 		outline: none;
 	}
 	.add-tag-btn {
-		background: #a67c52;
-		color: #fff;
+		background: var(--color-accent);
+		color: var(--color-primary-alt);
 		border: none;
 		border-radius: 5px;
 		padding: 0.35em 1em;
@@ -512,12 +513,12 @@
 		white-space: nowrap;
 	}
 	.add-tag-btn:disabled {
-		background: #e0d7ce;
-		color: #bfa07a;
+		background: var(--color-secondary);
+		color: var(--color-link);
 		cursor: not-allowed;
 	}
 	.add-tag-btn:hover:not(:disabled) {
-		background: #7c5e48;
+		background: var(--color-primary);
 	}
 	.tag-list {
 		display: flex;
@@ -527,21 +528,21 @@
 		width: 100%;
 	}
 	.tag {
-		background: #ede9e3;
-		color: #7c5e48;
+		background: var(--color-bg-hover);
+		color: var(--color-accent);
 		font-size: 0.97em;
 		padding: 0.18em 0.7em;
 		border-radius: 999px;
 		font-weight: 500;
 		letter-spacing: 0.01em;
-		border: 1px solid #e0d7ce;
+		border: 1px solid var(--color-border);
 		display: flex;
 		align-items: center;
 	}
 	.remove-tag-btn {
 		background: none;
 		border: none;
-		color: #a67c52;
+		color: var(--color-accent);
 		font-size: 1.1em;
 		margin-left: 0.3em;
 		cursor: pointer;
@@ -549,10 +550,10 @@
 		line-height: 1;
 	}
 	.remove-tag-btn:hover {
-		color: #b91c1c;
+		color: var(--color-character-remove-tag-hover, var(--color-danger));
 	}
 	.tag-warning {
-		color: #bfa007;
+		color: var(--color-character-tag-warning, var(--color-warning, #bfa007));
 		margin-top: 0.3em;
 		font-size: 0.98em;
 	}
@@ -568,20 +569,20 @@
 		gap: 0.5rem;
 	}
 	.art-upload-hint {
-		color: #6b7280;
+		color: var(--color-character-art-hint, var(--color-secondary));
 		font-size: 0.9rem;
 	}
 	.art-upload-section textarea {
 		width: 100%;
 		padding: 0.5rem;
-		border: 1px solid #d3d6db;
+		border: 1px solid var(--color-border);
 		border-radius: 6px;
 		font-size: 0.9rem;
-		background: #fafbfc;
+		background: var(--color-bg-alt);
 		resize: vertical;
 	}
 	.art-upload-section textarea:focus {
-		border-color: #a3a8b8;
+		border-color: var(--color-accent);
 		outline: none;
 	}
 	@media (max-width: 1200px) {

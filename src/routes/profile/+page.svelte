@@ -71,7 +71,7 @@
 	h2 {
 		text-align: center;
 		margin-top: 2rem;
-		color: #4f46e5;
+		color: var(--color-link);
 	}
 	.profile-search-bar {
 		max-width: 500px;
@@ -85,8 +85,8 @@
 		border-radius: 8px;
 		border: 1.5px solid #cbd5e1;
 		font-size: 1.07rem;
-		background: #f8fafc;
-		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+		background: var(--color-bg-alt);
+		box-shadow: 0 1px 4px var(--color-card-shadow);
 	}
 	.profiles-list {
 		list-style: none;
@@ -95,9 +95,9 @@
 		margin: 2rem auto;
 	}
 	.profiles-list li {
-		background: #fff;
+		background: var(--color-card-bg);
 		border-radius: 8px;
-		box-shadow: 0 2px 8px rgba(99, 102, 241, 0.06);
+		box-shadow: 0 2px 8px var(--color-card-shadow);
 		padding: 1.1rem 1.5rem;
 		margin-bottom: 1.1rem;
 		font-size: 1.08rem;
@@ -110,16 +110,16 @@
 		height: 44px;
 		border-radius: 50%;
 		object-fit: cover;
-		background: #e0e0e0;
+		background: var(--color-secondary);
 		display: inline-block;
-		box-shadow: 0 1px 4px rgba(99, 102, 241, 0.08);
+		box-shadow: 0 1px 4px var(--color-card-shadow);
 	}
 	.profile-avatar.fallback {
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		background: #e0e0e0;
-		color: #3730a3;
+		background: var(--color-secondary);
+		color: var(--color-link);
 		font-weight: bold;
 		font-size: 1.25rem;
 		width: 44px;
@@ -131,7 +131,7 @@
 		min-width: 0;
 	}
 	.profiles-list a {
-		color: #4f46e5;
+		color: var(--color-link);
 		font-weight: 500;
 		text-decoration: none;
 		font-size: 1.13rem;
@@ -139,8 +139,9 @@
 	.profiles-list a:hover {
 		text-decoration: underline;
 	}
-	.profiles-list small {
-		color: #888;
+	.profiles-list small,
+	.muted {
+		color: var(--color-secondary);
 		font-size: 0.97em;
 	}
 	p[style*='color:red'] {

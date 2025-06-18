@@ -125,10 +125,10 @@
 
 <style>
 	.zen-editor {
-		background: #fff;
+		background: var(--color-editor-bg);
 		border-radius: 8px;
-		border: 1px solid #e2e8f0;
-		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+		border: 1px solid var(--color-editor-border);
+		box-shadow: 0 1px 3px var(--color-editor-shadow);
 		transition: all 0.3s ease;
 	}
 
@@ -141,18 +141,18 @@
 		z-index: 1000;
 		border-radius: 0;
 		border: none;
-		background: #fff;
+		background: var(--color-editor-bg);
 		display: flex;
 		flex-direction: column;
 	}
 
 	.editor-header {
 		padding: 0.5rem;
-		border-bottom: 1px solid #e2e8f0;
+		border-bottom: 1px solid var(--color-editor-header-border);
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		background: #f8fafc;
+		background: var(--color-editor-header-bg);
 	}
 
 	.editor-controls {
@@ -161,18 +161,19 @@
 	}
 
 	.control-btn {
-		background: #f1f5f9;
-		border: 1px solid #cbd5e1;
+		background: var(--color-editor-btn-bg);
+		border: 1px solid var(--color-editor-btn-border);
 		border-radius: 4px;
 		padding: 0.3rem 0.7rem;
 		font-size: 0.9rem;
 		cursor: pointer;
+		color: var(--color-editor-btn-text);
 		transition: all 0.2s ease;
 	}
 
 	.control-btn:hover {
-		background: #e0e7ff;
-		border-color: #4f46e5;
+		background: var(--color-editor-btn-hover);
+		border-color: var(--color-editor-btn-active);
 	}
 
 	.exit-zen-btn {
@@ -181,12 +182,12 @@
 		font-size: 1.2rem;
 		cursor: pointer;
 		padding: 0.3rem 0.7rem;
-		color: #64748b;
+		color: var(--color-editor-secondary);
 		transition: color 0.2s ease;
 	}
 
 	.exit-zen-btn:hover {
-		color: #1e293b;
+		color: var(--color-editor-btn-active);
 	}
 
 	.editor-main {
@@ -208,44 +209,45 @@
 		flex: 1;
 		width: 100%;
 		padding: 1rem;
-		border: 1px solid #e2e8f0;
+		border: 1px solid var(--color-editor-border);
 		border-radius: 6px;
 		font-size: 1rem;
 		line-height: 1.5;
 		resize: none;
-		background: #fff;
+		background: var(--color-editor-bg);
 		transition: border-color 0.2s ease;
+		color: var(--color-editor-text);
 	}
 
 	.editor-textarea:focus {
 		outline: none;
-		border-color: #4f46e5;
+		border-color: var(--color-editor-btn-active);
 	}
 
 	.preview-column {
-		background: #f8fafc;
+		background: var(--color-editor-header-bg);
 		padding: 1rem;
-		border-left: 1px solid #e2e8f0;
+		border-left: 1px solid var(--color-editor-header-border);
 		overflow-y: auto;
 		transition: width 0.1s ease;
 	}
 
 	.resize-handle {
 		width: 4px;
-		background: #e2e8f0;
+		background: var(--color-editor-border);
 		cursor: ew-resize;
 		transition: background-color 0.2s ease;
 	}
 
 	.resize-handle:hover,
 	.resize-handle:active {
-		background: #4f46e5;
+		background: var(--color-editor-btn-active);
 	}
 
 	.preview-content {
 		font-size: 1rem;
 		line-height: 1.6;
-		color: #1e293b;
+		color: var(--color-editor-text);
         word-wrap: break-word;
 	}
 
@@ -254,7 +256,7 @@
 		align-items: center;
 		justify-content: center;
 		height: 100%;
-		color: #94a3b8;
+		color: var(--color-editor-secondary);
 		text-align: center;
 		padding: 2rem;
 	}
@@ -266,13 +268,13 @@
 
 	.char-counter {
 		font-size: 0.9rem;
-		color: #64748b;
+		color: var(--color-editor-secondary);
 		text-align: right;
 		margin-top: 0.5rem;
 	}
 
 	.char-counter.warn {
-		color: #dc2626;
+		color: var(--color-danger);
 	}
 
 	@media (max-width: 768px) {
@@ -283,7 +285,7 @@
 		.preview-column {
 			width: 100% !important;
 			border-left: none;
-			border-top: 1px solid #e2e8f0;
+			border-top: 1px solid var(--color-editor-header-border);
 		}
 
 		.resize-handle {

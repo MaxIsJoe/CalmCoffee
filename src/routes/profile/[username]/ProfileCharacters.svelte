@@ -117,7 +117,7 @@
 	.characters-loading,
 	.characters-error,
 	.characters-empty {
-		color: #888;
+		color: var(--color-secondary);
 		text-align: center;
 		margin: 2rem 0;
 	}
@@ -128,9 +128,9 @@
 		margin: 1.5rem 0 2.5rem 0;
 	}
 	.character-card {
-		background: #fff;
+		background: var(--color-card-bg);
 		border-radius: 12px;
-		box-shadow: 0 2px 12px rgba(30, 34, 54, 0.07);
+		box-shadow: 0 2px 12px var(--color-card-shadow);
 		padding: 1.2rem 1rem 1.1rem 1rem;
 		display: flex;
 		flex-direction: column;
@@ -150,12 +150,12 @@
 		height: 72px;
 		border-radius: 50%;
 		object-fit: cover;
-		background: #f3f4f6;
-		border: 2px solid #e5e7eb;
+		background: var(--color-bg-hover);
+		border: 2px solid var(--color-border);
 		margin-bottom: 0.7rem;
 	}
 	.character-card-avatar-placeholder {
-		background: #e0e7ef;
+		background: var(--color-bg-hover);
 	}
 	.character-card-name {
 		font-weight: 600;
@@ -175,20 +175,20 @@
 		border-radius: 7px;
 		font-size: 0.98em;
 		font-weight: 500;
-		background: #eef2ff;
-		color: #6366f1;
+		background: var(--color-bg-hover);
+		color: var(--color-link);
 	}
 	.character-tag.type {
-		background: #f3f4f6;
-		color: #3730a3;
+		background: var(--color-bg-alt);
+		color: var(--color-primary);
 	}
 	.character-tag.pronouns {
-		background: #e0e7ef;
-		color: #4b5563;
+		background: var(--color-bg-hover);
+		color: var(--color-secondary);
 	}
 	.character-tag.gender {
-		background: #e0e7ef;
-		color: #4b5563;
+		background: var(--color-bg-hover);
+		color: var(--color-secondary);
 	}
 	.characters-pagination {
 		display: flex;
@@ -198,8 +198,8 @@
 		margin: 1.5rem 0 0 0;
 	}
 	.characters-pagination button {
-		background: #6366f1;
-		color: #fff;
+		background: var(--color-link);
+		color: var(--color-primary-alt);
 		border: none;
 		border-radius: 6px;
 		padding: 0.3rem 1.1rem;
@@ -208,11 +208,11 @@
 		transition: background 0.15s;
 	}
 	.characters-pagination button:disabled {
-		background: #c7d2fe;
+		background: var(--color-secondary);
 		cursor: not-allowed;
 	}
 	.characters-pagination span {
 		font-size: 1.05rem;
-		color: #353857;
+		color: var(--color-primary);
 	}
 </style>

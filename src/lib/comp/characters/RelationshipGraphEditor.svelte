@@ -514,15 +514,15 @@
 <style>
 	.relationship-graph-editor {
 		margin-top: 2.5rem;
-		background: #fafbfc;
+		background: var(--color-card-bg);
 		border-radius: 12px;
 		padding: 1.5rem 1.2rem;
-		box-shadow: 0 2px 8px rgba(30, 34, 54, 0.04);
+		box-shadow: 0 2px 8px var(--color-card-shadow);
 	}
 	.relationship-graph-editor h2 {
 		font-size: 1.15rem;
 		font-weight: 600;
-		color: #4b4f6b;
+		color: var(--color-link);
 		margin-bottom: 1rem;
 	}
 	.graph-layout {
@@ -530,9 +530,9 @@
 		gap: 2.5rem;
 	}
 	.graph-area {
-		background: #fff;
+		background: var(--color-bg-alt);
 		border-radius: 8px;
-		box-shadow: 0 1px 4px rgba(30, 34, 54, 0.04);
+		box-shadow: 0 1px 4px var(--color-card-shadow);
 		overflow: hidden;
 		flex: 1 1 0%;
 		min-width: 0;
@@ -542,10 +542,10 @@
 		user-select: none;
 		position: absolute;
 		padding: 8px 16px;
-		background: #f3f4f6;
-		border: 2px solid #888;
+		background: var(--color-bg-alt);
+		border: 2px solid var(--color-border);
 		border-radius: 8px;
-		box-shadow: 2px 2px 6px #0001;
+		box-shadow: 2px 2px 6px var(--color-card-shadow);
 		z-index: 2;
 		min-width: 120px;
 		display: flex;
@@ -553,11 +553,11 @@
 		align-items: center;
 	}
 	.node.main-node {
-		border: 2.5px solid #4f46e5;
-		background: #e0e7ff;
+		border: 2.5px solid var(--color-link);
+		background: var(--color-bg-hover);
 	}
 	.node.connecting {
-		box-shadow: 0 0 0 3px #fde68a;
+		box-shadow: 0 0 0 3px var(--color-accent);
 	}
 	.node-avatar {
 		width: 48px;
@@ -570,7 +570,7 @@
 		width: 48px;
 		height: 48px;
 		border-radius: 50%;
-		background: #e0e7ef;
+		background: var(--color-bg-hover);
 		margin-bottom: 0.4rem;
 		display: flex;
 		align-items: center;
@@ -589,8 +589,8 @@
 		position: absolute;
 		top: 2px;
 		right: 2px;
-		background: #e53e3e;
-		color: #fff;
+		background: var(--color-danger);
+		color: var(--color-primary-alt);
 		border: none;
 		border-radius: 50%;
 		width: 22px;
@@ -602,8 +602,8 @@
 		padding: 0.2rem 0.7rem;
 		border-radius: 6px;
 		border: none;
-		background: #fbbf24;
-		color: #222;
+		background: var(--color-accent);
+		color: var(--color-primary-alt);
 		cursor: pointer;
 		font-size: 0.95rem;
 	}
@@ -627,11 +627,11 @@
 		position: absolute;
 		top: 40px;
 		left: 20px;
-		background: #fff;
-		border: 1px solid #ccc;
+		background: var(--color-card-bg);
+		border: 1px solid var(--color-border);
 		padding: 16px;
 		z-index: 1001; /* ensure above graph */
-		box-shadow: 0 2px 12px #0002;
+		box-shadow: 0 2px 12px var(--color-card-shadow);
 		border-radius: 8px;
 		min-width: 220px;
 	}
@@ -640,7 +640,9 @@
 		padding: 0.4rem 0.6rem;
 		margin-bottom: 0.7rem;
 		border-radius: 5px;
-		border: 1px solid #bbb;
+		border: 1px solid var(--color-border);
+		background: var(--color-bg-alt);
+		color: var(--color-text);
 		font-size: 1rem;
 	}
 	.search-modal ul {
@@ -654,8 +656,8 @@
 		margin-bottom: 0.3rem;
 	}
 	.search-modal button[type='button'] {
-		background: #e5e7eb;
-		color: #222;
+		background: var(--color-secondary);
+		color: var(--color-primary);
 		border: none;
 		border-radius: 5px;
 		padding: 0.3rem 0.9rem;
@@ -663,11 +665,12 @@
 		cursor: pointer;
 	}
 	.search-modal button[type='button']:hover {
-		background: #d1d5db;
+		background: var(--color-accent);
+		color: var(--color-primary-alt);
 	}
 	.search-modal ul button {
-		background: #6366f1;
-		color: #fff;
+		background: var(--color-link);
+		color: var(--color-primary-alt);
 		border: none;
 		border-radius: 5px;
 		padding: 0.3rem 0.9rem;
@@ -677,25 +680,25 @@
 		text-align: left;
 	}
 	.search-modal ul button:hover {
-		background: #3730a3;
+		background: var(--color-link-hover);
 	}
 	.edge-label-modal {
 		position: absolute;
 		top: 120px;
 		left: 50%;
 		transform: translateX(-50%);
-		background: #fff;
-		border: 1px solid #ccc;
+		background: var(--color-card-bg);
+		border: 1px solid var(--color-border);
 		padding: 22px 28px;
 		z-index: 20;
 		border-radius: 10px;
-		box-shadow: 0 2px 12px #0002;
+		box-shadow: 0 2px 12px var(--color-card-shadow);
 	}
 	.relationship-types-panel {
 		width: 260px;
-		background: #f8fafc;
+		background: var(--color-bg-hover);
 		border-radius: 8px;
-		box-shadow: 0 1px 4px rgba(30, 34, 54, 0.04);
+		box-shadow: 0 1px 4px var(--color-card-shadow);
 		padding: 1.1rem 1.2rem;
 		overflow-y: auto;
 		max-height: 500px;
@@ -703,9 +706,9 @@
 	.relationship-types-panel.minimal {
 		width: 100%;
 		max-width: 420px;
-		background: #f8fafc;
+		background: var(--color-bg-hover);
 		border-radius: 8px;
-		box-shadow: 0 1px 4px rgba(30, 34, 54, 0.04);
+		box-shadow: 0 1px 4px var(--color-card-shadow);
 		padding: 1.1rem 1.2rem;
 		overflow-y: auto;
 		max-height: 500px;
@@ -714,14 +717,14 @@
 		font-size: 1.08rem;
 		font-weight: 600;
 		margin-bottom: 1rem;
-		color: #4b4f6b;
+		color: var(--color-link);
 	}
 	.relationship-type-group {
 		margin-bottom: 1.1rem;
 	}
 	.type-label {
 		font-weight: 500;
-		color: #6366f1;
+		color: var(--color-link);
 		margin-bottom: 0.4rem;
 	}
 	.type-character {
@@ -737,13 +740,13 @@
 		object-fit: cover;
 	}
 	.empty-types {
-		color: #888;
+		color: var(--color-secondary);
 		font-size: 0.98rem;
 	}
 	.remove-rel-btn {
 		margin-left: 0.5rem;
-		background: #e53e3e;
-		color: #fff;
+		background: var(--color-danger);
+		color: var(--color-primary-alt);
 		border: none;
 		border-radius: 50%;
 		width: 20px;
@@ -755,24 +758,24 @@
 		justify-content: center;
 	}
 	.remove-rel-btn:hover {
-		background: #b91c1c;
+		background: var(--color-danger-hover);
 	}
 	.zoom-controls {
 		position: absolute;
 		top: 10px;
 		left: 10px;
 		z-index: 10;
-		background: #f3f4f6;
+		background: var(--color-bg-hover);
 		border-radius: 6px;
-		box-shadow: 0 1px 4px #0001;
+		box-shadow: 0 1px 4px var(--color-card-shadow);
 		padding: 0.3rem 0.7rem;
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
 	}
 	.zoom-controls button {
-		background: #6366f1;
-		color: #fff;
+		background: var(--color-link);
+		color: var(--color-primary-alt);
 		border: none;
 		border-radius: 4px;
 		width: 28px;
@@ -784,11 +787,11 @@
 		justify-content: center;
 	}
 	.zoom-controls button:hover {
-		background: #3730a3;
+		background: var(--color-link-hover);
 	}
 	.zoom-controls span {
 		font-size: 1rem;
-		color: #222;
+		color: var(--color-text);
 		width: 48px;
 		text-align: center;
 	}
@@ -805,8 +808,8 @@
 		cursor: grabbing;
 	}
 	.open-graph-btn {
-		background: #6366f1;
-		color: #fff;
+		background: var(--color-link);
+		color: var(--color-primary-alt);
 		border: none;
 		border-radius: 6px;
 		padding: 0.3rem 1rem;
@@ -816,7 +819,7 @@
 		margin-left: 1rem;
 	}
 	.open-graph-btn:hover {
-		background: #3730a3;
+		background: var(--color-link-hover);
 	}
 	.full-graph-modal {
 		position: fixed;
@@ -831,9 +834,9 @@
 		justify-content: center;
 	}
 	.full-graph-modal-content {
-		background: #fff;
+		background: var(--color-card-bg);
 		border-radius: 12px;
-		box-shadow: 0 2px 24px #0002;
+		box-shadow: 0 2px 24px var(--color-card-shadow);
 		padding: 2.2rem 2.2rem 1.2rem 2.2rem;
 		position: relative;
 		max-width: 1280px;
@@ -845,8 +848,8 @@
 		position: absolute;
 		top: 14px;
 		right: 18px;
-		background: #e53e3e;
-		color: #fff;
+		background: var(--color-danger);
+		color: var(--color-primary-alt);
 		border: none;
 		border-radius: 50%;
 		width: 32px;
@@ -855,6 +858,6 @@
 		cursor: pointer;
 	}
 	.close-modal-btn:hover {
-		background: #b91c1c;
+		background: var(--color-danger-hover);
 	}
 </style>

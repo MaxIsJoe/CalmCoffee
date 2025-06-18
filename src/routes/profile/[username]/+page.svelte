@@ -451,9 +451,9 @@
 		gap: 1.5rem;
 	}
 	.profile-card {
-		background: #fff;
+		background: var(--color-card-bg);
 		border-radius: 16px;
-		box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+		box-shadow: 0 4px 24px var(--color-card-shadow);
 		padding: 2rem 2.5rem;
 		width: 100%;
 		display: flex;
@@ -462,12 +462,12 @@
 	}
 	.profile-card.error,
 	.profile-card.loading {
-		background: #ffeaea;
-		color: #b00020;
+		background: var(--color-danger-bg, #ffeaea);
+		color: var(--color-danger);
 	}
 	.profile-card.loading.loading-steps {
-		background: #f3f4f6;
-		color: #222;
+		background: var(--color-bg-hover);
+		color: var(--color-text);
 		display: flex;
 		flex-direction: column;
 		align-items: center;
@@ -478,13 +478,13 @@
 		min-width: 128px;
 		min-height: 128px;
 		border-radius: 50%;
-		background: #e0e0e0;
+		background: var(--color-bg-hover);
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		font-size: 2.5rem;
 		font-weight: bold;
-		color: #666;
+		color: var(--color-secondary);
 		margin-bottom: 1.5rem;
 		overflow: hidden;
 	}
@@ -505,15 +505,15 @@
 		display: block;
 		padding: 0.3rem 0.9rem;
 		font-size: 0.95rem;
-		background: #4f46e5;
-		color: #fff;
+		background: var(--color-link);
+		color: var(--color-primary-alt);
 		border: none;
 		border-radius: 6px;
 		cursor: pointer;
 		transition: background 0.2s;
 	}
 	.edit-btn:hover {
-		background: #3730a3;
+		background: var(--color-link-hover);
 	}
 	.profile-bio {
 		margin-top: 1rem;
@@ -526,8 +526,10 @@
 		font-size: 1rem;
 		margin-top: 0.5rem;
 		border-radius: 8px;
-		border: 1px solid #ccc;
+		border: 1px solid var(--color-border);
 		padding: 0.5rem;
+		background: var(--color-bg-alt);
+		color: var(--color-text);
 	}
 	.profile-actions {
 		margin-top: 0.5rem;
@@ -540,12 +542,14 @@
 		padding: 0.5rem;
 		margin-top: 0.5rem;
 		border-radius: 8px;
-		border: 1px solid #ccc;
+		border: 1px solid var(--color-border);
 		font-size: 1rem;
+		background: var(--color-bg-alt);
+		color: var(--color-text);
 	}
 	button {
-		background: #4f46e5;
-		color: #fff;
+		background: var(--color-link);
+		color: var(--color-primary-alt);
 		border: none;
 		padding: 0.5rem 1.2rem;
 		border-radius: 6px;
@@ -554,17 +558,17 @@
 		transition: background 0.2s;
 	}
 	button:hover {
-		background: #3730a3;
+		background: var(--color-link-hover);
 	}
 	.edit-btn {
-		background: #4f46e5;
-		color: #fff;
+		background: var(--color-link);
+		color: var(--color-primary-alt);
 		margin-left: 1rem;
 		padding: 0.3rem 0.9rem;
 		font-size: 0.95rem;
 	}
 	.edit-btn:hover {
-		background: #3730a3;
+		background: var(--color-link-hover);
 	}
 	@media (max-width: 900px) {
 		.profile-main-container {
@@ -581,14 +585,14 @@
 	}
 	h2 {
 		font-size: 1.5rem;
-		color: #4f46e5;
+		color: var(--color-link);
 		margin-bottom: 0.8rem;
 	}
 	.profile-tabs {
 		display: flex;
 		overflow-x: auto;
 		-webkit-overflow-scrolling: touch;
-		border-bottom: 1px solid #e0d7ce;
+		border-bottom: 1px solid var(--color-border);
 		margin-bottom: 1.5rem;
 		padding-bottom: 0.2rem;
 		max-width: 100%;
@@ -600,8 +604,8 @@
 	}
 
 	.tab-button {
-		background: #f3f4f6;
-		color: #3730a3;
+		background: var(--color-bg-alt);
+		color: var(--color-link);
 		border: none;
 		border-radius: 7px 7px 0 0;
 		padding: 0.7em 1.5em;
@@ -616,8 +620,8 @@
 
 	.tab-button.active,
 	.tab-button:hover {
-		background: #e0e7ff;
-		color: #4f46e5;
+		background: var(--color-secondary);
+		color: var(--color-link);
 	}
 
 	@media (max-width: 768px) {
@@ -639,17 +643,17 @@
 		}
 	}
 	.profile-tab-content {
-		background: #fafafa;
+		background: var(--color-bg-alt);
 		border-radius: 0 0 12px 12px;
-		box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+		box-shadow: 0 2px 12px var(--color-card-shadow);
 		padding: 1.5rem 2rem;
 		min-height: 220px;
 	}
 	.profile-spinner {
 		width: 38px;
 		height: 38px;
-		border: 5px solid #e0e7ff;
-		border-top: 5px solid #6366f1;
+		border: 5px solid var(--color-secondary);
+		border-top: 5px solid var(--color-link);
 		border-radius: 50%;
 		animation: spin 1s linear infinite;
 		margin-bottom: 1.2rem;
@@ -663,9 +667,9 @@
 		}
 	}
 	.profile-interests-panel {
-		background: #f8f5f2;
+		background: var(--color-bg-alt);
 		border-radius: 10px;
-		box-shadow: 0 1px 6px #e0d7ce;
+		box-shadow: 0 1px 6px var(--color-card-shadow);
 		padding: 1em 1.2em 0.8em 1.2em;
 		margin: 1.5em 0 0 0;
 		text-align: center;
@@ -674,7 +678,7 @@
 		margin-top: 0;
 		margin-bottom: 0.7em;
 		font-size: 1.13em;
-		color: #3730a3;
+		color: var(--color-link);
 		font-weight: 600;
 	}
 	.interests-list {
@@ -685,13 +689,13 @@
 		margin-bottom: 0.7em;
 	}
 	.interest-chip {
-		background: #ede9e3;
-		color: #7c5e48;
+		background: var(--color-border);
+		color: var(--color-accent);
 		font-size: 0.97em;
 		padding: 0.18em 0.7em;
 		border-radius: 999px;
 		font-weight: 500;
-		border: 1px solid #e0d7ce;
+		border: 1px solid var(--color-border);
 		display: flex;
 		align-items: center;
 		gap: 0.2em;
@@ -699,7 +703,7 @@
 	.remove-interest-btn {
 		background: none;
 		border: none;
-		color: #a67c52;
+		color: var(--color-accent);
 		font-size: 1.1em;
 		margin-left: 0.2em;
 		cursor: pointer;
@@ -707,7 +711,7 @@
 		line-height: 1;
 	}
 	.remove-interest-btn:hover {
-		color: #b91c1c;
+		color: var(--color-danger);
 	}
 	.add-interest-form {
 		display: flex;
@@ -718,18 +722,19 @@
 	.add-interest-form input[type='text'] {
 		padding: 0.4em 0.7em;
 		border-radius: 5px;
-		border: 1px solid #cbd5e1;
+		border: 1px solid var(--color-border);
 		font-size: 1em;
-		background: #fff;
+		background: var(--color-card-bg);
+		color: var(--color-text);
 		transition: border-color 0.15s;
 	}
 	.add-interest-form input[type='text']:focus {
-		border-color: #6366f1;
+		border-color: var(--color-link);
 		outline: none;
 	}
 	.add-interest-form button {
-		background: #a67c52;
-		color: #fff;
+		background: var(--color-accent);
+		color: var(--color-primary-alt);
 		border: none;
 		border-radius: 5px;
 		padding: 0.35em 1em;
@@ -738,10 +743,10 @@
 		transition: background 0.15s;
 	}
 	.add-interest-form button:hover {
-		background: #7c5e48;
+		background: var(--color-primary);
 	}
 	.no-interests {
-		color: #888;
+		color: var(--color-secondary);
 		font-size: 0.97em;
 		margin-bottom: 0.7em;
 	}

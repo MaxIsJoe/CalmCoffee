@@ -141,14 +141,14 @@
 	}
 
 	h1 {
-		color: #4b2e19;
+		color: var(--color-primary);
 		font-size: 2rem;
 		font-weight: 700;
 		margin: 0 0 0.5rem 0;
 	}
 
 	.subtitle {
-		color: #6d4c41;
+		color: var(--color-primary);
 		font-size: 1.1rem;
 		margin: 0;
 	}
@@ -166,23 +166,25 @@
 	}
 
 	label {
-		color: #4b2e19;
+		color: var(--color-primary);
 		font-weight: 500;
 		font-size: 0.95rem;
 	}
 
 	input {
 		padding: 0.75rem;
-		border: 1px solid #e0e0e0;
+		border: 1px solid var(--color-border);
 		border-radius: 8px;
 		font-size: 1rem;
 		transition: all 0.2s;
+		background: var(--color-bg-alt);
+		color: var(--color-text);
 	}
 
 	input:focus {
-		border-color: #a1887f;
+		border-color: var(--color-accent);
 		outline: none;
-		box-shadow: 0 0 0 2px rgba(161, 136, 127, 0.1);
+		box-shadow: 0 0 0 2px var(--color-card-shadow);
 	}
 
 	.checkbox-group {
@@ -195,7 +197,7 @@
 		gap: 0.75rem;
 		cursor: pointer;
 		font-size: 0.9rem;
-		color: #4b2e19;
+		color: var(--color-primary);
 	}
 
 	.checkbox-label input[type="checkbox"] {
@@ -206,19 +208,19 @@
 	}
 
 	.checkbox-label a {
-		color: #a1887f;
+		color: var(--color-accent);
 		text-decoration: none;
 		transition: color 0.2s;
 	}
 
 	.checkbox-label a:hover {
-		color: #6d4c41;
+		color: var(--color-primary);
 		text-decoration: underline;
 	}
 
 	.submit-button {
-		background-color: #4b2e19;
-		color: white;
+		background-color: var(--color-primary);
+		color: var(--color-primary-alt);
 		padding: 0.75rem;
 		border: none;
 		border-radius: 8px;
@@ -233,11 +235,12 @@
 	}
 
 	.submit-button:hover:not(:disabled) {
-		background-color: #6d4c41;
+		background-color: var(--color-accent);
 	}
 
 	.submit-button:disabled {
-		background-color: #e0e0e0;
+		background-color: var(--color-border);
+		color: var(--color-secondary);
 		cursor: not-allowed;
 	}
 
@@ -251,7 +254,7 @@
 	.loader {
 		width: 20px;
 		height: 20px;
-		border: 2px solid #ffffff;
+		border: 2px solid var(--color-primary-alt);
 		border-top: 2px solid transparent;
 		border-radius: 50%;
 		animation: spin 1s linear infinite;

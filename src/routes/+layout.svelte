@@ -8,7 +8,11 @@
 	let showBanner = $state(true);
 	let versionInfo = $state<{ hash: string; message: string; timestamp: string } | null>(null);
 
+	// Theme switching logic
+	let theme = $state('light');
+
 	onMount(async () => {
+
 		try {
 			const response = await fetch('/version.json');
 			versionInfo = await response.json();
@@ -16,6 +20,8 @@
 			console.error('Failed to load version info:', error);
 		}
 	});
+
+	
 
 	function dismissBanner() {
 		showBanner = false;
@@ -71,7 +77,8 @@
 <style>
 	/* filepath: f:\projects\websites\CalmCaf\calm-coffee\src\routes\create\edit\[id]\+page.svelte */
 	:global(body) {
-		background: #fffdd0;
+		background: var(--color-bg);
+		color: var(--color-text);
 		min-height: 100vh;
 		display: flex;
 		flex-direction: column;
@@ -141,8 +148,8 @@
 
 	footer {
 		margin-top: auto;
-		background-color: #4b2e19;
-		color: #fffdd0;
+		background-color: var(--color-footer-bg);
+		color: var(--color-footer-text);
 		padding: 2rem 0 0 0;
 	}
 
@@ -160,19 +167,19 @@
 	}
 
 	.footer-section h3 {
-		color: #fffdd0;
+		color: var(--color-footer-text);
 		font-size: 1.5rem;
 		margin-bottom: 1rem;
 	}
 
 	.footer-section h4 {
-		color: #fffdd0;
+		color: var(--color-footer-text);
 		font-size: 1.2rem;
 		margin-bottom: 1rem;
 	}
 
 	.footer-section p {
-		color: #d4c2b8;
+		color: var(--color-secondary);
 		line-height: 1.6;
 	}
 
@@ -187,21 +194,21 @@
 	}
 
 	.footer-section ul li a {
-		color: #d4c2b8;
+		color: var(--color-footer-link);
 		text-decoration: none;
 		transition: color 0.2s ease;
 	}
 
 	.footer-section ul li a:hover {
-		color: #fffdd0;
+		color: var(--color-footer-link-hover);
 	}
 
 	.footer-bottom {
 		text-align: center;
 		padding: 1.5rem;
 		margin-top: 2rem;
-		background-color: #3e2723;
-		color: #d4c2b8;
+		background-color: var(--color-footer-alt);
+		color: var(--color-secondary);
 	}
 
 	@media (max-width: 768px) {
@@ -255,8 +262,8 @@
 	}
 
 	.banner {
-		background-color: #4b2e19;
-		color: #fffdd0;
+		background-color: var(--color-banner-bg);
+		color: var(--color-banner-text);
 		padding: 0.75rem 1rem;
 		display: flex;
 		justify-content: center;
@@ -270,7 +277,7 @@
 		right: 1rem;
 		background: none;
 		border: none;
-		color: #fffdd0;
+		color: var(--color-banner-text);
 		font-size: 1.5rem;
 		cursor: pointer;
 		padding: 0 0.5rem;
@@ -278,7 +285,7 @@
 	}
 
 	.banner button:hover {
-		color: #d4c2b8;
+		color: var(--color-banner-hover);
 	}
 
 	.version-info {
@@ -288,16 +295,16 @@
 
 	.build-time {
 		font-size: 0.7rem;
-		color: #b39c8f;
+		color: var(--color-secondary);
 	}
 
 	.version-info a {
-		color: #d4c2b8;
+		color: var(--color-footer-link);
 		text-decoration: none;
 	}
 
 	.version-info a:hover {
-		color: #fffdd0;
+		color: var(--color-footer-link-hover);
 		text-decoration: underline;
 	}
 </style>

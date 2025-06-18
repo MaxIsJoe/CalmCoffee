@@ -70,21 +70,23 @@
 	input {
 		margin-bottom: 10px;
 		padding: 8px;
-		border: 1px solid #ccc;
+		border: 1px solid var(--color-border);
 		border-radius: 4px;
+		color: var(--color-text);
+		background: var(--color-bg-alt);
 	}
 
 	button {
 		padding: 10px;
-		background-color: #007bff;
-		color: white;
+		background-color: var(--color-link);
+		color: var(--color-primary-alt);
 		border: none;
 		border-radius: 4px;
 		cursor: pointer;
 	}
 
 	button:disabled {
-		background-color: #ccc;
+		background-color: var(--color-border);
 		cursor: not-allowed;
 	}
 
@@ -92,8 +94,9 @@
 		color: red;
 	}
 	input:focus {
-		border-color: #007bff;
+		border-color: var(--color-link);
 		outline: none;
+		box-shadow: 0 0 5px var(--color-card-shadow);
 	}
 	input {
 		width: 100%;
@@ -103,17 +106,17 @@
 		width: 100%;
 	}
 	button:hover {
-		background-color: #0056b3;
+		background-color: var(--color-link-hover);
 	}
 	input::placeholder {
-		color: #999;
+		color: var(--color-secondary);
 	}
 	input:focus::placeholder {
 		color: transparent;
 	}
 	input:focus {
-		border-color: #007bff;
-		box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+		border-color: var(--color-link);
+		box-shadow: 0 0 5px var(--color-card-shadow);
 	}
 	input[type='email'],
 	input[type='password'] {
@@ -130,44 +133,41 @@
 	button:disabled {
 		opacity: 0.7;
 	}
-	button:hover {
-		background-color: #0056b3;
-	}
 	button:active {
-		background-color: #004494;
+		background-color: var(--color-primary);
 	}
 	button:focus {
 		outline: none;
-		box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+		box-shadow: 0 0 5px var(--color-card-shadow);
 	}
 	input:focus {
 		outline: none;
-		box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+		box-shadow: 0 0 5px var(--color-card-shadow);
 	}
 	input {
 		font-size: 16px;
 		padding: 10px;
 	}
 	input::placeholder {
-		color: #999;
+		color: var(--color-secondary);
 		font-size: 14px;
 	}
 	input:focus::placeholder {
 		color: transparent;
 	}
 	input:focus {
-		border-color: #007bff;
-		box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+		border-color: var(--color-link);
+		box-shadow: 0 0 5px var(--color-card-shadow);
 	}
 	.signup-link {
 		text-align: center;
 		margin-top: 1.5rem;
 	}
 	.signup-link a {
-		color: #007bff;
+		color: var(--color-link);
 		text-decoration: underline;
 	}
 	.signup-link a:hover {
-		color: #0056b3;
+		color: var(--color-link-hover);
 	}
 </style>

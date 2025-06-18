@@ -443,8 +443,8 @@
 		max-width: 40px;
 	}
 	.collapse-btn {
-		background: #e0e7ff;
-		color: #3730a3;
+		background: var(--color-block-toggle-bg);
+		color: var(--color-block-toggle-text);
 		border: none;
 		padding: 0.3rem 0.7rem;
 		border-radius: 6px;
@@ -455,43 +455,43 @@
 		transition: background 0.2s;
 	}
 	.collapse-btn:hover {
-		background: #c7d2fe;
+		background: var(--color-block-toggle-hover);
 	}
 	.modern-blocks-list {
 		width: 100%;
-		background: #f9f9fb;
+		background: var(--color-block-list-bg);
 		border-radius: 12px;
 		padding: 1.5rem 1.5rem 1rem 1.5rem;
-		box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+		box-shadow: 0 2px 12px var(--color-block-list-shadow);
 		height: fit-content;
 	}
 	.modern-blocks-list h2 {
 		margin-top: 0;
 		font-size: 1.2rem;
-		color: #4f46e5;
+		color: var(--color-block-list-title);
 	}
 	.block-item {
-		background: #fff;
+		background: var(--color-block-bg);
 		border-radius: 8px;
 		margin-bottom: 1.2rem;
 		padding: 1rem 1.2rem;
-		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+		box-shadow: 0 1px 4px var(--color-block-shadow);
 	}
 	.block-content {
 		font-size: 1.05rem;
-		color: #222;
+		color: var(--color-block-text);
 		margin-bottom: 0.5rem;
 	}
 	.block-date {
-		color: #888;
+		color: var(--color-block-date);
 		font-size: 0.85rem;
 	}
 	.modern-editor-panel {
 		flex: 1.2;
-		background: #fff;
+		background: var(--color-block-editor-bg);
 		border-radius: 12px;
 		padding: 2rem 2rem 1.5rem 2rem;
-		box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+		box-shadow: 0 2px 12px var(--color-block-editor-shadow);
 		display: flex;
 		flex-direction: column;
 		gap: 1.2rem;
@@ -502,8 +502,8 @@
 		margin-bottom: 0.5rem;
 	}
 	.control-btn {
-		background: #e0e7ff;
-		color: #3730a3;
+		background: var(--color-block-btn-bg);
+		color: var(--color-block-btn-text);
 		border: none;
 		padding: 0.4rem 1.1rem;
 		border-radius: 6px;
@@ -512,7 +512,7 @@
 		transition: background 0.2s;
 	}
 	.control-btn:hover {
-		background: #c7d2fe;
+		background: var(--color-block-btn-hover);
 	}
 	.editor-main {
 		display: flex;
@@ -528,21 +528,21 @@
 		width: 100%;
 		padding: 0.7rem;
 		border-radius: 8px;
-		border: 1.5px solid #cbd5e1;
-		background: #f8fafc;
-		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+		border: 1.5px solid var(--color-block-textarea-border);
+		background: var(--color-block-textarea-bg);
+		box-shadow: 0 1px 4px var(--color-block-textarea-shadow);
 		resize: vertical;
 		margin-bottom: 0.5rem;
 	}
 	.preview-content {
 		font-size: 1.05rem;
-		color: #222;
+		color: var(--color-block-text);
 		word-break: break-word;
 	}
 	.add-block-btn {
 		margin-top: 1.2rem;
-		background: #4f46e5;
-		color: #fff;
+		background: var(--color-block-add-btn-bg);
+		color: var(--color-block-add-btn-text);
 		border: none;
 		padding: 0.7rem 2.2rem;
 		border-radius: 8px;
@@ -552,30 +552,30 @@
 		transition: background 0.2s;
 	}
 	.add-block-btn:hover {
-		background: #3730a3;
+		background: var(--color-block-add-btn-hover);
 	}
 	.block-wait-msg {
-		color: #b91c1c;
+		color: var(--color-block-wait);
 		font-weight: 500;
 		margin-top: 1.2rem;
 	}
 	.modern-loading {
 		text-align: center;
 		font-size: 1.2rem;
-		color: #4f46e5;
+		color: var(--color-block-loading);
 		margin-top: 3rem;
 	}
 	.modern-error {
 		text-align: center;
 		font-size: 1.1rem;
-		color: #b91c1c;
+		color: var(--color-block-error);
 		margin-top: 3rem;
 	}
 	.block-content,
 	.preview-content {
 		/* existing styles for .block-content and .preview-content */
 		font-size: 1.05rem;
-		color: #222;
+		color: var(--color-block-text);
 		margin-bottom: 0.5rem;
 		word-break: break-word;
 	}
@@ -612,9 +612,9 @@
 		font-size: 1rem;
 	}
 	.styles-toggle-btn {
-		background: #f3f4f6;
-		color: #3730a3;
-		border: 1px solid #cbd5e1;
+		background: var(--color-block-toggle-bg);
+		color: var(--color-block-toggle-text);
+		border: 1px solid var(--color-block-toggle-border);
 		border-radius: 5px;
 		padding: 0.25rem 0.9rem;
 		font-size: 0.98rem;
@@ -624,7 +624,7 @@
 			border 0.2s;
 	}
 	.styles-toggle-btn:hover {
-		background: #e0e7ff;
-		border-color: #4f46e5;
+		background: var(--color-block-toggle-hover);
+		border-color: var(--color-block-toggle-hover-border);
 	}
 </style>

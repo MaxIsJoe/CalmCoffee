@@ -350,52 +350,49 @@
 
 <style>
 	.main-content-wrapper {
-		max-width: 1200px; /* Increased max-width for two columns */
+		max-width: 1200px;
 		margin: 2rem auto;
 		padding: 1.5rem;
-		background-color: #fff;
+		background-color: var(--color-card-bg);
 		border-radius: 12px;
-		box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-
+		box-shadow: 0 6px 20px var(--color-card-shadow);
 		display: grid;
-		grid-template-columns: 1fr 1.5fr; /* Left panel smaller, right panel larger */
-		gap: 2rem; /* Space between the two columns */
+		grid-template-columns: 1fr 1.5fr;
+		gap: 2rem;
 	}
 
 	.left-panel,
 	.right-panel {
 		display: flex;
 		flex-direction: column;
-		gap: 1.5rem; /* Space between sections within each panel */
+		gap: 1.5rem;
 	}
 
 	.panel-section {
-		background-color: #fcfcfc; /* Slightly different background for sections */
+		background-color: var(--color-bg-alt);
 		padding: 1.5rem;
 		border-radius: 10px;
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+		box-shadow: 0 2px 8px var(--color-card-shadow);
 	}
 
-	/* Headings */
 	h2 {
 		font-size: 2.2rem;
-		color: #4b2e19;
-		margin-top: 0; /* Reset margins for flex/grid context */
+		color: var(--color-primary);
+		margin-top: 0;
 		margin-bottom: 0;
 		font-weight: 700;
-		text-align: left; /* Align to the left of its panel */
+		text-align: left;
 	}
 
 	h3 {
 		font-size: 1.6rem;
-		color: #6d4c41;
-		margin-top: 0; /* Reset margins for flex/grid context */
+		color: var(--color-link);
+		margin-top: 0;
 		margin-bottom: 1rem;
 		font-weight: 600;
-		text-align: left; /* Align to the left of its panel */
+		text-align: left;
 	}
 
-	/* Buttons */
 	button {
 		padding: 0.6rem 1.4rem;
 		border: none;
@@ -404,72 +401,77 @@
 		font-size: 1rem;
 		font-weight: 500;
 		transition: background-color 0.2s ease, transform 0.1s ease;
-		white-space: nowrap; /* Prevent button text from wrapping */
+		white-space: nowrap;
+		background: var(--color-accent);
+		color: var(--color-primary-alt);
 	}
 
 	button:hover {
 		transform: translateY(-1px);
+		background: var(--color-primary);
+		color: var(--color-primary-alt);
 	}
 
-	/* Specific Button Styles */
 	.publish-toggle-btn {
-		background-color: #a1887f;
-		color: #fff;
+		background-color: var(--color-secondary);
+		color: var(--color-primary);
 	}
 
 	.publish-toggle-btn:hover {
-		background-color: #6d4c41;
+		background-color: var(--color-accent);
+		color: var(--color-primary-alt);
 	}
 
 	.edit-desc-btn {
-		background-color: #bca18c;
-		color: #fff;
+		background-color: var(--color-accent);
+		color: var(--color-primary-alt);
 		padding: 0.4rem 1rem;
 		font-size: 0.9rem;
 		margin-left: 1rem;
 	}
 
 	.edit-desc-btn:hover {
-		background-color: #a1887f;
+		background-color: var(--color-primary);
+		color: var(--color-primary-alt);
 	}
 
 	.edit-description-actions button {
-		background-color: #4b2e19;
-		color: #fff;
+		background-color: var(--color-primary);
+		color: var(--color-primary-alt);
 	}
 
 	.edit-description-actions button:hover {
-		background-color: #3e2723;
+		background-color: var(--color-accent);
+		color: var(--color-primary-alt);
 	}
 
 	.add-chapter button {
-		background-color: #8d6e63; /* Same as chapter list button */
-		color: #fff;
+		background-color: var(--color-accent);
+		color: var(--color-primary-alt);
 	}
 
 	.add-chapter button:hover {
-		background-color: #6d4c41;
+		background-color: var(--color-primary);
+		color: var(--color-primary-alt);
 	}
 
-
-	/* Input Fields */
 	input[type='text'],
 	textarea {
-		width: calc(100% - 2rem); /* Account for padding */
+		width: calc(100% - 2rem);
 		padding: 0.8rem 1rem;
 		border-radius: 8px;
-		border: 1px solid #d4c2b8;
-		background-color: #fcf8f5;
+		border: 1px solid var(--color-border);
+		background-color: var(--color-bg-alt);
 		font-size: 1rem;
-		color: #3e2723;
-		box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+		color: var(--color-text);
+		box-shadow: inset 0 1px 3px var(--color-card-shadow);
 		transition: border-color 0.2s ease, box-shadow 0.2s ease;
 	}
 
 	input[type='text']:focus,
 	textarea:focus {
-		border-color: #a1887f;
-		box-shadow: 0 0 0 3px rgba(161, 136, 127, 0.2);
+		border-color: var(--color-accent);
+		box-shadow: 0 0 0 3px var(--color-card-shadow);
 		outline: none;
 	}
 
@@ -478,23 +480,21 @@
 		min-height: 80px;
 	}
 
-	/* Text Elements */
 	.error-message {
-		color: #dc2626;
+		color: var(--color-danger);
 		text-align: center;
 		font-weight: 600;
 		margin-top: 1rem;
 	}
 
 	.story-description {
-		color: #5d4037;
+		color: var(--color-text);
 		font-size: 1.05rem;
 		line-height: 1.6;
-		text-align: left; /* Align to the left of its panel */
-		padding: 0 0.5rem; /* Small internal padding */
+		text-align: left;
+		padding: 0 0.5rem;
 	}
 
-	/* Layout Sections */
 	.project-header {
 		display: flex;
 		flex-direction: column;
@@ -509,20 +509,21 @@
 	}
 
 	.edit-title-btn {
-		background-color: #bca18c;
-		color: #fff;
+		background-color: var(--color-accent);
+		color: var(--color-primary-alt);
 		padding: 0.6rem 1.4rem;
 		font-size: 1rem;
 	}
 
 	.edit-title-btn:hover {
-		background-color: #a1887f;
+		background-color: var(--color-primary);
+		color: var(--color-primary-alt);
 	}
 
 	.edit-description-box {
 		display: flex;
 		flex-direction: column;
-		align-items: flex-start; /* Align contents to the left */
+		align-items: flex-start;
 		gap: 0.8rem;
 	}
 
@@ -536,26 +537,25 @@
 		align-items: center;
 		gap: 1rem;
 		margin-top: 1rem;
-		flex-wrap: wrap; /* Allow wrapping on small screens */
+		flex-wrap: wrap;
 	}
 
 	.add-chapter input {
-		flex-grow: 1; /* Allow input to take available space */
+		flex-grow: 1;
 	}
 
-	/* Chapters List */
 	ul {
 		list-style: none;
 		padding: 0;
-		margin: 1.5rem 0; /* Adjust margin for panel context */
+		margin: 1.5rem 0;
 	}
 
 	li {
-		background-color: #fefcfb;
+		background-color: var(--color-bg-alt);
 		border-radius: 10px;
-		box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+		box-shadow: 0 2px 10px var(--color-card-shadow);
 		padding: 1rem 1.5rem;
-		margin-bottom: 0.8rem; /* Slightly less space between list items */
+		margin-bottom: 0.8rem;
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
@@ -564,26 +564,25 @@
 
 	li:hover {
 		transform: translateY(-2px);
-		box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+		box-shadow: 0 4px 15px var(--color-card-shadow);
 	}
 
 	strong {
 		font-size: 1.15rem;
-		color: #3e2723;
+		color: var(--color-primary);
 		font-weight: 600;
 	}
 
 	li button {
-		background-color: #8d6e63;
-		color: #fff;
+		background-color: var(--color-accent);
+		color: var(--color-primary-alt);
 	}
 
 	li button:hover {
-		background-color: #6d4c41;
+		background-color: var(--color-primary);
+		color: var(--color-primary-alt);
 	}
 
-
-	/* Loading Screen - unchanged for the most part */
 	.loading-container {
 		display: flex;
 		flex-direction: column;
@@ -596,8 +595,8 @@
 	}
 
 	.loader {
-		border: 6px solid #d4c2b8;
-		border-top: 6px solid #a1887f;
+		border: 6px solid var(--color-border);
+		border-top: 6px solid var(--color-accent);
 		border-radius: 50%;
 		width: 50px;
 		height: 50px;
@@ -615,16 +614,16 @@
 	}
 
 	.loading-steps {
-		background-color: #fff;
+		background-color: var(--color-card-bg);
 		border-radius: 10px;
-		box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+		box-shadow: 0 4px 15px var(--color-card-shadow);
 		padding: 1.5rem 2.5rem;
 		text-align: left;
 		min-width: 250px;
 	}
 
 	.loading-steps p {
-		color: #bca18c;
+		color: var(--color-accent);
 		margin: 0.5rem 0;
 		font-weight: 500;
 		transition: color 0.3s ease;
@@ -632,14 +631,13 @@
 	}
 
 	.loading-steps p.active {
-		color: #4b2e19;
+		color: var(--color-primary);
 		font-weight: bold;
 	}
 
-	/* Responsive Adjustments */
 	@media (max-width: 992px) {
 		.main-content-wrapper {
-			grid-template-columns: 1fr; /* Stack columns on smaller screens */
+			grid-template-columns: 1fr;
 			gap: 1.5rem;
 			padding: 1rem;
 		}
@@ -647,7 +645,7 @@
 		.left-panel,
 		.right-panel {
 			width: 100%;
-			max-width: 600px; /* Constrain stacked panels */
+			max-width: 600px;
 			margin: 0 auto;
 		}
 
@@ -655,7 +653,7 @@
 		.edit-description-box,
 		.story-description,
 		h2, h3 {
-			align-items: center; /* Center align in stacked layout */
+			align-items: center;
 			text-align: center;
 		}
 
@@ -664,7 +662,7 @@
 		}
 
 		.add-chapter {
-			justify-content: center; /* Center input/button */
+			justify-content: center;
 		}
 	}
 
@@ -683,7 +681,7 @@
 		}
 
 		li {
-			flex-direction: column; /* Stack chapter title and button */
+			flex-direction: column;
 			align-items: flex-start;
 			gap: 0.7rem;
 			padding: 1rem;
@@ -691,7 +689,7 @@
 
 		li button {
 			margin-left: 0;
-			width: 100%; /* Full width buttons in list */
+			width: 100%;
 		}
 
 		.action-buttons {

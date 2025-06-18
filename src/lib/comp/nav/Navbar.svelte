@@ -17,6 +17,19 @@
 	let unreadCount = 0;
 	let mobileMenuOpen = false;
 
+	// Theme logic (sync with PreferencesSettings)
+	const THEME_VARIABLES = [
+		'--color-bg','--color-bg-alt','--color-text','--color-primary','--color-primary-alt','--color-secondary','--color-accent','--color-link','--color-link-hover','--color-footer-bg','--color-footer-alt','--color-footer-text','--color-footer-link','--color-footer-link-hover','--color-banner-bg','--color-banner-text','--color-banner-hover','--color-border','--color-card-bg','--color-card-shadow','--color-danger','--color-danger-hover','--color-success','--color-bg-hover','--color-navbar-bg','--color-navbar-border','--color-navbar-link','--color-navbar-link-hover','--color-navbar-shadow','--color-section-bg','--color-section-border',
+	];
+	type Theme = { name: string; variables: Record<string, string>; isCustom?: boolean };
+	const BUILTIN_THEMES: Theme[] = [
+		{ name: 'Morning Coffee', variables: {} },
+		{ name: 'Dark Chocolate', variables: {} },
+	];
+	let customThemes: Theme[] = [];
+	let selectedTheme: string = 'Morning Coffee';
+	let showThemeModal = false;
+
 	/*
 	account_id: string
     avatar_url: string | null
@@ -186,6 +199,62 @@
 	function closeMobileMenu() {
 		mobileMenuOpen = false;
 	}
+
+	function loadCustomThemes() {
+		const raw = localStorage.getItem('customThemes');
+		customThemes = raw ? JSON.parse(raw) : [];
+	}
+	function applyTheme(theme: Theme) {
+		if (theme.name === 'Morning Coffee') {
+			document.documentElement.setAttribute('data-theme', 'light');
+			removeCustomThemeStyle();
+			localStorage.setItem('theme', 'Morning Coffee');
+		} else if (theme.name === 'Dark Chocolate') {
+			document.documentElement.setAttribute('data-theme', 'dark');
+			removeCustomThemeStyle();
+			localStorage.setItem('theme', 'Dark Chocolate');
+		} else {
+			document.documentElement.setAttribute('data-theme', 'custom');
+			injectCustomThemeStyle(theme.variables);
+			localStorage.setItem('theme', theme.name);
+		}
+	}
+	function injectCustomThemeStyle(vars: Record<string, string>) {
+		removeCustomThemeStyle();
+		const style = document.createElement('style');
+		style.id = 'custom-theme-style';
+		let css = ':root {';
+		for (const v of THEME_VARIABLES) {
+			css += `${v}: ${vars[v]};`;
+		}
+		css += '}';
+		style.textContent = css;
+		document.head.appendChild(style);
+	}
+	function removeCustomThemeStyle() {
+		const el = document.getElementById('custom-theme-style');
+		if (el) el.remove();
+	}
+	onMount(() => {
+		loadCustomThemes();
+		const saved = localStorage.getItem('theme');
+		if (saved) {
+			selectedTheme = saved;
+			let themeName = saved;
+			if (saved === 'light') themeName = 'Morning Coffee';
+			if (saved === 'dark') themeName = 'Dark Chocolate';
+			const found = [...BUILTIN_THEMES, ...customThemes].find(t => t.name === themeName);
+			if (found) applyTheme(found);
+		}
+	});
+	function openThemeModal() { showThemeModal = true; }
+	function closeThemeModal() { showThemeModal = false; }
+	function selectTheme(name: string) {
+		selectedTheme = name;
+		const found = [...BUILTIN_THEMES, ...customThemes].find(t => t.name === name);
+		if (found) applyTheme(found);
+		closeThemeModal();
+	}
 </script>
 
 <nav>
@@ -321,6 +390,11 @@
 		{:else}
 			<a href="/account/login" class="login-btn" data-sveltekit-reload>Login</a>
 		{/if}
+		<div class="theme-quick-switch desktop-theme-switch">
+			<button class="theme-btn" aria-label="Theme" on:click={openThemeModal}>
+				{selectedTheme === 'Morning Coffee' ? '🌙' : selectedTheme === 'Dark Chocolate' ? '☀️' : '🎨'}
+			</button>
+		</div>
 	</div>
 </nav>
 
@@ -343,6 +417,38 @@
 				{:else}
 					<a href="/account/login" on:click={closeMobileMenu} data-sveltekit-reload>Login</a>
 				{/if}
+				<div class="theme-quick-switch mobile-theme-switch">
+					<button class="theme-btn" aria-label="Theme" on:click={openThemeModal}>
+						{selectedTheme === 'Morning Coffee' ? '🌙' : selectedTheme === 'Dark Chocolate' ? '☀️' : '🎨'}
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+{/if}
+
+{#if showThemeModal}
+	<div class="theme-modal-backdrop" on:click={closeThemeModal} tabindex="-1">
+		<div class="theme-modal" on:click|stopPropagation>
+			<div class="theme-modal-header">
+				<h2>Select Theme</h2>
+				<button class="theme-modal-close" aria-label="Close" on:click={closeThemeModal}>×</button>
+			</div>
+			<div class="theme-list">
+				{#each [...BUILTIN_THEMES, ...customThemes] as theme}
+					<div class="theme-list-item {selectedTheme === theme.name ? 'selected' : ''}" on:click={() => selectTheme(theme.name)} tabindex="0" aria-current={selectedTheme === theme.name}>
+						<div class="theme-list-name">{theme.name}{theme.isCustom ? ' (Custom)' : ''}</div>
+						<div class="theme-list-swatches">
+							<span class="swatch" style="background:{theme.variables['--color-bg'] || (theme.name === 'Morning Coffee' ? '#fffdd0' : '#3d2c21')}"></span>
+							<span class="swatch" style="background:{theme.variables['--color-primary'] || (theme.name === 'Morning Coffee' ? '#4b2e19' : '#a67c52')}"></span>
+							<span class="swatch" style="background:{theme.variables['--color-accent'] || (theme.name === 'Morning Coffee' ? '#a67c52' : '#d4c2b8')}"></span>
+							<span class="swatch" style="background:{theme.variables['--color-link'] || (theme.name === 'Morning Coffee' ? '#4f46e5' : '#bfa07a')}"></span>
+						</div>
+						{#if selectedTheme === theme.name}
+							<span class="theme-selected-indicator">✓</span>
+						{/if}
+					</div>
+				{/each}
 			</div>
 		</div>
 	</div>
@@ -354,8 +460,9 @@
 		justify-content: space-between;
 		align-items: center;
 		padding: 1rem 2rem;
-		background: #f5f5f5;
-		border-bottom: 1px solid #ddd;
+		background: var(--color-navbar-bg, var(--color-bg));
+		border-bottom: 1px solid var(--color-navbar-border, var(--color-border));
+		box-shadow: 0 2px 8px var(--color-navbar-shadow, var(--color-card-shadow));
 	}
 
 	.nav-left {
@@ -367,7 +474,7 @@
 	.logo {
 		font-weight: bold;
 		text-decoration: none;
-		color: #333;
+		color: var(--color-navbar-link, var(--color-link));
 		white-space: nowrap; /* Prevent logo from wrapping */
 	}
 
@@ -375,7 +482,8 @@
 	.nav-right a {
 		margin-right: 1rem;
 		text-decoration: none;
-		color: #333;
+		color: var(--color-navbar-link, var(--color-link));
+		transition: color 0.18s;
 	}
 	.user-dropdown {
 		position: relative;
@@ -397,8 +505,8 @@
 	}
 	.user-btn:hover,
 	.user-btn:focus {
-		background: #e0e7ff;
-		box-shadow: 0 2px 8px rgba(99, 102, 241, 0.09);
+		background: var(--color-secondary);
+		box-shadow: 0 2px 8px var(--color-card-shadow);
 	}
 	.avatar {
 		width: 32px;
@@ -406,27 +514,27 @@
 		border-radius: 50%;
 		object-fit: cover;
 		margin-right: 0.7em;
-		background: #e0e0e0;
+		background: var(--color-secondary);
 		display: inline-block;
-		box-shadow: 0 1px 4px rgba(99, 102, 241, 0.08);
+		box-shadow: 0 1px 4px var(--color-card-shadow);
 	}
 	.avatar-fallback {
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		background: #e0e0e0;
-		color: #3730a3;
+		background: var(--color-secondary);
+		color: var(--color-link);
 		font-weight: bold;
 		font-size: 1.1rem;
 		width: 32px;
 		height: 32px;
 		border-radius: 50%;
 		margin-right: 0.7em;
-		box-shadow: 0 1px 4px rgba(99, 102, 241, 0.08);
+		box-shadow: 0 1px 4px var(--color-card-shadow);
 	}
 	.username {
 		font-weight: 500;
-		color: #3730a3;
+		color: var(--color-link);
 		margin-right: 0.4em;
 	}
 	.chevron {
@@ -441,11 +549,11 @@
 		position: absolute;
 		right: 0;
 		top: 110%;
-		background: #fff;
+		background: var(--color-card-bg);
 		border-radius: 12px;
 		box-shadow:
-			0 8px 32px rgba(99, 102, 241, 0.18),
-			0 1.5px 8px rgba(0, 0, 0, 0.07);
+			0 8px 32px var(--color-card-shadow),
+			0 1.5px 8px var(--color-card-shadow);
 		min-width: 260px;
 		padding: 0.7em 0;
 		z-index: 100;
@@ -468,25 +576,25 @@
 		align-items: center;
 		gap: 0.7em;
 		padding: 0.7em 1.2em 0.5em 1.2em;
-		border-bottom: 1px solid #e0e7ff;
+		border-bottom: 1px solid var(--color-secondary);
 		margin-bottom: 0.3em;
-		background: #f8fafc;
+		background: var(--color-bg-alt);
 		border-radius: 12px 12px 0 0;
 	}
 	.dropdown-username {
 		font-weight: 600;
-		color: #3730a3;
+		color: var(--color-link);
 		font-size: 1.08em;
 	}
 	.dropdown-email {
 		font-size: 0.92em;
-		color: #888;
+		color: var(--color-secondary);
 		word-break: keep-all;
 	}
 	.dropdown-link {
 		background: none;
 		border: none;
-		color: #3730a3;
+		color: var(--color-link);
 		text-align: left;
 		padding: 0.7em 1.2em;
 		font-size: 1.05em;
@@ -499,8 +607,8 @@
 	}
 	.dropdown-link:hover,
 	.dropdown-link:focus {
-		background: #e0e7ff;
-		color: #4f46e5;
+		background: var(--color-secondary);
+		color: var(--color-link-hover);
 	}
 	.dropdown-link.logout {
 		color: #b91c1c;
@@ -536,18 +644,18 @@
 	.nav-search-bar input[type='text'] {
 		padding: 0.35em 0.8em;
 		border-radius: 5px;
-		border: 1px solid #e0d7ce;
+		border: 1px solid var(--color-border);
 		font-size: 1em;
-		background: #fffdfa;
+		background: var(--color-bg);
 		width: 140px;
 		transition: border 0.15s;
 	}
 	.nav-search-bar input[type='text']:focus {
-		border: 1.5px solid #a67c52;
+		border: 1.5px solid var(--color-accent);
 		outline: none;
 	}
 	.nav-search-bar button {
-		background: #ede9e3;
+		background: var(--color-secondary);
 		border: none;
 		border-radius: 5px;
 		padding: 0.3em 0.6em;
@@ -557,7 +665,7 @@
 		transition: background 0.15s;
 	}
 	.nav-search-bar button:hover {
-		background: #e0d7ce;
+		background: var(--color-banner-hover);
 	}
 	.nav-search-bar svg {
 		display: block;
@@ -795,6 +903,145 @@
 
 		.mobile-menu-logo {
 			font-size: 1.4rem;
+		}
+	}
+	.theme-quick-switch {
+		display: flex;
+		align-items: center;
+		position: relative;
+		margin-left: 1rem;
+	}
+	.theme-btn {
+		background: var(--color-card-bg);
+		color: var(--color-text);
+		border: 1px solid var(--color-border);
+		border-radius: 8px;
+		padding: 0.3em 0.7em;
+		font-size: 1.2em;
+		cursor: pointer;
+		box-shadow: 0 2px 8px var(--color-card-shadow);
+		transition: background 0.2s, color 0.2s;
+	}
+	.theme-btn:hover {
+		background: var(--color-primary);
+		color: var(--color-primary-alt);
+	}
+	.theme-dropdown {
+		position: absolute;
+		top: 120%;
+		left: 0;
+		background: var(--color-card-bg);
+		border: 1px solid var(--color-border);
+		border-radius: 8px;
+		box-shadow: 0 2px 8px var(--color-card-shadow);
+		z-index: 200;
+		padding: 0.5em 1em;
+	}
+	.theme-dropdown select {
+		font-size: 1em;
+		background: var(--color-card-bg);
+		color: var(--color-text);
+		border: none;
+		outline: none;
+	}
+	.desktop-theme-switch {
+		display: flex;
+	}
+	.mobile-theme-switch {
+		display: flex;
+		margin: 1.2rem 0 0 0;
+		justify-content: flex-start;
+	}
+	@media (max-width: 768px) {
+		.desktop-theme-switch {
+			display: none;
+		}
+		/* .mobile-theme-switch is now only in the mobile menu */
+	}
+	.theme-modal-backdrop {
+		position: fixed;
+		top: 0; left: 0; right: 0; bottom: 0;
+		background: rgba(0,0,0,0.25);
+		z-index: 2000;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+	.theme-modal {
+		background: var(--color-card-bg);
+		color: var(--color-text);
+		border-radius: 14px;
+		box-shadow: 0 4px 32px var(--color-card-shadow);
+		min-width: 320px;
+		max-width: 95vw;
+		width: 400px;
+		max-height: 90vh;
+		overflow-y: auto;
+		padding: 1.5rem 1.2rem 1.2rem 1.2rem;
+		position: relative;
+	}
+	.theme-modal-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 1.2rem;
+	}
+	.theme-modal-close {
+		background: none;
+		border: none;
+		font-size: 1.7em;
+		color: var(--color-text);
+		cursor: pointer;
+		padding: 0 0.3em;
+		line-height: 1;
+	}
+	.theme-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0.7em;
+	}
+	.theme-list-item {
+		display: flex;
+		align-items: center;
+		gap: 1em;
+		padding: 0.7em 1em;
+		border-radius: 8px;
+		cursor: pointer;
+		background: var(--color-bg-alt);
+		border: 2px solid transparent;
+		transition: border 0.15s, background 0.15s;
+		outline: none;
+	}
+	.theme-list-item.selected, .theme-list-item:focus {
+		border: 2px solid var(--color-accent);
+		background: var(--color-section-bg);
+	}
+	.theme-list-name {
+		flex: 1 1 120px;
+		font-weight: 500;
+		font-size: 1.08em;
+	}
+	.theme-list-swatches {
+		display: flex;
+		gap: 0.2em;
+	}
+	.swatch {
+		width: 22px;
+		height: 22px;
+		border-radius: 5px;
+		border: 1.5px solid var(--color-border);
+		display: inline-block;
+	}
+	.theme-selected-indicator {
+		color: var(--color-success);
+		font-size: 1.2em;
+		margin-left: 0.5em;
+	}
+	@media (max-width: 600px) {
+		.theme-modal {
+			min-width: 0;
+			width: 98vw;
+			padding: 1.1rem 0.5rem 0.7rem 0.5rem;
 		}
 	}
 </style>

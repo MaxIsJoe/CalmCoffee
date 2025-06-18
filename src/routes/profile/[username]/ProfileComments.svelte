@@ -31,11 +31,11 @@
 		margin: 0;
 	}
 	.comments-list li {
-		background: #fff;
+		background: var(--color-card-bg);
 		border-radius: 8px;
 		padding: 1rem 1.2rem;
 		margin-bottom: 1.1rem;
-		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+		box-shadow: 0 1px 4px var(--color-card-shadow);
 	}
 	.comment-meta {
 		display: flex;
@@ -44,7 +44,7 @@
 		margin-bottom: 0.2em;
 	}
 	.comment-story {
-		color: #4f46e5;
+		color: var(--color-link);
 		font-weight: 500;
 		text-decoration: none;
 	}
@@ -52,11 +52,11 @@
 		text-decoration: underline;
 	}
 	.comment-date {
-		color: #888;
+		color: var(--color-secondary);
 		font-size: 0.97em;
 	}
 	.comment-text {
-		color: #222;
+		color: var(--color-text);
 		font-size: 1.05em;
 		margin-top: 0.2em;
 	}
@@ -64,6 +64,6 @@
 		margin-top: 0;
 		margin-bottom: 1rem;
 		font-size: 1.2rem;
-		color: #3730a3;
+		color: var(--color-link);
 	}
 </style>

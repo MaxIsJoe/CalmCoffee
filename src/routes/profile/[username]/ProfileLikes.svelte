@@ -363,7 +363,7 @@
 	}
 
 	.reaction-section h2 {
-		color: #4f46e5;
+		color: var(--color-link);
 		margin-bottom: 1.5rem;
 		font-size: 1.5rem;
 	}
@@ -371,11 +371,11 @@
 	.section-header {
 		margin: 1.5rem 0 1rem 0;
 		padding-bottom: 0.5rem;
-		border-bottom: 2px solid #e5e7eb;
+		border-bottom: 2px solid var(--color-border);
 	}
 
 	.section-header h3 {
-		color: #374151;
+		color: var(--color-primary);
 		font-size: 1.2rem;
 		margin: 0;
 	}
@@ -390,10 +390,10 @@
 
 	.story-card,
 	.character-card {
-		background: white;
+		background: var(--color-card-bg);
 		border-radius: 8px;
 		padding: 1rem;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		box-shadow: 0 2px 4px var(--color-card-shadow);
 		text-decoration: none;
 		color: inherit;
 		transition: transform 0.2s, box-shadow 0.2s;
@@ -408,20 +408,20 @@
 	.story-card h3,
 	.character-card h3 {
 		margin: 0 0 0.5rem 0;
-		color: #1f2937;
+		color: var(--color-link);
 		font-size: 1.1rem;
 	}
 
 	.author,
 	.type {
-		color: #6b7280;
+		color: var(--color-secondary);
 		font-size: 0.9rem;
 		margin: 0.25rem 0;
 	}
 
 	.description {
 		font-size: 0.9rem;
-		color: #4b5563;
+		color: var(--color-text);
 		margin: 0.5rem 0 0 0;
 		display: -webkit-box;
 		-webkit-line-clamp: 3;
@@ -445,8 +445,8 @@
 	}
 
 	.pagination button {
-		background: #f3f4f6;
-		border: 1px solid #e5e7eb;
+		background: var(--color-bg-alt);
+		border: 1px solid var(--color-border);
 		border-radius: 4px;
 		padding: 0.5rem 1rem;
 		cursor: pointer;
@@ -454,26 +454,26 @@
 	}
 
 	.pagination button.active {
-		background: #4f46e5;
-		color: white;
-		border-color: #4f46e5;
+		background: var(--color-link);
+		color: var(--color-primary-alt);
+		border-color: var(--color-link);
 	}
 
 	.pagination button:hover:not(.active) {
-		background: #e5e7eb;
+		background: var(--color-bg-hover);
 	}
 
 	.loading {
 		text-align: center;
 		padding: 2rem;
-		color: #6b7280;
+		color: var(--color-secondary);
 	}
 
 	.error {
 		text-align: center;
 		padding: 2rem;
-		color: #dc2626;
-		background: #fef2f2;
+		color: var(--color-danger);
+		background: var(--color-danger-bg, #fef2f2);
 		border-radius: 8px;
 	}
 
@@ -485,10 +485,10 @@
 	}
 
 	.blog-card {
-		background: white;
+		background: var(--color-card-bg);
 		border-radius: 8px;
 		padding: 1.2rem;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		box-shadow: 0 2px 4px var(--color-card-shadow);
 		text-decoration: none;
 		color: inherit;
 		transition: transform 0.2s, box-shadow 0.2s;
@@ -501,19 +501,19 @@
 
 	.blog-card h3 {
 		margin: 0 0 0.5rem 0;
-		color: #1f2937;
+		color: var(--color-link);
 		font-size: 1.1rem;
 	}
 
 	.blog-card .date {
-		color: #6b7280;
+		color: var(--color-secondary);
 		font-size: 0.85rem;
 		margin: 0.25rem 0;
 	}
 
 	.blog-card .content {
 		font-size: 0.9rem;
-		color: #4b5563;
+		color: var(--color-text);
 		margin: 0.5rem 0 0 0;
 		display: -webkit-box;
 		-webkit-line-clamp: 4;
@@ -525,7 +525,7 @@
 	.controls {
 		margin-bottom: 1.5rem;
 		padding: 0.5rem;
-		background: #f8fafc;
+		background: var(--color-bg-alt);
 		border-radius: 8px;
 		display: flex;
 		justify-content: flex-end;
@@ -546,26 +546,26 @@
 
 	.toggle-label {
 		font-size: 0.95rem;
-		color: #4b5563;
+		color: var(--color-secondary);
 	}
 
 	.empty-state {
 		text-align: center;
 		padding: 3rem 1rem;
-		background: #f8fafc;
+		background: var(--color-bg-alt);
 		border-radius: 12px;
 		margin: 1rem 0;
 	}
 
 	.empty-state p {
 		margin: 0;
-		color: #4b5563;
+		color: var(--color-text);
 		font-size: 1.1rem;
 	}
 
 	.empty-state .sub-text {
 		margin-top: 0.5rem;
-		color: #6b7280;
+		color: var(--color-secondary);
 		font-size: 0.95rem;
 	}
 </style>

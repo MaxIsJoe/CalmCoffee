@@ -596,8 +596,8 @@
 		margin: 1.5rem 0 0 0;
 	}
 	.characters-pagination button {
-		background: #6366f1;
-		color: #fff;
+		background: var(--color-link);
+		color: var(--color-primary-alt);
 		border: none;
 		border-radius: 6px;
 		padding: 0.3rem 1.1rem;
@@ -606,8 +606,11 @@
 		transition: background 0.15s;
 	}
 	.characters-pagination button:disabled {
-		background: #c7d2fe;
+		background: var(--color-secondary);
 		cursor: not-allowed;
+	}
+	.characters-pagination button:hover:enabled {
+		background: var(--color-link-hover);
 	}
 	.characters-pagination span {
 		font-size: 1.05rem;
@@ -629,9 +632,9 @@
 		max-width: 400px;
 		min-width: 260px;
 		margin: 0;
-		background: #fff;
+		background: var(--color-card-bg);
 		border-radius: 12px;
-		box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+		box-shadow: 0 2px 12px var(--color-card-shadow);
 		padding: 1.5rem 2rem;
 		cursor: pointer;
 		transition:
@@ -644,17 +647,17 @@
 	}
 	.story-item:hover,
 	.story-item:focus {
-		background: #f3f4f6;
-		box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+		background: var(--color-bg-alt);
+		box-shadow: 0 4px 24px var(--color-card-shadow);
 	}
 	.story-item h3 {
 		margin: 0 0 0.5rem 0;
 		font-size: 1.3rem;
-		color: #4f46e5;
+		color: var(--color-link);
 	}
 	.story-item p {
 		margin: 0 0 0.5rem 0;
-		color: #444;
+		color: var(--color-text);
 	}
 	.story-meta-row {
 		display: flex;
@@ -664,8 +667,8 @@
 		flex-wrap: wrap;
 	}
 	.age-rating {
-		background: #e0e7ff;
-		color: #3730a3;
+		background: var(--color-secondary);
+		color: var(--color-link);
 		padding: 0.2rem 0.7rem;
 		border-radius: 6px;
 		font-size: 0.95rem;

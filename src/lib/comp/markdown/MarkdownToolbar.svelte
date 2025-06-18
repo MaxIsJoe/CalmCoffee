@@ -134,22 +134,22 @@ Example usage in a parent Svelte component:
 		margin-bottom: 0.7rem;
 		flex-wrap: wrap;
 		padding: 0.3rem;
-		background: #f8fafc;
+		background: var(--color-toolbar-bg);
 		border-radius: 8px;
-		border: 1px solid #e2e8f0;
+		border: 1px solid var(--color-toolbar-border);
 	}
 
 	.toolbar-group {
 		display: flex;
 		gap: 0.3rem;
 		padding: 0.15rem;
-		background: #f1f5f9;
+		background: var(--color-toolbar-group-bg);
 		border-radius: 6px;
 	}
 
 	.markdown-toolbar button {
-		background: #f3f4f6;
-		border: 1px solid #cbd5e1;
+		background: var(--color-toolbar-btn-bg);
+		border: 1px solid var(--color-toolbar-btn-border);
 		border-radius: 4px;
 		padding: 0.2rem 0.5rem;
 		font-size: 0.9rem;
@@ -161,22 +161,24 @@ Example usage in a parent Svelte component:
 		align-items: center;
 		justify-content: center;
 		line-height: 1;
+		color: var(--color-toolbar-btn-text);
 	}
 
 	.markdown-toolbar button:hover {
-		background: #e0e7ff;
-		border-color: #4f46e5;
+		background: var(--color-toolbar-btn-hover);
+		border-color: var(--color-toolbar-btn-active);
 		transform: translateY(-1px);
 	}
 
 	.markdown-toolbar button:active {
+		background: var(--color-toolbar-btn-active);
 		transform: translateY(0);
 	}
 
 	/* Specific button styles */
 	.markdown-toolbar button code {
 		font-size: 0.8em;
-		background: #e0e7ff;
+		background: var(--color-toolbar-btn-code-bg);
 		padding: 0.1em 0.2em;
 		border-radius: 3px;
 	}

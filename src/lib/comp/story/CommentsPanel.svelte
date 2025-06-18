@@ -151,8 +151,8 @@
 		width: 370px;
 		max-width: 100vw;
 		height: 100vh;
-		background: #eef2ff;
-		box-shadow: -2px 0 24px rgba(99, 102, 241, 0.1);
+		background: var(--color-bg-alt);
+		box-shadow: -2px 0 24px var(--color-card-shadow);
 		padding: 2.2em 1.5em 1.5em 1.5em;
 		z-index: 1001;
 		overflow-y: auto;
@@ -167,7 +167,7 @@
 		background: none;
 		border: none;
 		font-size: 2em;
-		color: #6366f1;
+		color: var(--color-link);
 		cursor: pointer;
 		line-height: 1;
 	}
@@ -175,7 +175,7 @@
 	.global-comments-panel h4 {
 		margin: 0 0 0.7em 0;
 		font-size: 1.15em;
-		color: #3730a3;
+		color: var(--color-link);
 	}
 
 	.global-comments-panel ul {

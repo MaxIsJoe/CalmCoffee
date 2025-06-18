@@ -134,9 +134,9 @@
 		max-width: 800px;
 		margin: 2rem auto;
 		padding: 2rem;
-		background: #fff;
-		border-radius: 16px;
-		box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+		background: var(--color-card-bg);
+		border-radius: 12px;
+		box-shadow: 0 2px 8px var(--color-card-shadow);
 	}
 
 	.story-header {
@@ -147,24 +147,24 @@
 	.story-header h1 {
 		margin: 0;
 		font-size: 2.2rem;
-		color: #4f46e5;
+		color: var(--color-link);
 	}
 
 	.story-author {
-		color: #888;
+		color: var(--color-secondary);
 		margin: 0.5rem 0 0 0;
 		font-size: 1.05rem;
 	}
 
 	.author-link {
-		color: #3730a3;
+		color: var(--color-link);
 		font-weight: 500;
 		text-decoration: none;
 		transition: color 0.2s;
 	}
 
 	.author-link:hover {
-		color: #4f46e5;
+		color: var(--color-accent);
 		text-decoration: underline;
 	}
 
@@ -174,7 +174,7 @@
 		gap: 2rem;
 		margin-bottom: 2rem;
 		padding: 1rem;
-		background: #f8fafc;
+		background: var(--color-section-bg);
 		border-radius: 12px;
 	}
 
@@ -187,31 +187,31 @@
 
 	.stat-label {
 		font-size: 0.9rem;
-		color: #64748b;
+		color: var(--color-secondary);
 	}
 
 	.stat-value {
 		font-size: 1.2rem;
 		font-weight: 600;
-		color: #3730a3;
+		color: var(--color-link);
 	}
 
 	.story-description {
 		margin-bottom: 2rem;
 		padding: 1.5rem;
-		background: #f8fafc;
+		background: var(--color-section-bg);
 		border-radius: 12px;
 	}
 
 	.story-description h3 {
 		margin: 0 0 0.8rem 0;
-		color: #3730a3;
+		color: var(--color-link);
 		font-size: 1.2rem;
 	}
 
 	.story-description p {
 		margin: 0;
-		color: #334155;
+		color: var(--color-text);
 		line-height: 1.6;
 	}
 
@@ -229,7 +229,7 @@
 	}
 
 	.continue-reading-btn {
-		background: #4f46e5;
+		background: var(--color-primary);
 		color: white;
 		border: none;
 		padding: 0.8rem 1.5rem;
@@ -244,7 +244,7 @@
 	}
 
 	.continue-reading-btn:hover {
-		background: #4338ca;
+		background: var(--color-accent);
 	}
 
 	.continue-reading-btn svg {
@@ -252,9 +252,9 @@
 	}
 
 	.start-reading-btn {
-		background: #f3f4f6;
-		color: #4f46e5;
-		border: 1px solid #cbd5e1;
+		background: var(--color-bg-alt);
+		color: var(--color-primary);
+		border: 1px solid var(--color-border);
 		padding: 0.8rem 1.5rem;
 		border-radius: 8px;
 		font-size: 1.1rem;
@@ -264,18 +264,18 @@
 	}
 
 	.start-reading-btn:hover {
-		background: #e0e7ff;
+		background: var(--color-bg-hover);
 	}
 
 	.chapter-list {
-		background: #f8fafc;
+		background: var(--color-section-bg);
 		border-radius: 12px;
 		padding: 1.5rem;
 	}
 
 	.chapter-list h3 {
 		margin: 0 0 1rem 0;
-		color: #3730a3;
+		color: var(--color-link);
 		font-size: 1.2rem;
 	}
 
@@ -287,7 +287,7 @@
 
 	.chapter-list li {
 		padding: 1rem;
-		border-bottom: 1px solid #e2e8f0;
+		border-bottom: 1px solid var(--color-section-border);
 		cursor: pointer;
 		display: flex;
 		align-items: center;
@@ -297,7 +297,7 @@
 	}
 
 	.chapter-list li:hover {
-		background-color: #f1f5f9;
+		background-color: var(--color-bg-hover);
 	}
 
 	.chapter-content {
@@ -305,25 +305,25 @@
 	}
 
 	.chapter-arrow {
-		color: #94a3b8;
+		color: var(--color-secondary);
 		flex-shrink: 0;
 	}
 
 	.chapter-list li:hover .chapter-arrow {
-		color: #4f46e5;
+		color: var(--color-accent);
 	}
 
 	.chapter-title {
 		display: block;
 		font-weight: 500;
-		color: #334155;
+		color: var(--color-text);
 		margin-bottom: 0.3rem;
 	}
 
 	.chapter-desc {
 		margin: 0;
 		font-size: 0.95rem;
-		color: #64748b;
+		color: var(--color-secondary);
 	}
 
 	@media (max-width: 640px) {
@@ -352,8 +352,8 @@
 	}
 
 	.age-rating {
-		background: #e0e7ff;
-		color: #3730a3;
+		background: var(--color-bg-alt);
+		color: var(--color-primary);
 		padding: 0.2rem 0.7rem;
 		border-radius: 6px;
 		font-size: 0.95rem;
@@ -368,14 +368,14 @@
 	}
 
 	.story-tag {
-		background: #ede9e3;
-		color: #7c5e48;
+		background: var(--color-bg-alt);
+		color: var(--color-accent);
 		font-size: 0.93em;
 		padding: 0.18em 0.7em;
 		border-radius: 999px;
 		font-weight: 500;
 		letter-spacing: 0.01em;
-		border: 1px solid #e0d7ce;
+		border: 1px solid var(--color-border);
 		cursor: pointer;
 		transition:
 			background 0.15s,
@@ -384,8 +384,8 @@
 
 	.story-tag:hover,
 	.story-tag:focus {
-		background: #e0d7ce;
-		color: #a67c52;
+		background: var(--color-border);
+		color: var(--color-accent);
 		outline: none;
 	}
 

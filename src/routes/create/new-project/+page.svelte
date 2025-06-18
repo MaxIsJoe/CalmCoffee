@@ -259,9 +259,9 @@
 	}
 
 	form {
-		background: #fff;
+		background: var(--color-card-bg);
 		border-radius: 16px;
-		box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+		box-shadow: 0 4px 24px var(--color-card-shadow);
 		padding: 2.5rem;
 		transition: opacity 0.3s, transform 0.3s;
 	}
@@ -279,31 +279,31 @@
 
 	h3 {
 		margin: 0;
-		color: #4b2e19;
+		color: var(--color-primary);
 		font-size: 1.5rem;
 	}
 
 	.step-description {
-		color: #6d4c41;
+		color: var(--color-primary);
 		margin: 0;
 		line-height: 1.5;
 	}
 
 	label {
 		font-weight: 600;
-		color: #6d4c41;
+		color: var(--color-primary);
 		margin-bottom: 0.2rem;
 	}
 
 	input[type='text'],
 	textarea,
 	select {
-		border: 1px solid #bca18c;
+		border: 1px solid var(--color-border);
 		border-radius: 8px;
 		padding: 0.8rem 1rem;
 		font-size: 1rem;
-		background: #f9f6f3;
-		color: #3e2723;
+		background: var(--color-bg-alt);
+		color: var(--color-text);
 		transition: all 0.2s;
 	}
 
@@ -311,9 +311,9 @@
 	textarea:focus,
 	select:focus {
 		outline: none;
-		border-color: #a1887f;
-		background: #fff;
-		box-shadow: 0 0 0 3px rgba(161, 136, 127, 0.1);
+		border-color: var(--color-accent);
+		background: var(--color-card-bg);
+		box-shadow: 0 0 0 3px var(--color-card-shadow);
 	}
 
 	textarea {
@@ -344,30 +344,30 @@
 
 	.next-btn,
 	.create-btn {
-		background: #a1887f;
-		color: #fff;
+		background: var(--color-accent);
+		color: var(--color-primary-alt);
 		border: none;
 	}
 
 	.next-btn:hover:not(:disabled),
 	.create-btn:hover:not(:disabled) {
-		background: #6d4c41;
+		background: var(--color-primary);
 	}
 
 	.back-btn {
-		background: #f3f4f6;
-		color: #6d4c41;
-		border: 1px solid #bca18c;
+		background: var(--color-bg-alt);
+		color: var(--color-primary);
+		border: 1px solid var(--color-border);
 	}
 
 	.back-btn:hover {
-		background: #e0d7ce;
+		background: var(--color-border);
 	}
 
 	.next-btn:disabled,
 	.create-btn:disabled {
-		background: #e0d7ce;
-		color: #bfa07a;
+		background: var(--color-border);
+		color: var(--color-secondary);
 		cursor: not-allowed;
 	}
 

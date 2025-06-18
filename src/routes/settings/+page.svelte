@@ -35,7 +35,7 @@
 		display: flex;
 		max-width: 700px;
 		margin: 2.5rem auto;
-		background: #fff;
+		background: var(--color-card-bg);
 		border-radius: 14px;
 		box-shadow: 0 4px 24px rgba(99, 102, 241, 0.07);
 		min-height: 400px;
@@ -43,7 +43,7 @@
 	.settings-sidebar {
 		display: flex;
 		flex-direction: column;
-		background: #f3f4f6;
+		background: var(--color-bg-alt);
 		padding: 2rem 1.2rem 2rem 1.2rem;
 		border-radius: 14px 0 0 14px;
 		min-width: 150px;
@@ -51,7 +51,7 @@
 	.settings-sidebar button {
 		background: none;
 		border: none;
-		color: #3730a3;
+		color: var(--color-link);
 		font-size: 1.08rem;
 		padding: 0.7em 0.5em;
 		margin-bottom: 0.5em;
@@ -62,8 +62,8 @@
 	}
 	.settings-sidebar button.selected,
 	.settings-sidebar button:hover {
-		background: #e0e7ff;
-		color: #4f46e5;
+		background: var(--color-secondary);
+		color: var(--color-link-hover);
 	}
 	.settings-main {
 		flex: 1;

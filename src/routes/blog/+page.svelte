@@ -127,7 +127,7 @@
 
 <style>
 	a {
-		color: #6366f1;
+		color: var(--color-link);
 		text-decoration: underline;
 	}
 
@@ -139,7 +139,7 @@
 	h1 {
 		font-size: 2.1rem;
 		font-weight: 700;
-		color: #22223b;
+		color: var(--color-blog-heading, var(--color-text));
 		margin-bottom: 1.2rem;
 		letter-spacing: -0.5px;
 	}
@@ -152,29 +152,29 @@
 	label[for="age-filter"] {
 		font-size: 1.06rem;
 		font-weight: 500;
-		color: #374151;
+		color: var(--color-blog-label, var(--color-secondary));
 		margin-right: 0.4rem;
 	}
 	select#age-filter {
 		padding: 0.35em 1.1em 0.35em 0.7em;
 		border-radius: 6px;
-		border: 1px solid #c7d2fe;
-		background: #f8fafc;
+		border: 1px solid var(--color-blog-select-border, #c7d2fe);
+		background: var(--color-blog-select-bg, #f8fafc);
 		font-size: 1.05rem;
-		color: #22223b;
+		color: var(--color-blog-select-text, var(--color-text));
 		transition: border 0.2s;
 	}
 	select#age-filter:focus {
 		outline: none;
-		border-color: #6366f1;
-		background: #eef2ff;
+		border-color: var(--color-blog-select-focus-border, var(--color-link));
+		background: var(--color-blog-select-focus-bg, #eef2ff);
 	}
 	.blog-list {
 		list-style: none;
 		padding: 0;
 	}
 	.blog-error {
-		color: #b91c1c;
+		color: var(--color-blog-error, var(--color-danger));
 	}
 	.blog-loading {
 		display: flex;
@@ -186,8 +186,8 @@
 	.spinner {
 		width: 32px;
 		height: 32px;
-		border: 4px solid #e0e7ff;
-		border-top: 4px solid #6366f1;
+		border: 4px solid var(--color-blog-spinner-bg, #e0e7ff);
+		border-top: 4px solid var(--color-blog-spinner-fg, var(--color-link));
 		border-radius: 50%;
 		animation: spin 1s linear infinite;
 		margin-bottom: 1rem;
@@ -204,7 +204,7 @@
 		display: flex;
 		gap: 1rem;
 		margin-bottom: 1.5rem;
-		border-bottom: 1px solid #e5e7eb;
+		border-bottom: 1px solid var(--color-blog-tabs-border, #e5e7eb);
 	}
 
 	.tabs button {
@@ -213,16 +213,16 @@
 		background: none;
 		cursor: pointer;
 		font-size: 1rem;
-		color: #6b7280;
+		color: var(--color-blog-tabs-btn, #6b7280);
 		transition: color 0.2s, border-bottom 0.2s;
 	}
 
 	.tabs button.active {
-		color: #22223b;
-		border-bottom: 2px solid #6366f1;
+		color: var(--color-blog-tabs-btn-active, var(--color-text));
+		border-bottom: 2px solid var(--color-blog-tabs-btn-active-border, var(--color-link));
 	}
 
 	.tabs button:hover:not(.active) {
-		color: #374151;
+		color: var(--color-blog-tabs-btn-hover, var(--color-link-hover));
 	}
 </style>

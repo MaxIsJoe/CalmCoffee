@@ -216,16 +216,16 @@
 
 <style>
 	.microblog-error {
-		color: #f87171;
+		color: var(--color-danger);
 		font-size: 0.95rem;
 		margin-top: 0.5rem;
 	}
 	.microblog-item {
-		background: #fff;
+		background: var(--color-card-bg);
 		border-radius: 8px;
 		margin-bottom: 1.1rem;
 		padding: 1rem 1.2rem;
-		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+		box-shadow: 0 1px 4px var(--color-card-shadow);
 	}
 	.microblog-header {
 		display: flex;
@@ -238,26 +238,26 @@
 		height: 32px;
 		border-radius: 50%;
 		object-fit: cover;
-		border: 1px solid #e5e7eb;
-		background: #f3f4f6;
+		border: 1px solid var(--color-border);
+		background: var(--color-bg-alt);
 	}
 	.microblog-writer {
 		font-weight: 600;
 		font-size: 1.08rem;
-		color: #334155;
+		color: var(--color-link);
 	}
 	.microblog-content {
 		font-size: 1.05rem;
-		color: #222;
+		color: var(--color-text);
 		margin-bottom: 0.3rem;
 	}
 	.microblog-date {
-		color: #888;
+		color: var(--color-secondary);
 		font-size: 0.97em;
 	}
 	.microblog-age-rating {
 		margin-left: 0.7em;
-		color: #6366f1;
+		color: var(--color-link);
 		font-size: 0.97em;
 		font-weight: 500;
 	}
@@ -268,14 +268,14 @@
 		gap: 0.4em;
 	}
 	.microblog-tag {
-		background: #ede9e3;
-		color: #7c5e48;
+		background: var(--color-bg-hover);
+		color: var(--color-accent);
 		font-size: 0.93em;
 		padding: 0.18em 0.7em;
 		border-radius: 999px;
 		font-weight: 500;
 		letter-spacing: 0.01em;
-		border: 1px solid #e0d7ce;
+		border: 1px solid var(--color-border);
 		cursor: pointer;
 		transition:
 			background 0.15s,
@@ -283,14 +283,14 @@
 	}
 	.microblog-tag:hover,
 	.microblog-tag:focus {
-		background: #e0d7ce;
-		color: #a67c52;
+		background: var(--color-border);
+		color: var(--color-accent);
 		outline: none;
 	}
 	.share-btn {
 		background: none;
 		border: none;
-		color: #6366f1;
+		color: var(--color-link);
 		cursor: pointer;
 		padding: 0.2rem;
 		margin-left: 0.7rem;
@@ -301,7 +301,7 @@
 	}
 
 	.share-btn:hover {
-		color: #4f46e5;
+		color: var(--color-link-hover);
 	}
 
 	.share-tooltip {
@@ -309,8 +309,8 @@
 		bottom: 100%;
 		left: 50%;
 		transform: translateX(-50%);
-		background: #1e293b;
-		color: white;
+		background: var(--color-primary);
+		color: var(--color-primary-alt);
 		padding: 0.3rem 0.6rem;
 		border-radius: 4px;
 		font-size: 0.85rem;
@@ -326,6 +326,6 @@
 		transform: translateX(-50%);
 		border-width: 4px;
 		border-style: solid;
-		border-color: #1e293b transparent transparent transparent;
+		border-color: var(--color-primary) transparent transparent transparent;
 	}
 </style>

@@ -279,30 +279,34 @@
 		padding: 0.5rem 25px;
 	}
 	.input {
-		padding: 0.5rem 0.9rem;
-		border: 1px solid #d3d6db;
+		background: var(--color-card-bg);
+		border: 1px solid var(--color-border);
+		color: var(--color-text);
 		border-radius: 6px;
-		font-size: 1rem;
-		background: #fafbfc;
-		transition: border 0.2s;
+		padding: 0.4em 0.8em;
+		font-size: 1em;
+		transition: border 0.15s;
 	}
 	.input:focus {
-		border-color: #a3a8b8;
+		border-color: var(--color-accent);
 		outline: none;
 	}
 	.btn-primary {
-		background: #4b4f6b;
-		color: #fff;
-		padding: 0.5rem 1.2rem;
-		border-radius: 6px;
-		text-decoration: none;
-		font-weight: 500;
-		transition: background 0.2s;
+		background: var(--color-btn-primary, var(--color-link));
+		color: var(--color-btn-primary-text, #fff);
 		border: none;
+		border-radius: 6px;
+		padding: 0.5em 1.2em;
+		font-size: 1em;
+		font-weight: 500;
 		cursor: pointer;
+		transition: background 0.15s;
 	}
 	.btn-primary:hover {
-		background: #353857;
+		background: var(--color-btn-primary-hover, var(--color-link-hover));
+	}
+	.characters-header h1 {
+		color: var(--color-primary);
 	}
 	.character-list {
 		list-style: none;
@@ -314,78 +318,71 @@
 		padding: 0 1.5rem 1.5rem 1.5rem;
 	}
 	.character-item {
-		background: #fff;
-		border: 1px solid #e5e7eb;
-		border-radius: 8px;
-		padding: 0.8rem 1.1rem;
+		background: var(--color-character-card-bg, var(--color-card-bg));
+		border-radius: 10px;
+		box-shadow: 0 2px 8px var(--color-character-card-shadow, var(--color-card-shadow));
+		margin-bottom: 1.2em;
+		padding: 1.2em 1.5em;
 		display: flex;
-		flex-direction: column;
 		align-items: center;
-		text-align: center;
-		transition:
-			box-shadow 0.15s,
-			border 0.15s;
-		box-shadow: 0 1px 2px rgba(30, 34, 54, 0.03);
+		gap: 1.2em;
+		border: 1px solid var(--color-character-card-border, var(--color-border));
 	}
 	.character-item:hover {
-		border-color: #bfc2d4;
-		box-shadow: 0 2px 8px rgba(30, 34, 54, 0.07);
+		border-color: var(--color-border);
+		box-shadow: 0 2px 8px var(--color-card-shadow);
 	}
 	.character-link {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
 		text-decoration: none;
 		color: inherit;
-		width: 100%;
-		gap: 0.7rem;
+		display: flex;
+		align-items: center;
+		gap: 1.2em;
 	}
 	.character-avatar {
-		width: 96px;
-		height: 96px;
+		width: 64px;
+		height: 64px;
 		border-radius: 50%;
 		object-fit: cover;
-		border: 3px solid #e5e7eb;
-		background: #f6f7fa;
-		margin-bottom: 0.5rem;
+		background: var(--color-character-avatar-bg, var(--color-secondary));
+		border: 2px solid var(--color-character-avatar-border, var(--color-border));
+		box-shadow: 0 1px 4px var(--color-character-avatar-shadow, var(--color-card-shadow));
 	}
 	.character-info {
 		display: flex;
 		flex-direction: column;
-		gap: 0.2rem;
+		gap: 0.2em;
 	}
 	.character-name {
-		font-size: 1.2rem;
+		font-size: 1.15em;
 		font-weight: 600;
+		color: var(--color-character-name, var(--color-link));
 	}
 	.character-type {
-		font-size: 0.95rem;
-		color: #6b7280;
-		background: #f3f4f6;
-		border-radius: 4px;
-		padding: 0.1rem 0.5rem;
-		/* margin-left: 0.2rem; */
+		font-size: 0.98em;
+		color: var(--color-character-type, var(--color-accent));
 	}
 	.character-gender,
 	.character-popularity {
-		font-size: 0.9rem;
-		color: #8a8fa3;
-		margin-top: 0.1rem;
+		font-size: 0.97em;
+		color: var(--color-character-gender, var(--color-secondary));
 	}
 	.character-creator {
 		font-size: 0.93rem;
-		color: #8a8fa3;
+		color: var(--color-secondary);
 		margin-top: 0.1rem;
 	}
 	.muted {
-		color: #888;
+		color: var(--color-muted);
 		font-size: 1rem;
-		margin: 1.5rem 0;
+		margin: 2rem 0;
+		text-align: center;
 	}
 	.error {
-		color: #c00;
+		color: var(--color-error);
 		font-weight: 500;
-		margin: 1.5rem 0;
+		margin: 2rem 0;
+		text-align: center;
 	}
 	.characters-main {
 		display: flex;
@@ -398,16 +395,16 @@
 	}
 	.my-characters-section {
 		flex: 1;
-		background: #fafbfc;
+		background: var(--color-bg-alt);
 		border-radius: 12px;
 		padding: 1.2rem 1rem;
-		box-shadow: 0 2px 8px rgba(30, 34, 54, 0.04);
+		box-shadow: 0 2px 8px var(--color-card-shadow);
 	}
 	.my-characters-title {
 		font-size: 1.15rem;
 		font-weight: 600;
 		margin-bottom: 1rem;
-		color: #4b4f6b;
+		color: var(--color-primary);
 	}
 	.my-characters-cards-grid {
 		display: grid;
@@ -415,8 +412,8 @@
 		gap: 1.1rem;
 	}
 	.my-character-card {
-		background: #fff;
-		border: 1px solid #e5e7eb;
+		background: var(--color-card-bg);
+		border: 1px solid var(--color-border);
 		border-radius: 8px;
 		padding: 0.7rem 1rem;
 		display: flex;
@@ -424,7 +421,7 @@
 		align-items: center;
 		gap: 0.7rem;
 		justify-content: flex-start;
-		box-shadow: 0 1px 2px rgba(30, 34, 54, 0.03);
+		box-shadow: 0 1px 2px var(--color-card-shadow);
 	}
 	.my-character-card a {
 		text-decoration: none;
@@ -476,55 +473,37 @@
 	}
 	.pagination {
 		display: flex;
+		gap: 0.5em;
+		margin-top: 1.5em;
 		justify-content: center;
-		align-items: center;
-		gap: 1rem;
-		margin: 2rem 0;
 	}
-
 	.pagination-btn {
-		padding: 0.5rem 1rem;
-		border: 1px solid #cbd5e1;
-		border-radius: 6px;
-		background: white;
-		color: #4f46e5;
+		background: var(--color-btn-primary, var(--color-link));
+		color: var(--color-btn-primary-text, #fff);
+		border: none;
+		border-radius: 5px;
+		padding: 0.3em 1em;
+		font-size: 1em;
 		cursor: pointer;
-		transition: all 0.2s;
+		transition: background 0.15s;
 	}
-
-	.pagination-btn:hover:not(:disabled) {
-		background: #4f46e5;
-		color: white;
-	}
-
 	.pagination-btn:disabled {
-		opacity: 0.5;
+		background: var(--color-border);
+		color: var(--color-secondary);
 		cursor: not-allowed;
 	}
-
 	.page-numbers {
 		display: flex;
 		gap: 0.5rem;
 	}
-
 	.page-number {
-		width: 2.5rem;
-		height: 2.5rem;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		border: 1px solid #cbd5e1;
-		border-radius: 6px;
-		background: white;
-		color: #4f46e5;
-		cursor: pointer;
-		transition: all 0.2s;
+		font-size: 1em;
+		color: var(--color-secondary);
+		margin: 0 0.3em;
 	}
-
 	.page-number:hover:not(.active) {
 		background: #e0e7ff;
 	}
-
 	.page-number.active {
 		background: #4f46e5;
 		color: white;
