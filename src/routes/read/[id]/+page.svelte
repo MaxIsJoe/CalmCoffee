@@ -5,7 +5,9 @@
 	import { coffeeMarkdown } from '$lib/md/coffeeMarkdown';
 	import type { Database } from '../../../../database.types';
 	import StoryReactions from '$lib/comp/story/StoryReactions.svelte';
+	import StoryOverview from '$lib/comp/story/StoryOverview.svelte';
 	import { sendCommentNotification } from '$lib/notifications';
+	import { saveLastReadChapter } from '$lib/utils/readingProgress';
 
 	let story: Database['public']['Tables']['stories']['Row'] | null = null;
 	let chapters: Database['public']['Tables']['chapters']['Row'][] = [];
@@ -15,6 +17,8 @@
 	let loading = true;
 	let loadingMessage = 'Loading story...';
 	let storyId = '';
+	let isReading = false;
+	let selectedChapterId: string = '';
 	$: storyId = $page.params.id;
 
 	let blockOrder: 'oldest' | 'newest' = 'oldest';
@@ -22,6 +26,7 @@
 	let resizing = false;
 	let startX = 0;
 	let startWidth = 0;
+	let isFullScreen = true;
 
 	let comments: Record<
 		string,
@@ -127,6 +132,7 @@
 
 	// Only attach listeners in the browser
 	import { browser } from '$app/environment';
+	import { usernameCache } from '$lib/stores/username_cache';
 
 	// Attach/detach mousemove/mouseup listeners for resizing
 	$: if (browser && resizing) {
@@ -136,8 +142,6 @@
 		window.removeEventListener('mousemove', onResize);
 		window.removeEventListener('mouseup', stopResize);
 	}
-
-	let selectedChapterId: string = '';
 
 	async function fetchCommentsForBlocks(blockIds: string[]) {
 		console.log('Fetching comments for blocks:', blockIds);
@@ -230,6 +234,19 @@
 	function toggleComments(blockId: string) {
 		openCommentsBlockId = openCommentsBlockId === blockId ? null : blockId;
 	}
+
+	function startReading(chapterId?: string) {
+		isReading = true;
+		if (chapterId) {
+			selectedChapterId = chapterId;
+			saveLastReadChapter(storyId, chapterId);
+		}
+	}
+
+	// Watch for chapter changes to save progress
+	$: if (selectedChapterId && isReading) {
+		saveLastReadChapter(storyId, selectedChapterId);
+	}
 </script>
 
 {#if loading}
@@ -241,8 +258,22 @@
 	<p style="color:red">{error}</p>
 {:else if !story}
 	<p>Story not found.</p>
+{:else if !isReading}
+	<StoryOverview
+		{story}
+		{author}
+		{chapters}
+		{blocks}
+		onStartReading={startReading}
+	/>
 {:else}
 	<div class="read-controls">
+		<button class="back-to-overview" on:click={() => (isReading = false)}>
+			<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+				<path d="M19 12H5M12 19l-7-7 7-7"/>
+			</svg>
+			Back to Overview
+		</button>
 		<label>
 			Block order:
 			<select bind:value={blockOrder}>
@@ -261,19 +292,33 @@
 				</select>
 			</label>
 		{/if}
+		<button 
+			class="layout-toggle" 
+			on:click={() => isFullScreen = !isFullScreen}
+			title={isFullScreen ? "Switch to contained layout" : "Switch to full-screen layout"}
+		>
+			<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+				{#if isFullScreen}
+					<path d="M4 14h6m0 0v6m0-6l-7 7m17-11h-6m0 0V4m0 6l7-7"/>
+				{:else}
+					<path d="M4 4h6m0 0v6m0-6l-7 7m17 11h-6m0 0v-6m0 6l7-7"/>
+				{/if}
+			</svg>
+		</button>
 	</div>
 	<div
-		class="read-story-container resizable"
-		style="max-width:{readingWidth}px;width:100%;position:relative;"
+		class="read-story-container {isFullScreen ? 'fullscreen' : 'resizable'}"
+		style={isFullScreen ? '' : `max-width:${readingWidth}px;width:100%;position:relative;`}
 	>
-		<div class="resize-handle left" on:mousedown={startResize}></div>
-		<div class="resize-handle right" on:mousedown={startResize}></div>
+		{#if !isFullScreen}
+			<!-- svelte-ignore a11y_no_static_element_interactions -->
+			<div class="resize-handle left" on:mousedown={startResize}></div>
+			<!-- svelte-ignore a11y_no_static_element_interactions -->
+			<div class="resize-handle right" on:mousedown={startResize}></div>
+		{/if}
 		<h1>{story.title}</h1>
 		{#if author}
-			<p class="story-author">By <span>{author.username}</span></p>
-		{/if}
-		{#if story.description}
-			<p class="story-desc">{story.description}</p>
+			<p class="story-author">By <a href="/profile/{author.username}" class="author-link">{author.username}</a></p>
 		{/if}
 		<StoryReactions storyId={story.id} />
 		{#if selectedChapterId}
@@ -394,6 +439,8 @@
 		margin: 1.2rem auto 0 auto;
 		display: flex;
 		justify-content: flex-end;
+		align-items: center;
+		gap: 1rem;
 	}
 	.read-controls label {
 		font-size: 1rem;
@@ -409,6 +456,28 @@
 		border: 1px solid #cbd5e1;
 		background: #f3f4f6;
 		color: #3730a3;
+	}
+	.layout-toggle {
+		background: #f3f4f6;
+		border: 1px solid #cbd5e1;
+		border-radius: 6px;
+		padding: 0.4em;
+		cursor: pointer;
+		color: #3730a3;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: all 0.2s;
+	}
+	.layout-toggle:hover {
+		background: #e0e7ff;
+	}
+	.read-story-container.fullscreen {
+		max-width: none;
+		width: 100%;
+		margin: 0;
+		border-radius: 0;
+		min-height: 100vh;
 	}
 	.read-story-container.resizable {
 		resize: none;
@@ -456,9 +525,15 @@
 		margin-bottom: 0.5rem;
 		font-size: 1.05rem;
 	}
-	.story-author span {
+	.author-link {
 		color: #3730a3;
 		font-weight: 500;
+		text-decoration: none;
+		transition: color 0.2s;
+	}
+	.author-link:hover {
+		color: #4f46e5;
+		text-decoration: underline;
 	}
 	.story-desc {
 		margin: 1rem 0;
@@ -653,5 +728,24 @@
 			width: 100vw;
 			padding: 1.2em 0.5em 1em 0.5em;
 		}
+	}
+	.back-to-overview {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		background: #f3f4f6;
+		border: 1px solid #cbd5e1;
+		border-radius: 6px;
+		padding: 0.4em 0.8em;
+		cursor: pointer;
+		color: #3730a3;
+		font-size: 0.95rem;
+		transition: all 0.2s;
+	}
+	.back-to-overview:hover {
+		background: #e0e7ff;
+	}
+	.back-to-overview svg {
+		display: block;
 	}
 </style>

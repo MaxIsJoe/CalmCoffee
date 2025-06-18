@@ -77,6 +77,49 @@
 		flex-direction: column;
 		margin: 0;
 		padding: 0;
+		font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+	}
+
+	:global(h1, h2, h3, h4, h5, h6) {
+		font-family: 'Inter', sans-serif;
+		font-weight: 600;
+		letter-spacing: -0.02em;
+	}
+
+	:global(p, li, span, div) {
+		line-height: 1.6;
+		letter-spacing: 0.01em;
+	}
+
+	:global(.read-story-container) {
+		font-family: 'Merriweather', Georgia, serif;
+		font-size: 1.1rem;
+		line-height: 1.8;
+		letter-spacing: 0.01em;
+	}
+
+	:global(.read-story-container p) {
+		margin-bottom: 1.5em;
+	}
+
+	:global(.read-story-container h1) {
+		font-size: 2.2em;
+		line-height: 1.3;
+		margin-bottom: 0.8em;
+	}
+
+	:global(.read-story-container h2) {
+		font-size: 1.8em;
+		line-height: 1.4;
+		margin: 1.5em 0 0.8em;
+	}
+
+	:global(.read-story-container h3) {
+		font-size: 1.5em;
+		line-height: 1.4;
+		margin: 1.3em 0 0.7em;
 	}
 
 	@keyframes spin {
