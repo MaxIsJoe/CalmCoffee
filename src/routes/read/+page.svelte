@@ -65,7 +65,7 @@
 			.select(`
 				id, 
 				title, 
-				description, 
+				short_description,
 				age_rating, 
 				created_at, 
 				user_id, 
@@ -129,7 +129,7 @@
 			(story) =>
 				!search ||
 				story.title?.toLowerCase().includes(search.toLowerCase()) ||
-				story.description?.toLowerCase().includes(search.toLowerCase())
+				story.short_description?.toLowerCase().includes(search.toLowerCase())
 		)
 		.sort((a, b) => {
 			if (sort === 'newest') {
@@ -220,8 +220,8 @@
 				{#if story.user_id && authors[story.user_id]}
 					<p class="story-author">By <span>{authors[story.user_id]}</span></p>
 				{/if}
-				{#if story.description}
-					<p>{@html coffeeMarkdown(story.description)}</p>
+				{#if story.short_description}
+					<p>{@html coffeeMarkdown(story.short_description)}</p>
 				{/if}
 				<div class="story-meta-row">
 					<span class="age-rating">{story.age_rating}</span>

@@ -93,6 +93,8 @@
 	let editedDescription = '';
 	let editingTitle = false;
 	let editedTitle = '';
+	let editingShortDescription = false;
+	let editedShortDescription = '';
 
 	function startEditDescription() {
 		editedDescription = story?.description || '';
@@ -102,6 +104,11 @@
 	function startEditTitle() {
 		editedTitle = story?.title || '';
 		editingTitle = true;
+	}
+
+	function startEditShortDescription() {
+		editedShortDescription = story?.short_description || '';
+		editingShortDescription = true;
 	}
 
 	async function saveDescription() {
@@ -116,6 +123,20 @@
 		}
 		story = { ...story, description: editedDescription };
 		editingDescription = false;
+	}
+
+	async function saveShortDescription() {
+		if (!story) return;
+		const { error: updateError } = await supabase
+			.from('stories')
+			.update({ short_description: editedShortDescription })
+			.eq('id', story.id);
+		if (updateError) {
+			error = updateError.message;
+			return;
+		}
+		story = { ...story, short_description: editedShortDescription };
+		editingShortDescription = false;
 	}
 
 	async function saveTitle() {
@@ -224,6 +245,30 @@
 					<p class="story-description">
 						{@html coffeeMarkdown(story.description || '', defaultStyles)}
 						<button class="edit-desc-btn" on:click={startEditDescription}>Edit Description</button>
+					</p>
+				{/if}
+			</div>
+
+			<div class="panel-section">
+				{#if editingShortDescription}
+					<div class="edit-description-box">
+						<textarea 
+							bind:value={editedShortDescription} 
+							rows="2" 
+							class="edit-description-textarea"
+							placeholder="Enter a short description (will be shown in story listings)"
+							maxlength="300"
+						></textarea>
+						<div class="edit-description-actions">
+							<button on:click={saveShortDescription}>Save</button>
+							<button on:click={() => (editingShortDescription = false)}>Cancel</button>
+						</div>
+					</div>
+				{:else}
+					<p class="story-description">
+						<strong>Short Description:</strong><br>
+						{@html coffeeMarkdown(story.short_description || '', defaultStyles)}
+						<button class="edit-desc-btn" on:click={startEditShortDescription}>Edit Short Description</button>
 					</p>
 				{/if}
 			</div>

@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { supabase } from '$lib/supabaseClient';
 	import { sendCommentNotification } from '$lib/notifications';
+	import { usernameCache } from '$lib/stores/username_cache';
+	import { onMount } from 'svelte';
 
 	export let blockId: string;
 	export let comments: { id: string; commenter_id: string; comment: string; username?: string }[];
@@ -9,6 +11,19 @@
 	let commentInput = '';
 	let commentError = '';
 	let submittingComment = false;
+	let usernames: Record<string, string> = {};
+
+	onMount(async () => {
+		// Fetch usernames for all comments that don't have them
+		for (const comment of comments) {
+			if (!comment.username) {
+				const username = await usernameCache.getUsername(comment.commenter_id);
+				if (username) {
+					usernames[comment.commenter_id] = username;
+				}
+			}
+		}
+	});
 
 	async function submitComment() {
 		const text = commentInput.trim();
@@ -41,7 +56,7 @@
 			// Refresh comments
 			const { data } = await supabase
 				.from('story_block_comments')
-				.select('id, commenter_id, comment, created_at, profiles(username)')
+				.select('id, commenter_id, comment, created_at')
 				.eq('id', blockId)
 				.order('created_at', { ascending: true });
 
@@ -49,23 +64,27 @@
 				comments = data.map(c => ({
 					id: c.id,
 					commenter_id: c.commenter_id,
-					comment: c.comment,
-					username: (c.profiles as { username: string }[])[0]?.username
+					comment: c.comment
 				}));
+
+				// Fetch usernames for new comments
+				for (const comment of comments) {
+					if (!usernames[comment.commenter_id]) {
+						const username = await usernameCache.getUsername(comment.commenter_id);
+						if (username) {
+							usernames[comment.commenter_id] = username;
+						}
+					}
+				}
 			}
 
 			// Send notification
-			const { data: commenterProfile } = await supabase
-				.from('profiles')
-				.select('username')
-				.eq('account_id', commenter_id)
-				.single();
-
-			if (commenterProfile?.username) {
+			const username = await usernameCache.getUsername(commenter_id);
+			if (username) {
 				await sendCommentNotification({
 					userId: commenter_id,
 					commenterId: commenter_id,
-					commenterUsername: commenterProfile.username,
+					commenterUsername: username,
 					storyTitle: 'Story' // This should be passed as a prop if needed
 				});
 			}
@@ -74,6 +93,8 @@
 	}
 </script>
 
+<!-- svelte-ignore a11y_click_events_have_key_events -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div class="global-comments-panel-backdrop" on:click={onClose}></div>
 <div class="global-comments-panel">
 	<button class="close-comments-panel" on:click={onClose} aria-label="Close comments">&times;</button>
@@ -82,7 +103,13 @@
 		<ul>
 			{#each comments as c}
 				<li>
-					<span class="comment-user">{c.username ?? c.commenter_id.slice(0, 8)}:</span>
+					<a 
+						href="/profile/{c.username}" 
+						class="comment-user"
+						title="View profile"
+					>
+						{usernames[c.commenter_id] ?? c.username ?? c.commenter_id.slice(0, 8)}
+					</a>
 					<span class="comment-text">{c.comment}</span>
 				</li>
 			{/each}
@@ -166,6 +193,13 @@
 		color: #6366f1;
 		font-weight: 500;
 		margin-right: 0.5em;
+		text-decoration: none;
+		transition: color 0.2s;
+	}
+
+	.comment-user:hover {
+		color: #4f46e5;
+		text-decoration: underline;
 	}
 
 	.comment-text {

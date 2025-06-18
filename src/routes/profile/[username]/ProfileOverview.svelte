@@ -108,7 +108,7 @@
 							<strong class="overview-story-title">{story.title}</strong>
 						</a>
 						{#if story.description}
-							<span class="overview-story-desc">{story.description}</span>
+							<span class="overview-story-desc">{story.short_description}</span>
 						{/if}
 						<span class="overview-story-meta">
 							{#if story.created_at}
@@ -205,7 +205,7 @@
 <style>
 	.overview-grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+		grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 		gap: 2rem;
 		margin-top: 1.5em;
 	}
