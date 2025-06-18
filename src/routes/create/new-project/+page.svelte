@@ -5,6 +5,7 @@
 
 	let title = '';
 	let description = '';
+	let short_description = '';
 	let age_rating: Database['public']['Enums']['AgeRating'] = 'Everyone';
 	let error = '';
 	let loading = false;
@@ -28,6 +29,7 @@
 			.insert({
 				title,
 				description,
+				short_description,
 				age_rating,
 				user_id: user.id,
 				tags
@@ -76,7 +78,14 @@
 <form on:submit|preventDefault={createProject}>
 	<label>Title</label>
 	<input type="text" bind:value={title} required maxlength="100" />
-	<label>Description</label>
+	<label>Short Description</label>
+	<textarea 
+		bind:value={short_description} 
+		maxlength="300" 
+		placeholder="A brief summary of your story (max 300 characters)"
+		rows="2"
+	></textarea>
+	<label>Full Description</label>
 	<textarea bind:value={description} maxlength="500"></textarea>
 	<label>Age Rating</label>
 	<select bind:value={age_rating}>

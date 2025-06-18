@@ -55,6 +55,12 @@
 			<span class="stat-label">Reading Time</span>
 			<span class="stat-value">{readingTime} min</span>
 		</div>
+		{#if story.updated_at && story.updated_at !== story.created_at}
+			<div class="stat-item">
+				<span class="stat-label">Last Updated</span>
+				<span class="stat-value">{new Date(story.updated_at).toLocaleDateString()}</span>
+			</div>
+		{/if}
 	</div>
 
 	{#if story.description}
