@@ -181,7 +181,7 @@
 
 		blocks = [...blocks, data];
 		newBlockContent = '';
-		newBlockStyles = '{}';
+		newBlockStyles = JSON.stringify(defaultStyles);
 		canCreateBlock = false;
 	}
 
