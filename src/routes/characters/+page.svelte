@@ -144,6 +144,18 @@
 	});
 </script>
 
+<svelte:head>
+	<title>Characters - Calm Coffee</title>
+	<meta name="description" content="Discover and catalogue your original characters (OCs) and Sonas in the Calm Coffee community. Share your character designs and stories." />
+	<meta name="keywords" content="original characters, OCs, sonas, character creation, character design" />
+	<meta property="og:title" content="Characters - Calm Coffee" />
+	<meta property="og:description" content="Discover and create original characters (OCs) and sonas in the Calm Coffee community. Share your character designs and stories." />
+	<meta property="og:type" content="website" />
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:title" content="Characters - Calm Coffee" />
+	<meta name="twitter:description" content="Discover and catalogue your original characters (OCs) and sonas in the Calm Coffee community. Share your character designs and stories." />
+</svelte:head>
+
 <div class="characters-header">
 	<h1>Characters</h1>
 	<div class="characters-controls">

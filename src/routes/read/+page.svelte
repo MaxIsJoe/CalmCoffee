@@ -168,7 +168,17 @@
 	}
 </script>
 
-<h2>Read Stories</h2>
+<svelte:head>
+	<title>Stories - Calm Coffee</title>
+	<meta name="description" content="Discover and read stories from the Calm Coffee community." />
+	<meta name="keywords" content="stories, creative writing, reading, fiction, writing community" />
+	<meta property="og:title" content="Stories - Calm Coffee" />
+	<meta property="og:description" content="Discover and read stories from the Calm Coffee community." />
+	<meta property="og:type" content="website" />
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:title" content="Stories - Calm Coffee" />
+	<meta name="twitter:description" content="Discover and read stories from the Calm Coffee community." />
+</svelte:head>
 
 {#if $user}
 	<div class="story-manage-bar">

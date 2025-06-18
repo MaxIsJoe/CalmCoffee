@@ -16,6 +16,7 @@
 	$: storyId = $page.params.id;
 
 	let loadingStep = 0;
+	let showDeleteConfirm = false;
 
 	onMount(async () => {
 		loadingStep = 1; // Authenticating user
@@ -188,6 +189,42 @@
 		}
 		loading = false;
 	}
+
+	async function deleteStory() {
+		if (!story) return;
+		loading = true;
+		loadingStep = 5; // Indicate deletion step
+		const { data: userData } = await supabase.auth.getUser();
+		const user = userData.user;
+
+		if (!user) {
+			error = 'You must be logged in to delete a story.';
+			loading = false;
+			return;
+		}
+
+		// Verify user owns the story
+		if (story.user_id !== user.id) {
+			error = 'You do not have permission to delete this story.';
+			loading = false;
+			return;
+		}
+
+		const { error: deleteError } = await supabase
+			.from('stories')
+			.delete()
+			.eq('id', story.id)
+			.eq('user_id', user.id); // Double-check ownership on delete for security
+
+		if (deleteError) {
+			error = deleteError.message;
+			loading = false;
+			return;
+		}
+
+		// Redirect to create page after successful deletion
+		goto('/create');
+	}
 </script>
 
 {#if loading}
@@ -199,6 +236,9 @@
 			<p class:active={loadingStep >= 3}>3. Fetching chapters...</p>
 			{#if loadingStep === 4}
 				<p class:active={loadingStep === 4}>4. Updating publish status...</p>
+			{/if}
+			{#if loadingStep === 5}
+				<p class:active={loadingStep === 5}>5. Deleting story...</p>
 			{/if}
 		</div>
 	</div>
@@ -227,6 +267,7 @@
 						<button on:click={togglePublishStatus} class="publish-toggle-btn">
 							{story.is_published ? 'Unpublish' : 'Publish'}
 						</button>
+						<button on:click={() => (showDeleteConfirm = true)} class="delete-btn">Delete Story</button>
 					</div>
 				</div>
 			</div>
@@ -289,6 +330,19 @@
 					<input type="text" bind:value={newChapterTitle} placeholder="New chapter title" />
 					<button on:click={addChapter}>Add Chapter</button>
 				</div>
+			</div>
+		</div>
+	</div>
+{/if}
+
+{#if showDeleteConfirm}
+	<div class="modal-overlay" on:click={() => (showDeleteConfirm = false)}>
+		<div class="modal-content" on:click|stopPropagation>
+			<h3>Delete Story</h3>
+			<p>Are you sure you want to delete "{story?.title}"? This action cannot be undone.</p>
+			<div class="modal-actions">
+				<button class="cancel-btn" on:click={() => (showDeleteConfirm = false)}>Cancel</button>
+				<button class="confirm-delete-btn" on:click={deleteStory}>Delete Story</button>
 			</div>
 		</div>
 	</div>
@@ -639,6 +693,15 @@
 			margin-left: 0;
 			width: 100%; /* Full width buttons in list */
 		}
+
+		.action-buttons {
+			flex-direction: column;
+			width: 100%;
+		}
+
+		.action-buttons button {
+			width: 100%;
+		}
 	}
 
 	@media (max-width: 480px) {
@@ -689,5 +752,72 @@
 	.edit-title-actions {
 		display: flex;
 		gap: 1rem;
+	}
+
+	.delete-btn {
+		background-color: #dc2626;
+		color: #fff;
+	}
+
+	.delete-btn:hover {
+		background-color: #b91c1c;
+	}
+
+	.modal-overlay {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background-color: rgba(0, 0, 0, 0.5);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 1000;
+	}
+
+	.modal-content {
+		background-color: #fff;
+		padding: 2rem;
+		border-radius: 12px;
+		box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+		max-width: 500px;
+		width: 90%;
+	}
+
+	.modal-content h3 {
+		color: #dc2626;
+		margin-top: 0;
+		margin-bottom: 1rem;
+	}
+
+	.modal-content p {
+		color: #4b2e19;
+		margin-bottom: 1.5rem;
+		line-height: 1.5;
+	}
+
+	.modal-actions {
+		display: flex;
+		justify-content: flex-end;
+		gap: 1rem;
+	}
+
+	.cancel-btn {
+		background-color: #e0d7ce;
+		color: #4b2e19;
+	}
+
+	.cancel-btn:hover {
+		background-color: #d4c2b8;
+	}
+
+	.confirm-delete-btn {
+		background-color: #dc2626;
+		color: #fff;
+	}
+
+	.confirm-delete-btn:hover {
+		background-color: #b91c1c;
 	}
 </style>

@@ -30,6 +30,18 @@
 	});
 </script>
 
+<svelte:head>
+	<title>Calm Coffee - A Cozy Writing Platform</title>
+	<meta name="description" content="Write, share, and discover stories one block at a time. A cozy platform for writers to express their creativity in manageable pieces." />
+	<meta name="keywords" content="writing platform, creative writing, stories, blogging, character creation" />
+	<meta property="og:title" content="Calm Coffee - A Cozy Writing Platform" />
+	<meta property="og:description" content="Write, share, and discover stories one block at a time. A cozy platform for writers to express their creativity in manageable pieces." />
+	<meta property="og:type" content="website" />
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:title" content="Calm Coffee - A Cozy Writing Platform" />
+	<meta name="twitter:description" content="Write, share, and discover stories one block at a time. A cozy platform for writers to express their creativity in manageable pieces." />
+</svelte:head>
+
 <div class="home-hero">
 	<h1>Welcome to Calm Coffee</h1>
 	<p class="subtitle">
