@@ -1,12 +1,10 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import AccountSettings from './AccountSettings.svelte';
-	import InvitesSettings from './InvitesSettings.svelte';
 	import PreferencesSettings from './PreferencesSettings.svelte';
 
 	const categories = [
 		{ key: 'account', label: 'Account' },
-		{ key: 'invites', label: 'Invites' },
 		{ key: 'preferences', label: 'Preferences' }
 	];
 
@@ -14,7 +12,6 @@
 
 	let components = {
 		account: AccountSettings,
-		invites: InvitesSettings,
 		preferences: PreferencesSettings
 	};
 </script>

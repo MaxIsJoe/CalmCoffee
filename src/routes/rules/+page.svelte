@@ -27,7 +27,7 @@
 
 <style>
 	.rules-container {
-		max-width: 800px;
+		max-width: 1280px;
 		margin: 2rem auto;
 		padding: 0 1rem;
 	}
