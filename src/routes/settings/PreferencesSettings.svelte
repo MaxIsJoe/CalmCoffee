@@ -51,6 +51,10 @@
 			name: 'Dark Chocolate',
 			variables: {}, // Uses [data-theme="dark"]
 		},
+		{
+			name: 'Caramel',
+			variables: {}, // Uses [data-theme="caramel"]
+		},
 	];
 
 	let customThemes: Theme[] = [];
@@ -80,6 +84,10 @@
 			document.documentElement.setAttribute('data-theme', 'dark');
 			removeCustomThemeStyle();
 			localStorage.setItem('theme', 'Dark Chocolate');
+		} else if (theme.name === 'Caramel') {
+			document.documentElement.setAttribute('data-theme', 'caramel');
+			removeCustomThemeStyle();
+			localStorage.setItem('theme', 'Caramel');
 		} else {
 			document.documentElement.setAttribute('data-theme', 'custom');
 			injectCustomThemeStyle(theme.variables);
@@ -119,7 +127,9 @@
 	});
 
 	function handleThemeChange(e: Event) {
-		const name = (e.target as HTMLSelectElement).value;
+		const target = e.target;
+		if (!(target instanceof HTMLSelectElement)) return;
+		const name = target.value;
 		selectedTheme = name;
 		const found = [...BUILTIN_THEMES, ...customThemes].find(t => t.name === name);
 		if (found) applyTheme(found);

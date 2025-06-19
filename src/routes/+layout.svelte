@@ -179,7 +179,7 @@
 	}
 
 	.footer-section p {
-		color: var(--color-secondary);
+		color: var(--color-footer-muted);
 		line-height: 1.6;
 	}
 
@@ -208,7 +208,7 @@
 		padding: 1.5rem;
 		margin-top: 2rem;
 		background-color: var(--color-footer-alt);
-		color: var(--color-secondary);
+		color: var(--color-footer-muted);
 	}
 
 	@media (max-width: 768px) {
@@ -295,7 +295,7 @@
 
 	.build-time {
 		font-size: 0.7rem;
-		color: var(--color-secondary);
+		color: var(--color-footer-muted);
 	}
 
 	.version-info a {

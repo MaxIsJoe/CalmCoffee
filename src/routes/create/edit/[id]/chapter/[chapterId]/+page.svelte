@@ -24,6 +24,8 @@
 	let nextBlockTime: Date | null = null;
 	let timeUntilNextBlock = '';
 
+	const timeLimit: number = 25;
+
 	onMount(async () => {
 		loading = true;
 		const { data: userData } = await supabase.auth.getUser();
@@ -53,15 +55,15 @@
 		} else {
 			blocks = (blockData || []).map(b => ({ ...b, created_at: b.created_at || '' }));
 		}
-		// Check if user can create a new block (last block created_at > 35 minutes ago)
+		// Check if user can create a new block (last block created_at > 25 minutes ago)
 		const lastBlock = blocks.length > 0 ? blocks[blocks.length - 1] : null;
 		if (lastBlock && lastBlock.created_at) {
 			const last = new Date(lastBlock.created_at);
 			const now = new Date();
 			const diff = (now.getTime() - last.getTime()) / (1000 * 60); // diff in minutes
-			canCreateBlock = diff >= 35;
+			canCreateBlock = diff >= timeLimit;
 			if (!canCreateBlock) {
-				nextBlockTime = new Date(last.getTime() + 35 * 60 * 1000);
+				nextBlockTime = new Date(last.getTime() + timeLimit * 60 * 1000);
 				updateTimeUntilNextBlock();
 				timerInterval = setInterval(updateTimeUntilNextBlock, 1000);
 			}
@@ -224,7 +226,7 @@
 			<div class="block-wait-msg-info">
 				<span class="wait-icon" aria-hidden="true">⏳</span>
 				<span>
-					<span class="block-wait-title">You can add a new block every 35 minutes.</span><br />
+					<span class="block-wait-title">You can add a new block every {timeLimit} minutes.</span><br />
 					{#if timeUntilNextBlock}
 						Next block available in <b>{timeUntilNextBlock}</b>
 					{/if}

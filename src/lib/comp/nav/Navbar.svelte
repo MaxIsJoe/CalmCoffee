@@ -25,6 +25,7 @@
 	const BUILTIN_THEMES: Theme[] = [
 		{ name: 'Morning Coffee', variables: {} },
 		{ name: 'Dark Chocolate', variables: {} },
+		{ name: 'Caramel', variables: {} },
 	];
 	let customThemes: Theme[] = [];
 	let selectedTheme: string = 'Morning Coffee';
@@ -213,6 +214,10 @@
 			document.documentElement.setAttribute('data-theme', 'dark');
 			removeCustomThemeStyle();
 			localStorage.setItem('theme', 'Dark Chocolate');
+		} else if (theme.name === 'Caramel') {
+			document.documentElement.setAttribute('data-theme', 'caramel');
+			removeCustomThemeStyle();
+			localStorage.setItem('theme', 'Caramel');
 		} else {
 			document.documentElement.setAttribute('data-theme', 'custom');
 			injectCustomThemeStyle(theme.variables);
@@ -392,7 +397,7 @@
 		{/if}
 		<div class="theme-quick-switch desktop-theme-switch">
 			<button class="theme-btn" aria-label="Theme" on:click={openThemeModal}>
-				{selectedTheme === 'Morning Coffee' ? '🌙' : selectedTheme === 'Dark Chocolate' ? '☀️' : '🎨'}
+				{selectedTheme === 'Morning Coffee' ? '🌙' : selectedTheme === 'Dark Chocolate' ? '☀️' : selectedTheme === 'Caramel' ? '🍫' : '🎨'}
 			</button>
 		</div>
 	</div>
@@ -419,7 +424,7 @@
 				{/if}
 				<div class="theme-quick-switch mobile-theme-switch">
 					<button class="theme-btn" aria-label="Theme" on:click={openThemeModal}>
-						{selectedTheme === 'Morning Coffee' ? '🌙' : selectedTheme === 'Dark Chocolate' ? '☀️' : '🎨'}
+						{selectedTheme === 'Morning Coffee' ? '🌙' : selectedTheme === 'Dark Chocolate' ? '☀️' : selectedTheme === 'Caramel' ? '🍫' : '🎨'}
 					</button>
 				</div>
 			</div>
