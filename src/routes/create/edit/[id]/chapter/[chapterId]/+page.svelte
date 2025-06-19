@@ -264,8 +264,8 @@
 
 <style>
 	.chapter-blocks-layout {
-		width: 100vw;
-		min-height: 100vh;
+		width: 90%;
+		min-height: 90vh;
 		margin: 0;
 		background: var(--color-block-list-bg);
 		border-radius: 0;
@@ -273,9 +273,11 @@
 		padding: 0;
 		display: flex;
 		flex-direction: column;
+		word-break: break-all;
+		margin: 0 auto;
 	}
 	.chapter-blocks-header {
-		width: 100vw;
+		width: 90%;
 		background: var(--color-block-list-bg);
 		display: flex;
 		align-items: center;
@@ -310,7 +312,7 @@
 		margin-left: 1.2rem;
 	}
 	.block-list {
-		width: 100vw;
+		width: 100%;
 		padding: 0 2vw 2vw 2vw;
 		margin: 0;
 		list-style: none;
@@ -335,22 +337,6 @@
 		color: var(--color-block-error);
 		margin-top: 3rem;
 	}
-	:global(.block-editor) {
-		width: 100vw !important;
-		border-radius: 0 !important;
-		margin: 0 0 1.5rem 0 !important;
-		box-shadow: none !important;
-		padding-left: 2vw !important;
-		padding-right: 2vw !important;
-	}
-	:global(.block-preview) {
-		width: 100%;
-		border-radius: 0 !important;
-		margin: 0;
-		box-shadow: none !important;
-		padding-left: 0;
-		padding-right: 0;
-	}
 	@media (max-width: 900px) {
 		.chapter-blocks-header {
 			flex-direction: column;
@@ -362,10 +348,6 @@
 			padding: 0 2vw 1vw 2vw;
 			gap: 0.7rem;
 		}
-		:global(.block-editor) {
-			padding-left: 2vw !important;
-			padding-right: 2vw !important;
-		}
 	}
 	@media (max-width: 600px) {
 		.chapter-blocks-header {
@@ -373,10 +355,6 @@
 		}
 		.block-list {
 			padding: 0 1vw 1vw 1vw;
-		}
-		:global(.block-editor) {
-			padding-left: 1vw !important;
-			padding-right: 1vw !important;
 		}
 	}
 </style>
