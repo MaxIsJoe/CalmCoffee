@@ -4,54 +4,28 @@
 	import { page } from '$app/stores';
 	import { coffeeMarkdown, defaultStyles } from '$lib/md/coffeeMarkdown';
 	import type { Database } from '../../../../../../../database.types';
-	import ZenMarkdownEditor from '$lib/comp/markdown/ZenMarkdownEditor.svelte';
+	import BlockList from '$lib/comp/markdown/BlockList.svelte';
+	import BlockEditor from '$lib/comp/markdown/BlockEditor.svelte';
+	import BlockPreview from '$lib/comp/markdown/BlockPreview.svelte';
 
 	let blocks: Database['public']['Tables']['blocks']['Row'][] = [];
 	let error = '';
 	let loading = true;
-	let newBlockContent = '';
-	let newBlockStyles = JSON.stringify(defaultStyles, null, 2); // Use defaultStyles as initial value
 	let canCreateBlock = true;
-
 	let chapterId = '';
 	$: chapterId = $page.params.chapterId;
 
-	let showBlocksList = true; // Collapsible blocks list
-	let showEditor = true;
-
-	onMount(() => {
-		// Check if we're on mobile
-		const isMobile = window.matchMedia('(max-width: 900px)').matches;
-		if (isMobile) {
-			showBlocksList = false;
-		}
-
-		// Listen for screen size changes
-		const mediaQuery = window.matchMedia('(max-width: 900px)');
-		const handleResize = (e: MediaQueryListEvent) => {
-			showBlocksList = !e.matches;
-		};
-		mediaQuery.addEventListener('change', handleResize);
-
-		return () => {
-			mediaQuery.removeEventListener('change', handleResize);
-		};
-	});
-
-	function toggleBlocksList() {
-		showBlocksList = !showBlocksList;
-	}
-	function toggleEditor() {
-		showEditor = !showEditor;
-	}
-	function clearEditor() {
-		newBlockContent = '';
-	}
-	function copyMarkdown() {
-		navigator.clipboard.writeText(newBlockContent);
-	}
+	// Modes: 'preview', 'add', 'edit'
+	let mode: 'preview' | 'add' | 'edit' = 'preview';
+	let editingBlockId: string | null = null;
+	let editorContent = '';
+	let editorStyles = JSON.stringify(defaultStyles, null, 2);
+	let editorLoading = false;
+	let nextBlockTime: Date | null = null;
+	let timeUntilNextBlock = '';
 
 	onMount(async () => {
+		loading = true;
 		const { data: userData } = await supabase.auth.getUser();
 		const user = userData.user;
 		if (!user) {
@@ -59,14 +33,13 @@
 			loading = false;
 			return;
 		}
-		// Check chapter ownership by joining to story
 		const { data: chapterData, error: chapterError } = await supabase
 			.from('chapters')
 			.select('*, stories:user_id')
 			.eq('id', chapterId)
 			.single();
 		if (chapterError || !chapterData || chapterData.user_id !== user.id) {
-			error = `You do not have access to this chapter. Expected user_id: ${chapterData.user_id}, your user_id: ${user.id}.`;
+			error = 'You do not have access to this chapter.';
 			loading = false;
 			return;
 		}
@@ -78,7 +51,7 @@
 		if (blockError) {
 			error = blockError.message;
 		} else {
-			blocks = blockData || [];
+			blocks = (blockData || []).map(b => ({ ...b, created_at: b.created_at || '' }));
 		}
 		// Check if user can create a new block (last block created_at > 35 minutes ago)
 		const lastBlock = blocks.length > 0 ? blocks[blocks.length - 1] : null;
@@ -96,9 +69,7 @@
 		loading = false;
 	});
 
-	let nextBlockTime: Date | null = null;
-	let timeUntilNextBlock = '';
-
+	let timerInterval: ReturnType<typeof setInterval> | null = null;
 	function updateTimeUntilNextBlock() {
 		if (!nextBlockTime) {
 			timeUntilNextBlock = '';
@@ -117,174 +88,121 @@
 		const mins = minutes % 60;
 		timeUntilNextBlock = `${hours > 0 ? hours + 'h ' : ''}${mins}m ${seconds}s`;
 	}
-
-	let timerInterval: ReturnType<typeof setInterval> | null = null;
-
 	$: if (canCreateBlock && timerInterval) {
 		clearInterval(timerInterval);
 		timerInterval = null;
 	}
 
-	async function addBlock() {
-		if (!canCreateBlock) return;
-		if (!newBlockContent.trim() || newBlockContent.length > 1000) {
-			error = 'Block must be 1-1000 characters.';
-			return;
-		}
-		let stylesObj = {};
-		if (newBlockStyles.trim()) {
-			try {
-				stylesObj = JSON.parse(newBlockStyles);
-			} catch (e) {
-				error = 'Styles must be valid JSON.';
-				return;
-			}
-		}
-		const { data: userData } = await supabase.auth.getUser();
-		const user = userData.user;
-		if (!user) {
-			error = 'You must be logged in.';
-			return;
-		}
-		// Double check chapter ownership
-		const { data: chapterData, error: chapterError } = await supabase
-			.from('chapters')
-			.select('*, stories:user_id')
-			.eq('id', chapterId)
-			.single();
-		if (chapterError || !chapterData || chapterData.user_id !== user.id) {
-			error = 'You do not have access to this chapter.';
-			return;
-		}
-		const nowIso = new Date().toISOString();
-		const { data, error: insertError } = await supabase
-			.from('blocks')
-			.insert({
-				content: newBlockContent,
-				chapter_id: chapterId,
-				user_id: user.id,
-				styles: stylesObj,
-				updated_at: nowIso
-			})
-			.select()
-			.single();
-		if (insertError) {
-			error = insertError.message;
-			return;
-		}
-		// Update chapter's updated_at
-		await supabase.from('chapters').update({ updated_at: nowIso }).eq('id', chapterId);
-		// Update story's updated_at
-		if (chapterData && chapterData.story_id) {
-			await supabase.from('stories').update({ updated_at: nowIso }).eq('id', chapterData.story_id);
-		}
-
-		blocks = [...blocks, data];
-		newBlockContent = '';
-		newBlockStyles = JSON.stringify(defaultStyles);
-		canCreateBlock = false;
+	function handleAddClick() {
+		mode = 'add';
+		editorContent = '';
+		editorStyles = JSON.stringify(defaultStyles, null, 2);
+		error = '';
 	}
-
-	// Live preview variables
-	let previewHtml = '';
-	$: previewHtml = (() => {
-		try {
-			return coffeeMarkdown(newBlockContent, JSON.parse(newBlockStyles));
-		} catch {
-			return coffeeMarkdown(newBlockContent, undefined);
-		}
-	})();
-
-	let showStylesEditor = false; // for new block
-	let showEditStylesEditor = false; // for editing block
-
-	function toggleStylesEditor() {
-		showStylesEditor = !showStylesEditor;
-	}
-	function toggleEditStylesEditor() {
-		showEditStylesEditor = !showEditStylesEditor;
-	}
-
-	let editingBlockId: string | null = null;
-	let editingContent = '';
-	let editingStyles = '{}'; // JSON string for editing block styles
-	let editLoading = false;
-
-	function startEditBlock(blockId: string, content: string, styles: any) {
+	function handleEditClick(blockId: string) {
+		const block = blocks.find(b => b.id === blockId);
+		if (!block) return;
+		mode = 'edit';
 		editingBlockId = blockId;
-		editingContent = content;
-		editingStyles = styles ? JSON.stringify(styles, null, 2) : '{}';
-		showEditStylesEditor = false;
+		editorContent = block.content;
+		editorStyles = block.styles ? JSON.stringify(block.styles, null, 2) : JSON.stringify(defaultStyles, null, 2);
 		error = '';
 	}
-	function cancelEditBlock() {
+	function handleCancel() {
+		mode = 'preview';
 		editingBlockId = null;
-		editingContent = '';
-		editingStyles = '{}';
-		showEditStylesEditor = false;
+		editorContent = '';
+		editorStyles = JSON.stringify(defaultStyles, null, 2);
 		error = '';
 	}
-	async function saveEditBlock(blockId: string) {
-		if (!editingContent.trim() || editingContent.length > 1000) {
-			error = 'Block must be 1-1000 characters.';
+	async function handleSave(e: CustomEvent<{ value: string, styles: string }>) {
+		const value = e.detail.value;
+		let stylesObj = {};
+		try {
+			stylesObj = JSON.parse(e.detail.styles);
+		} catch {
+			error = 'Styles must be valid JSON.';
 			return;
 		}
-		let stylesObj = {};
-		if (editingStyles.trim()) {
-			try {
-				stylesObj = JSON.parse(editingStyles);
-			} catch (e) {
-				error = 'Styles must be valid JSON.';
-				return;
-			}
-		}
-		editLoading = true;
+		editorLoading = true;
 		const { data: userData } = await supabase.auth.getUser();
 		const user = userData.user;
 		if (!user) {
 			error = 'You must be logged in.';
-			editLoading = false;
-			return;
-		}
-		// Double check chapter ownership
-		const { data: chapterData, error: chapterError } = await supabase
-			.from('chapters')
-			.select('*, stories:user_id')
-			.eq('id', chapterId)
-			.single();
-		if (chapterError || !chapterData || chapterData.user_id !== user.id) {
-			error = 'You do not have access to this chapter.';
-			editLoading = false;
+			editorLoading = false;
 			return;
 		}
 		const nowIso = new Date().toISOString();
-		const { error: updateError, data: updated } = await supabase
-			.from('blocks')
-			.update({ content: editingContent, styles: stylesObj, updated_at: nowIso })
-			.eq('id', blockId)
-			.select();
-		if (updateError) {
-			error = updateError.message;
-			editLoading = false;
-			return;
+		if (mode === 'add') {
+			// Double check chapter ownership
+			const { data: chapterData, error: chapterError } = await supabase
+				.from('chapters')
+				.select('*, stories:user_id')
+				.eq('id', chapterId)
+				.single();
+			if (chapterError || !chapterData || chapterData.user_id !== user.id) {
+				error = 'You do not have access to this chapter.';
+				editorLoading = false;
+				return;
+			}
+			const { data, error: insertError } = await supabase
+				.from('blocks')
+				.insert({
+					content: value,
+					chapter_id: chapterId,
+					user_id: user.id,
+					styles: stylesObj,
+					updated_at: nowIso
+				})
+				.select()
+				.single();
+			if (insertError) {
+				error = insertError.message;
+				editorLoading = false;
+				return;
+			}
+			await supabase.from('chapters').update({ updated_at: nowIso }).eq('id', chapterId);
+			if (chapterData && chapterData.story_id) {
+				await supabase.from('stories').update({ updated_at: nowIso }).eq('id', chapterData.story_id);
+			}
+			blocks = [...blocks, data];
+			canCreateBlock = false;
+		} else if (mode === 'edit' && editingBlockId) {
+			const { data: chapterData, error: chapterError } = await supabase
+				.from('chapters')
+				.select('*, stories:user_id')
+				.eq('id', chapterId)
+				.single();
+			if (chapterError || !chapterData || chapterData.user_id !== user.id) {
+				error = 'You do not have access to this chapter.';
+				editorLoading = false;
+				return;
+			}
+			const { error: updateError, data: updated } = await supabase
+				.from('blocks')
+				.update({ content: value, styles: stylesObj, updated_at: nowIso })
+				.eq('id', editingBlockId)
+				.select();
+			if (updateError) {
+				error = updateError.message;
+				editorLoading = false;
+				return;
+			}
+			await supabase.from('chapters').update({ updated_at: nowIso }).eq('id', chapterId);
+			if (chapterData && chapterData.story_id) {
+				await supabase.from('stories').update({ updated_at: nowIso }).eq('id', chapterData.story_id);
+			}
+			blocks = blocks.map((b) =>
+				b.id === editingBlockId
+					? { ...b, content: value, styles: stylesObj, updated_at: nowIso }
+					: b
+			);
+			editingBlockId = null;
 		}
-		// Update chapter's updated_at
-		await supabase.from('chapters').update({ updated_at: nowIso }).eq('id', chapterId);
-		// Update story's updated_at
-		if (chapterData && chapterData.story_id) {
-			await supabase.from('stories').update({ updated_at: nowIso }).eq('id', chapterData.story_id);
-		}
-
-		// Update local blocks array
-		blocks = blocks.map((b) =>
-			b.id === blockId
-				? { ...b, content: editingContent, styles: stylesObj, updated_at: nowIso }
-				: b
-		);
-		editingBlockId = null;
-		editingContent = '';
-		editingStyles = '{}';
-		editLoading = false;
+		mode = 'preview';
+		editorContent = '';
+		editorStyles = JSON.stringify(defaultStyles, null, 2);
+		editorLoading = false;
 	}
 </script>
 
@@ -293,254 +211,81 @@
 {:else if error}
 	<div class="modern-error">{error}</div>
 {:else}
-	<div class="modern-block-editor">
-		<div class="modern-blocks-list-wrapper {showBlocksList ? '' : 'collapsed'}">
-			<button class="collapse-btn" on:click={toggleBlocksList} aria-label="Toggle blocks list">
-				{showBlocksList ? '⮜ Hide' : '⮞'}
-			</button>
-			{#if showBlocksList}
-				<div class="modern-blocks-list">
-					<h2>Blocks in Chapter</h2>
-					<ul>
-						{#each blocks as block}
-							<li class="block-item">
-								{#if editingBlockId === block.id}
-									<ZenMarkdownEditor
-										bind:value={editingContent}
-										maxLength={1000}
-										placeholder="Edit your block content..."
-										bind:showPreview={showEditStylesEditor}
-										customStyles={(() => {
-											try {
-												return JSON.parse(editingStyles);
-											} catch {
-												return defaultStyles;
-											}
-										})()}
-									/>
-									<button
-										class="styles-toggle-btn"
-										type="button"
-										on:click={toggleEditStylesEditor}
-										style="margin:0.5rem 0;"
-									>
-										{showEditStylesEditor ? 'Hide Styles ▲' : 'Advanced Styles ▼'}
-									</button>
-									{#if showEditStylesEditor}
-										<textarea
-											class="modern-textarea"
-											bind:value={editingStyles}
-											placeholder="Block styles (JSON)"
-											style="margin-bottom:0.5rem;height:70px;font-size:0.95rem;"
-										></textarea>
-									{/if}
-									<div style="display:flex;gap:0.5rem;">
-										<button
-											class="control-btn"
-											on:click={() => saveEditBlock(block.id)}
-											disabled={editLoading}
-										>
-											{editLoading ? 'Saving...' : 'Save'}
-										</button>
-										<button class="control-btn" on:click={cancelEditBlock} type="button"
-											>Cancel</button
-										>
-									</div>
-								{:else}
-									<div class="block-content">
-										{@html coffeeMarkdown(block.content, block.styles === null ? undefined : (block.styles as any))}
-									</div>
-									<small class="block-date"
-										>{block.created_at ? new Date(block.created_at).toLocaleString() : ''}</small
-									>
-									<button
-										class="control-btn"
-										style="margin-top:0.3rem;"
-										on:click={() => startEditBlock(block.id, block.content, block.styles)}
-									>
-										Edit
-									</button>
-								{/if}
-							</li>
-						{/each}
-					</ul>
-				</div>
+	<div class="chapter-blocks-layout">
+		<div class="chapter-blocks-header">
+			<h2>Blocks in Chapter</h2>
+			{#if mode === 'preview'}
+				<button class="add-block-btn" on:click={handleAddClick} disabled={!canCreateBlock}>
+					Add Block
+				</button>
+			{/if}
+			{#if !canCreateBlock && mode === 'preview'}
+				<span class="block-wait-msg">
+					Next block available in <b>{timeUntilNextBlock}</b>
+				</span>
 			{/if}
 		</div>
-		<div class="modern-editor-panel">
-			<div class="editor-controls">
-				<button on:click={toggleEditor} class="control-btn"
-					>{showEditor ? 'Hide' : 'Show'} Editor</button
-				>
-				<button on:click={clearEditor} class="control-btn">Clear</button>
-				<button on:click={copyMarkdown} class="control-btn">Copy Markdown</button>
-			</div>
-			<div class="editor-main">
-				{#if showEditor}
-					<div class="editor-column">
-						<ZenMarkdownEditor
-							bind:value={newBlockContent}
-							maxLength={1000}
-							placeholder="Write your next 1000 characters (markdown supported)"
-							customStyles={(() => {
-								try {
-									return JSON.parse(newBlockStyles);
-								} catch {
-									return defaultStyles;
-								}
-							})()}
+		{#if mode === 'add'}
+			<BlockEditor
+				value={editorContent}
+				styles={editorStyles}
+				on:save={handleSave}
+				on:cancel={handleCancel}
+				loading={editorLoading}
+				error={error}
+			/>
+		{/if}
+		<ul class="block-list">
+			{#each blocks as block (block.id)}
+				<li>
+					{#if mode === 'edit' && editingBlockId === block.id}
+						<BlockEditor
+							value={editorContent}
+							styles={editorStyles}
+							isEditing={true}
+							on:save={handleSave}
+							on:cancel={handleCancel}
+							loading={editorLoading}
+							error={error}
 						/>
-						<button
-							class="styles-toggle-btn"
-							type="button"
-							on:click={toggleStylesEditor}
-							style="margin:0.5rem 0;"
-						>
-							{showStylesEditor ? 'Hide Styles ▲' : 'Advanced Styles ▼'}
-						</button>
-						{#if showStylesEditor}
-							<textarea
-								bind:value={newBlockStyles}
-								placeholder="Block styles (JSON)"
-								class="modern-textarea"
-								style="margin-top:0.5rem;height:70px;font-size:0.95rem;"
-							></textarea>
-						{/if}
-					</div>
-				{/if}
-			</div>
-			{#if canCreateBlock}
-				<button class="add-block-btn" on:click={addBlock}>Add Block</button>
-			{:else}
-				<p class="block-wait-msg">
-					You can add a new block every 35 minutes.<br />
-					{#if timeUntilNextBlock}
-						Next block available in <b>{timeUntilNextBlock}</b>
+					{:else}
+						<BlockPreview
+							content={block.content}
+							styles={block.styles}
+							createdAt={block.created_at}
+							onEdit={() => handleEditClick(block.id)}
+						/>
 					{/if}
-				</p>
-			{/if}
-		</div>
+				</li>
+			{/each}
+		</ul>
 	</div>
 {/if}
 
 <style>
-	.modern-block-editor {
-		display: flex;
-		gap: 2rem;
-		margin: 2rem auto;
-		max-width: 100%;
-	}
-	.modern-blocks-list-wrapper {
-		display: flex;
-		flex-direction: column;
-		align-items: flex-start;
-		min-width: 270px;
-		max-width: 320px;
-		transition: width 0.2s;
-	}
-	.modern-blocks-list-wrapper.collapsed {
-		min-width: 0;
-		max-width: 40px;
-	}
-	.collapse-btn {
-		background: var(--color-block-toggle-bg);
-		color: var(--color-block-toggle-text);
-		border: none;
-		padding: 0.3rem 0.7rem;
-		border-radius: 6px;
-		font-size: 1rem;
-		margin-bottom: 0.7rem;
-		cursor: pointer;
-		align-self: flex-end;
-		transition: background 0.2s;
-	}
-	.collapse-btn:hover {
-		background: var(--color-block-toggle-hover);
-	}
-	.modern-blocks-list {
-		width: 100%;
+	.chapter-blocks-layout {
+		width: 100vw;
+		min-height: 100vh;
+		margin: 0;
 		background: var(--color-block-list-bg);
-		border-radius: 12px;
-		padding: 1.5rem 1.5rem 1rem 1.5rem;
-		box-shadow: 0 2px 12px var(--color-block-list-shadow);
-		height: fit-content;
-	}
-	.modern-blocks-list h2 {
-		margin-top: 0;
-		font-size: 1.2rem;
-		color: var(--color-block-list-title);
-	}
-	.block-item {
-		background: var(--color-block-bg);
-		border-radius: 8px;
-		margin-bottom: 1.2rem;
-		padding: 1rem 1.2rem;
-		box-shadow: 0 1px 4px var(--color-block-shadow);
-	}
-	.block-content {
-		font-size: 1.05rem;
-		color: var(--color-block-text);
-		margin-bottom: 0.5rem;
-	}
-	.block-date {
-		color: var(--color-block-date);
-		font-size: 0.85rem;
-	}
-	.modern-editor-panel {
-		flex: 1.2;
-		background: var(--color-block-editor-bg);
-		border-radius: 12px;
-		padding: 2rem 2rem 1.5rem 2rem;
-		box-shadow: 0 2px 12px var(--color-block-editor-shadow);
+		border-radius: 0;
+		box-shadow: none;
+		padding: 0;
 		display: flex;
 		flex-direction: column;
-		gap: 1.2rem;
 	}
-	.editor-controls {
+	.chapter-blocks-header {
+		width: 100vw;
+		background: var(--color-block-list-bg);
 		display: flex;
-		gap: 0.7rem;
-		margin-bottom: 0.5rem;
-	}
-	.control-btn {
-		background: var(--color-block-btn-bg);
-		color: var(--color-block-btn-text);
-		border: none;
-		padding: 0.4rem 1.1rem;
-		border-radius: 6px;
-		font-size: 1rem;
-		cursor: pointer;
-		transition: background 0.2s;
-	}
-	.control-btn:hover {
-		background: var(--color-block-btn-hover);
-	}
-	.editor-main {
-		display: flex;
-		gap: 2rem;
-		flex-direction: row;
-	}
-	.editor-column {
-		display: flex;
-		flex-direction: column;
-		flex: 1;
-	}
-	.modern-textarea {
-		width: 100%;
-		padding: 0.7rem;
-		border-radius: 8px;
-		border: 1.5px solid var(--color-block-textarea-border);
-		background: var(--color-block-textarea-bg);
-		box-shadow: 0 1px 4px var(--color-block-textarea-shadow);
-		resize: vertical;
-		margin-bottom: 0.5rem;
-	}
-	.preview-content {
-		font-size: 1.05rem;
-		color: var(--color-block-text);
-		word-break: break-word;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1.5rem;
+		padding: 2rem 2vw 1.2rem 2vw;
+		margin: 0;
+		border-bottom: 1.5px solid var(--color-block-list-shadow);
 	}
 	.add-block-btn {
-		margin-top: 1.2rem;
 		background: var(--color-block-add-btn-bg);
 		color: var(--color-block-add-btn-text);
 		border: none;
@@ -551,13 +296,32 @@
 		cursor: pointer;
 		transition: background 0.2s;
 	}
-	.add-block-btn:hover {
+	.add-block-btn:disabled {
+		background: var(--color-block-btn-bg);
+		color: var(--color-block-btn-text);
+		cursor: not-allowed;
+	}
+	.add-block-btn:hover:enabled {
 		background: var(--color-block-add-btn-hover);
 	}
 	.block-wait-msg {
 		color: var(--color-block-wait);
 		font-weight: 500;
-		margin-top: 1.2rem;
+		margin-left: 1.2rem;
+	}
+	.block-list {
+		width: 100vw;
+		padding: 0 2vw 2vw 2vw;
+		margin: 0;
+		list-style: none;
+		display: flex;
+		flex-direction: column;
+		gap: 1.2rem;
+	}
+	.block-list > li {
+		width: 100%;
+		margin: 0;
+		padding: 0;
 	}
 	.modern-loading {
 		text-align: center;
@@ -571,60 +335,48 @@
 		color: var(--color-block-error);
 		margin-top: 3rem;
 	}
-	.block-content,
-	.preview-content {
-		/* existing styles for .block-content and .preview-content */
-		font-size: 1.05rem;
-		color: var(--color-block-text);
-		margin-bottom: 0.5rem;
-		word-break: break-word;
+	:global(.block-editor) {
+		width: 100vw !important;
+		border-radius: 0 !important;
+		margin: 0 0 1.5rem 0 !important;
+		box-shadow: none !important;
+		padding-left: 2vw !important;
+		padding-right: 2vw !important;
+	}
+	:global(.block-preview) {
+		width: 100%;
+		border-radius: 0 !important;
+		margin: 0;
+		box-shadow: none !important;
+		padding-left: 0;
+		padding-right: 0;
 	}
 	@media (max-width: 900px) {
-		.modern-block-editor {
+		.chapter-blocks-header {
 			flex-direction: column;
-			gap: 1.5rem;
+			align-items: flex-start;
+			gap: 0.7rem;
+			padding: 1.2rem 2vw 0.7rem 2vw;
 		}
-		.editor-main {
-			flex-direction: column;
-			gap: 1rem;
+		.block-list {
+			padding: 0 2vw 1vw 2vw;
+			gap: 0.7rem;
 		}
-		.editor-column {
-			width: 100%;
-		}
-		.modern-preview.collapsable-preview {
-			min-width: 500px;
-			margin-left: 0;
-			max-width: 100%;
-		}
-		.modern-blocks-list-wrapper {
-			max-width: 100vw;
-			min-width: 0;
+		:global(.block-editor) {
+			padding-left: 2vw !important;
+			padding-right: 2vw !important;
 		}
 	}
-	.block-item .control-btn {
-		font-size: 0.95rem;
-		padding: 0.25rem 0.8rem;
-		margin-left: 0;
-	}
-	.block-item textarea.modern-textarea {
-		height: 120px;
-		width: 100%;
-		font-size: 1rem;
-	}
-	.styles-toggle-btn {
-		background: var(--color-block-toggle-bg);
-		color: var(--color-block-toggle-text);
-		border: 1px solid var(--color-block-toggle-border);
-		border-radius: 5px;
-		padding: 0.25rem 0.9rem;
-		font-size: 0.98rem;
-		cursor: pointer;
-		transition:
-			background 0.2s,
-			border 0.2s;
-	}
-	.styles-toggle-btn:hover {
-		background: var(--color-block-toggle-hover);
-		border-color: var(--color-block-toggle-hover-border);
+	@media (max-width: 600px) {
+		.chapter-blocks-header {
+			padding: 0.7rem 1vw 0.5rem 1vw;
+		}
+		.block-list {
+			padding: 0 1vw 1vw 1vw;
+		}
+		:global(.block-editor) {
+			padding-left: 1vw !important;
+			padding-right: 1vw !important;
+		}
 	}
 </style>
