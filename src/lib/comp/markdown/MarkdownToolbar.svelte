@@ -53,6 +53,7 @@
 	<div class="toolbar-group">
 		<button type="button" title="Blockquote" on:click={() => insert('> ', '', 'quote')}>&gt;</button>
 		<button type="button" title="Code Block" on:click={() => insert('```\n', '\n```', 'code block')}>```</button>
+		<button type="button" title="Poetry Block" on:click={() => insert('<poetry>\n', '\n</poetry>', 'Your poem here')}>✒️</button>
 	</div>
 
 	<!-- Layout Sections -->

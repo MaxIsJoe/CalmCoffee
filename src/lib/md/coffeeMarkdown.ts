@@ -20,6 +20,7 @@ export type CoffeeMarkdownStyles = {
 	custom?: string; // default style for <custom> tag (optional)
 	align?: string; // Add this new style for alignment
 	section?: string; // New style for the overall section container
+	poetry?: string; // Add poetry style for <poetry> blocks
 };
 
 export const defaultStyles: Required<CoffeeMarkdownStyles> = {
@@ -44,6 +45,7 @@ export const defaultStyles: Required<CoffeeMarkdownStyles> = {
 	custom: '', // no default, user must provide
 	align: 'text-align:center;', // Default alignment style
 	section: 'margin:1em 0; overflow:hidden;', // Default style for sections
+	poetry: 'font-family:serif;font-style:italic;white-space:pre-line;padding:1em 1.5em;margin:1.2em 0;line-height:1.7;', // Default poetry style
 };
 
 //background-image: url('https://wallpaperaccess.com/full/781336.jpg')
@@ -84,12 +86,13 @@ export function coffeeMarkdown(md: string, styles: CoffeeMarkdownStyles = {}): s
 
 	// 4. Paragraphs last
 	html = handleParagraphs(html, mergedStyles);
+	html = handlePoetry(html, mergedStyles);
 
 	return html;
 }
 
 function escapeHtml(md: string): string {
-	const allowedTags = ['u', 'b', 'i', 'code', 'pre', 'custom', 'bgc', 'url', 'br', 'align', 'columns'];
+	const allowedTags = ['u', 'b', 'i', 'code', 'pre', 'custom', 'bgc', 'url', 'br', 'align', 'columns', 'poetry'];
 
 	return md.replace(/<([^>]+)>/g, (match, tagContent) => {
 		const tagNameMatch = tagContent.match(/^\/?([a-zA-Z0-9-]+)/);
@@ -369,6 +372,19 @@ function handleColumns(html: string, mergedStyles: Required<CoffeeMarkdownStyles
         ${processedMainBlock}
     </div>
 </div>`;
+		}
+	);
+}
+
+function handlePoetry(html: string, mergedStyles: Required<CoffeeMarkdownStyles>): string {
+	return html.replace(
+		/<poetry>([\s\S]*?)<\/poetry>/gi,
+		(_, content) => {
+			// Remove leading/trailing newlines, preserve internal whitespace and line breaks
+			const cleaned = content.replace(/^\n+|\n+$/g, '');
+			// Remove any <p> tags that may have been added inside poetry
+			const noPTags = cleaned.replace(/<p[^>]*>/gi, '').replace(/<\/p>/gi, '');
+			return `<div style="${mergedStyles.poetry}">${noPTags}</div>`;
 		}
 	);
 }
