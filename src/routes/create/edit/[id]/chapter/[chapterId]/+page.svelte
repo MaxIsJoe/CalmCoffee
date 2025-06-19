@@ -219,12 +219,18 @@
 					Add Block
 				</button>
 			{/if}
-			{#if !canCreateBlock && mode === 'preview'}
-				<span class="block-wait-msg">
-					Next block available in <b>{timeUntilNextBlock}</b>
-				</span>
-			{/if}
 		</div>
+		{#if !canCreateBlock && mode === 'preview'}
+			<div class="block-wait-msg-info">
+				<span class="wait-icon" aria-hidden="true">⏳</span>
+				<span>
+					<span class="block-wait-title">You can add a new block every 35 minutes.</span><br />
+					{#if timeUntilNextBlock}
+						Next block available in <b>{timeUntilNextBlock}</b>
+					{/if}
+				</span>
+			</div>
+		{/if}
 		{#if mode === 'add'}
 			<BlockEditor
 				value={editorContent}
@@ -306,10 +312,36 @@
 	.add-block-btn:hover:enabled {
 		background: var(--color-block-add-btn-hover);
 	}
-	.block-wait-msg {
+	.block-wait-msg-info {
+		display: flex;
+		align-items: flex-start;
+		gap: 1rem;
 		color: var(--color-block-wait);
 		font-weight: 500;
-		margin-left: 1.2rem;
+		background: var(--color-block-wait-info-bg);
+		border-left: 5px solid var(--color-block-wait-info-border);
+		margin: 0 auto;
+		padding-bottom: 24px;
+		padding-top: 24px;
+		padding-left: 24px;
+		padding-right: 24px;
+		border-radius: 10px;
+		font-size: 1.08rem;
+		max-width: 75%;
+		box-shadow: 0 2px 8px var(--color-block-list-shadow);
+	}
+	.block-wait-msg-info .wait-icon {
+		font-size: 1.7em;
+		margin-right: 0.5em;
+		margin-top: 0.1em;
+		flex-shrink: 0;
+		opacity: 0.85;
+	}
+	.block-wait-title {
+		color: var(--color-block-wait);
+		font-weight: 600;
+		margin-bottom: 0.2em;
+		display: block;
 	}
 	.block-list {
 		width: 100%;
@@ -347,6 +379,11 @@
 		.block-list {
 			padding: 0 2vw 1vw 2vw;
 			gap: 0.7rem;
+		}
+		.block-wait-msg-info {
+			padding: 0.8rem 1vw 0.8rem 1vw;
+			font-size: 0.99rem;
+			max-width: 98vw;
 		}
 	}
 	@media (max-width: 600px) {
