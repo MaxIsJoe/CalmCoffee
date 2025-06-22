@@ -5,7 +5,7 @@
 
   export let value: string = '';
   export let styles: string = JSON.stringify(defaultStyles, null, 2);
-  export let maxLength: number = 1000;
+  export let maxLength: number = 1650;
   export let isEditing: boolean = false;
   export let loading: boolean = false;
   export let error: string = '';
