@@ -296,6 +296,388 @@
 	let showDeleteConfirm = false;
 	let themeToDelete: string | null = null;
 
+	// Reactive statement to update preview when colors change
+	$: if (showPreview && showCreateForm) {
+		injectCustomThemeStyle(customThemeDraft.variables);
+	}
+
+	// Color palette generation functions
+	function generateRandomColor(): string {
+		// Generate a random HSL color with good saturation and lightness
+		const hue = Math.floor(Math.random() * 360);
+		const saturation = Math.floor(Math.random() * 30) + 40; // 40-70% saturation
+		const lightness = Math.floor(Math.random() * 30) + 35; // 35-65% lightness
+		return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+	}
+
+	function generateComplementaryColor(baseColor: string): string {
+		// Extract HSL values from base color
+		const match = baseColor.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
+		if (!match) return generateRandomColor();
+		
+		const [, h, s, l] = match.map(Number);
+		const complementaryHue = (h + 180) % 360;
+		return `hsl(${complementaryHue}, ${s}%, ${l}%)`;
+	}
+
+	function generateAnalogousColor(baseColor: string, offset: number): string {
+		// Extract HSL values from base color
+		const match = baseColor.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
+		if (!match) return generateRandomColor();
+		
+		const [, h, s, l] = match.map(Number);
+		const analogousHue = (h + offset) % 360;
+		return `hsl(${analogousHue}, ${s}%, ${l}%)`;
+	}
+
+	function generateLighterVariant(color: string, amount: number = 20): string {
+		const match = color.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
+		if (!match) return color;
+		
+		const [, h, s, l] = match.map(Number);
+		const newLightness = Math.min(95, l + amount);
+		return `hsl(${h}, ${s}%, ${newLightness}%)`;
+	}
+
+	function generateDarkerVariant(color: string, amount: number = 20): string {
+		const match = color.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
+		if (!match) return color;
+		
+		const [, h, s, l] = match.map(Number);
+		const newLightness = Math.max(5, l - amount);
+		return `hsl(${h}, ${s}%, ${newLightness}%)`;
+	}
+
+	function generateMonochromaticVariant(color: string, saturationChange: number = 0, lightnessChange: number = 0): string {
+		const match = color.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
+		if (!match) return color;
+		
+		const [, h, s, l] = match.map(Number);
+		const newSaturation = Math.max(0, Math.min(100, s + saturationChange));
+		const newLightness = Math.max(0, Math.min(100, l + lightnessChange));
+		return `hsl(${h}, ${newSaturation}%, ${newLightness}%)`;
+	}
+
+	function generateColorPalette(): Record<string, string> {
+		// Generate a base color scheme
+		const primaryColor = generateRandomColor();
+		const secondaryColor = generateAnalogousColor(primaryColor, 30);
+		const accentColor = generateComplementaryColor(primaryColor);
+		
+		// Generate background colors (light variants)
+		const bgColor = generateLighterVariant(primaryColor, 40);
+		const bgAltColor = generateLighterVariant(secondaryColor, 35);
+		const cardBgColor = generateLighterVariant(primaryColor, 45);
+		
+		// Generate text colors (dark variants)
+		const textColor = generateDarkerVariant(primaryColor, 60);
+		const mutedColor = generateMonochromaticVariant(primaryColor, -20, 10);
+		
+		// Generate link colors
+		const linkColor = accentColor;
+		const linkHoverColor = generateDarkerVariant(accentColor, 15);
+		
+		// Generate border colors
+		const borderColor = generateMonochromaticVariant(primaryColor, -30, 20);
+		
+		// Generate button colors
+		const btnPrimaryColor = accentColor;
+		const btnPrimaryTextColor = generateLighterVariant(accentColor, 60);
+		const btnPrimaryHoverColor = generateDarkerVariant(accentColor, 10);
+		
+		// Generate danger/success colors
+		const dangerColor = `hsl(${(Math.floor(Math.random() * 30) + 340) % 360}, 70%, 50%)`; // Reddish
+		const successColor = `hsl(${(Math.floor(Math.random() * 60) + 120) % 180}, 70%, 50%)`; // Greenish
+		
+		// Generate navbar colors
+		const navbarBgColor = generateLighterVariant(primaryColor, 30);
+		const navbarLinkColor = generateDarkerVariant(primaryColor, 40);
+		const navbarLinkHoverColor = accentColor;
+		
+		// Generate microblog colors
+		const microblogBgColor = generateLighterVariant(secondaryColor, 40);
+		const microblogTagBgColor = generateLighterVariant(accentColor, 50);
+		const microblogTagTextColor = generateDarkerVariant(accentColor, 30);
+		
+		// Generate character colors
+		const characterCardBgColor = generateLighterVariant(primaryColor, 35);
+		const characterAvatarBgColor = generateLighterVariant(secondaryColor, 45);
+		const characterTagBgColor = generateLighterVariant(accentColor, 45);
+		
+		// Generate block editor colors
+		const blockBgColor = generateLighterVariant(primaryColor, 40);
+		const blockBtnBgColor = generateLighterVariant(accentColor, 40);
+		const blockBtnHoverColor = accentColor;
+		
+		// Generate editor colors
+		const editorBgColor = generateLighterVariant(primaryColor, 45);
+		const editorBtnBgColor = generateLighterVariant(secondaryColor, 40);
+		const editorBtnHoverColor = secondaryColor;
+		
+		// Generate toolbar colors
+		const toolbarBgColor = generateLighterVariant(secondaryColor, 35);
+		const toolbarBtnBgColor = generateLighterVariant(primaryColor, 40);
+		const toolbarBtnHoverColor = primaryColor;
+		
+		// Generate blog colors
+		const blogHeadingColor = generateDarkerVariant(primaryColor, 30);
+		const blogSelectBgColor = generateLighterVariant(primaryColor, 45);
+		const blogTabsBtnColor = generateLighterVariant(secondaryColor, 40);
+		const blogTabsBtnActiveColor = secondaryColor;
+
+		return {
+			'--color-bg': bgColor,
+			'--color-bg-alt': bgAltColor,
+			'--color-text': textColor,
+			'--color-primary': primaryColor,
+			'--color-primary-alt': generateLighterVariant(primaryColor, 60),
+			'--color-secondary': secondaryColor,
+			'--color-accent': accentColor,
+			'--color-link': linkColor,
+			'--color-link-hover': linkHoverColor,
+			'--color-border': borderColor,
+			'--color-muted': mutedColor,
+			'--color-danger': dangerColor,
+			'--color-danger-hover': generateDarkerVariant(dangerColor, 15),
+			'--color-success': successColor,
+			'--color-btn-primary': btnPrimaryColor,
+			'--color-btn-primary-text': btnPrimaryTextColor,
+			'--color-btn-primary-hover': btnPrimaryHoverColor,
+			
+			// Navbar
+			'--color-navbar-bg': navbarBgColor,
+			'--color-navbar-link': navbarLinkColor,
+			'--color-navbar-link-hover': navbarLinkHoverColor,
+			'--color-navbar-border': borderColor,
+			'--color-navbar-shadow': generateMonochromaticVariant(borderColor, 0, -10),
+			
+			// Cards & Sections
+			'--color-card-bg': cardBgColor,
+			'--color-card-shadow': generateMonochromaticVariant(borderColor, 0, -15),
+			'--color-section-bg': generateLighterVariant(primaryColor, 42),
+			'--color-section-border': borderColor,
+			'--color-bg-hover': generateLighterVariant(primaryColor, 25),
+			
+			// Footer & Banner
+			'--color-footer-bg': generateDarkerVariant(primaryColor, 20),
+			'--color-footer-alt': generateDarkerVariant(primaryColor, 25),
+			'--color-footer-text': generateLighterVariant(primaryColor, 70),
+			'--color-footer-link': generateLighterVariant(accentColor, 50),
+			'--color-footer-link-hover': accentColor,
+			'--color-footer-muted': generateMonochromaticVariant(primaryColor, -40, 30),
+			'--color-banner-bg': generateLighterVariant(accentColor, 45),
+			'--color-banner-text': generateDarkerVariant(accentColor, 40),
+			'--color-banner-hover': generateDarkerVariant(accentColor, 10),
+			
+			// Microblog
+			'--color-microblog-bg': microblogBgColor,
+			'--color-microblog-shadow': generateMonochromaticVariant(borderColor, 0, -12),
+			'--color-microblog-border': borderColor,
+			'--color-microblog-text': textColor,
+			'--color-microblog-tag-bg': microblogTagBgColor,
+			'--color-microblog-tag-text': microblogTagTextColor,
+			'--color-microblog-tag-border': generateMonochromaticVariant(accentColor, -20, 30),
+			'--color-microblog-add-tag-bg': accentColor,
+			'--color-microblog-add-tag-text': generateLighterVariant(accentColor, 60),
+			'--color-microblog-add-tag-hover-bg': generateDarkerVariant(accentColor, 10),
+			'--color-microblog-remove-tag': generateDarkerVariant(accentColor, 20),
+			'--color-microblog-remove-tag-hover': dangerColor,
+			'--color-microblog-textarea-bg': generateLighterVariant(primaryColor, 48),
+			'--color-microblog-textarea-border': borderColor,
+			'--color-microblog-focus': accentColor,
+			'--color-microblog-post-bg': accentColor,
+			'--color-microblog-post-text': generateLighterVariant(accentColor, 60),
+			'--color-microblog-post-hover-bg': generateDarkerVariant(accentColor, 5),
+			'--color-microblog-confirm-bg': successColor,
+			'--color-microblog-confirm-text': generateLighterVariant(successColor, 60),
+			'--color-microblog-confirm-hover-bg': generateDarkerVariant(successColor, 10),
+			'--color-microblog-cancel-bg': generateLighterVariant(dangerColor, 50),
+			'--color-microblog-cancel-text': generateDarkerVariant(dangerColor, 30),
+			'--color-microblog-cancel-hover-bg': dangerColor,
+			'--color-microblog-cancel-hover-text': generateLighterVariant(dangerColor, 60),
+			'--color-microblog-select-bg': generateLighterVariant(primaryColor, 45),
+			'--color-microblog-select-border': borderColor,
+			'--color-microblog-select-text': textColor,
+			'--color-microblog-tag-input-bg': generateLighterVariant(primaryColor, 45),
+			'--color-microblog-tag-input-border': borderColor,
+			'--color-microblog-preview-bg': generateLighterVariant(primaryColor, 50),
+			'--color-microblog-preview-border': borderColor,
+			'--color-microblog-preview-text': textColor,
+			'--color-microblog-label': generateDarkerVariant(primaryColor, 25),
+			'--color-microblog-counter': mutedColor,
+			'--color-microblog-toggle': accentColor,
+			'--color-microblog-toggle-hover': generateDarkerVariant(accentColor, 10),
+			'--color-microblog-styles-bg': generateLighterVariant(primaryColor, 45),
+			'--color-microblog-styles-border': borderColor,
+			'--color-microblog-error': dangerColor,
+			'--color-microblog-warning': `hsl(${(Math.floor(Math.random() * 30) + 40) % 70}, 80%, 50%)`, // Orange/Yellow
+			'--color-microblog-post-disabled-bg': generateMonochromaticVariant(primaryColor, -50, 20),
+			'--color-microblog-post-disabled-text': generateMonochromaticVariant(primaryColor, -60, 40),
+			'--color-microblog-add-tag-disabled-bg': generateMonochromaticVariant(accentColor, -50, 30),
+			'--color-microblog-add-tag-disabled-text': generateMonochromaticVariant(accentColor, -60, 50),
+			'--color-microblog-confirm-disabled-bg': generateMonochromaticVariant(successColor, -50, 30),
+			'--color-microblog-confirm-disabled-text': generateMonochromaticVariant(successColor, -60, 50),
+			
+			// Characters
+			'--color-character-card-bg': characterCardBgColor,
+			'--color-character-card-shadow': generateMonochromaticVariant(borderColor, 0, -8),
+			'--color-character-card-border': borderColor,
+			'--color-character-avatar-bg': characterAvatarBgColor,
+			'--color-character-avatar-border': borderColor,
+			'--color-character-avatar-shadow': generateMonochromaticVariant(borderColor, 0, -10),
+			'--color-character-name': generateDarkerVariant(primaryColor, 20),
+			'--color-character-type': accentColor,
+			'--color-character-gender': generateDarkerVariant(secondaryColor, 25),
+			'--color-character-tag-bg': characterTagBgColor,
+			'--color-character-tag-text': generateDarkerVariant(accentColor, 25),
+			'--color-character-tag-border': generateMonochromaticVariant(accentColor, -25, 25),
+			'--color-character-add-tag-bg': accentColor,
+			'--color-character-add-tag-text': generateLighterVariant(accentColor, 60),
+			'--color-character-add-tag-hover-bg': generateDarkerVariant(accentColor, 10),
+			'--color-character-remove-tag': generateDarkerVariant(accentColor, 20),
+			'--color-character-remove-tag-hover': dangerColor,
+			'--color-character-tag-warning': generateMonochromaticVariant(dangerColor, 0, 20),
+			'--color-character-art-hint': mutedColor,
+			'--color-character-info-text': generateDarkerVariant(primaryColor, 30),
+			'--color-character-info-bg': generateLighterVariant(primaryColor, 50),
+			'--color-character-info-label': accentColor,
+			'--color-character-info-border': borderColor,
+			'--color-character-info-shadow': generateMonochromaticVariant(borderColor, 0, -5),
+			'--color-character-relationship-bg': generateLighterVariant(secondaryColor, 45),
+			'--color-character-relationship-shadow': generateMonochromaticVariant(borderColor, 0, -8),
+			'--color-character-tag-panel-bg': generateLighterVariant(primaryColor, 52),
+			'--color-character-tag-panel-shadow': generateMonochromaticVariant(borderColor, 0, -6),
+			'--color-character-tag-panel-title': generateDarkerVariant(primaryColor, 35),
+			'--color-character-add-tag-disabled-bg': generateMonochromaticVariant(accentColor, -50, 30),
+			'--color-character-add-tag-disabled-text': generateMonochromaticVariant(accentColor, -60, 50),
+			
+			// Block Editor
+			'--color-block-bg': blockBgColor,
+			'--color-block-shadow': generateMonochromaticVariant(borderColor, 0, -10),
+			'--color-block-text': textColor,
+			'--color-block-date': mutedColor,
+			'--color-block-btn-bg': blockBtnBgColor,
+			'--color-block-btn-hover': blockBtnHoverColor,
+			'--color-block-btn-text': generateDarkerVariant(accentColor, 30),
+			'--color-block-add-btn-bg': accentColor,
+			'--color-block-add-btn-hover': generateDarkerVariant(accentColor, 10),
+			'--color-block-add-btn-text': generateLighterVariant(accentColor, 60),
+			'--color-block-editor-bg': generateLighterVariant(primaryColor, 45),
+			'--color-block-editor-shadow': generateMonochromaticVariant(borderColor, 0, -12),
+			'--color-block-textarea-bg': generateLighterVariant(primaryColor, 48),
+			'--color-block-textarea-border': borderColor,
+			'--color-block-textarea-shadow': generateMonochromaticVariant(borderColor, 0, -8),
+			'--color-block-toggle-bg': generateLighterVariant(secondaryColor, 40),
+			'--color-block-toggle-text': generateDarkerVariant(secondaryColor, 30),
+			'--color-block-toggle-hover': secondaryColor,
+			'--color-block-toggle-border': borderColor,
+			'--color-block-toggle-hover-border': secondaryColor,
+			'--color-block-list-bg': generateLighterVariant(primaryColor, 43),
+			'--color-block-list-shadow': generateMonochromaticVariant(borderColor, 0, -10),
+			'--color-block-list-title': generateDarkerVariant(primaryColor, 25),
+			'--color-block-wait': mutedColor,
+			'--color-block-loading': accentColor,
+			'--color-block-error': dangerColor,
+			'--color-block-wait-info-bg': generateLighterVariant(primaryColor, 50),
+			'--color-block-wait-info-border': borderColor,
+			
+			// Editor & Toolbar
+			'--color-editor-bg': editorBgColor,
+			'--color-editor-border': borderColor,
+			'--color-editor-shadow': generateMonochromaticVariant(borderColor, 0, -8),
+			'--color-editor-header-bg': generateLighterVariant(primaryColor, 35),
+			'--color-editor-header-border': borderColor,
+			'--color-editor-btn-bg': editorBtnBgColor,
+			'--color-editor-btn-hover': editorBtnHoverColor,
+			'--color-editor-btn-text': generateDarkerVariant(secondaryColor, 30),
+			'--color-editor-btn-border': borderColor,
+			'--color-editor-btn-active': secondaryColor,
+			'--color-editor-text': textColor,
+			'--color-editor-secondary': mutedColor,
+			'--color-toolbar-bg': toolbarBgColor,
+			'--color-toolbar-border': borderColor,
+			'--color-toolbar-group-bg': generateLighterVariant(secondaryColor, 40),
+			'--color-toolbar-btn-bg': toolbarBtnBgColor,
+			'--color-toolbar-btn-hover': toolbarBtnHoverColor,
+			'--color-toolbar-btn-active': primaryColor,
+			'--color-toolbar-btn-border': borderColor,
+			'--color-toolbar-btn-text': generateDarkerVariant(primaryColor, 30),
+			'--color-toolbar-btn-code-bg': generateLighterVariant(primaryColor, 50),
+			
+			// Blog
+			'--color-blog-heading': blogHeadingColor,
+			'--color-blog-label': generateDarkerVariant(primaryColor, 25),
+			'--color-blog-select-bg': blogSelectBgColor,
+			'--color-blog-select-border': borderColor,
+			'--color-blog-select-text': textColor,
+			'--color-blog-select-focus-border': accentColor,
+			'--color-blog-select-focus-bg': generateLighterVariant(accentColor, 55),
+			'--color-blog-spinner-bg': generateLighterVariant(primaryColor, 45),
+			'--color-blog-spinner-fg': accentColor,
+			'--color-blog-tabs-border': borderColor,
+			'--color-blog-tabs-btn': blogTabsBtnColor,
+			'--color-blog-tabs-btn-active': blogTabsBtnActiveColor,
+			'--color-blog-tabs-btn-active-border': secondaryColor,
+			'--color-blog-tabs-btn-hover': generateDarkerVariant(secondaryColor, 5),
+			'--color-blog-error': dangerColor
+		};
+	}
+
+	function randomizeTheme() {
+		const newPalette = generateColorPalette();
+		customThemeDraft.variables = { ...customThemeDraft.variables, ...newPalette };
+		
+		// Update preview if it's showing
+		if (showPreview) {
+			injectCustomThemeStyle(customThemeDraft.variables);
+		}
+	}
+
+	function exportThemeToCSS(theme: Theme): void {
+		// Generate CSS content
+		let cssContent = `/* Calm Coffee Theme: ${theme.name} */\n`;
+		cssContent += `/* Generated on: ${new Date().toLocaleString()} */\n\n`;
+		cssContent += `:root {\n`;
+		
+		// Add all theme variables
+		for (const variable of THEME_VARIABLES) {
+			const value = theme.variables[variable] || '#ffffff'; // fallback
+			cssContent += `  ${variable}: ${value};\n`;
+		}
+		
+		cssContent += `}\n\n`;
+		
+		// Add some helpful comments
+		cssContent += `/* Usage Instructions:\n`;
+		cssContent += ` * 1. Save this file as "${theme.name.replace(/[^a-zA-Z0-9]/g, '_')}.css"\n`;
+		cssContent += ` * 2. Import it in your HTML: <link rel="stylesheet" href="theme.css">\n`;
+		cssContent += ` * 3. Or import it in your CSS: @import "theme.css";\n`;
+		cssContent += ` */\n`;
+		
+		// Create and download the file
+		const blob = new Blob([cssContent], { type: 'text/css' });
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = `${theme.name.replace(/[^a-zA-Z0-9]/g, '_')}.css`;
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+		URL.revokeObjectURL(url);
+	}
+
+	function exportCurrentThemeToCSS(): void {
+		if (showCreateForm && customThemeDraft.name.trim()) {
+			exportThemeToCSS(customThemeDraft);
+		} else {
+			// Export the currently selected theme
+			const currentTheme = [...BUILTIN_THEMES, ...customThemes].find(t => t.name === selectedTheme);
+			if (currentTheme) {
+				exportThemeToCSS(currentTheme);
+			}
+		}
+	}
+
 	function loadCustomThemes() {
 		const raw = localStorage.getItem('customThemes');
 		customThemes = raw ? JSON.parse(raw) : [];
@@ -379,8 +761,26 @@
 		};
 	}
 
+	function toggleCreateForm() {
+		showCreateForm = !showCreateForm;
+		if (showCreateForm) {
+			// Generate a random theme when opening the create form
+			const randomPalette = generateColorPalette();
+			customThemeDraft.variables = { ...customThemeDraft.variables, ...randomPalette };
+			
+			// Apply the random theme to preview if it's showing
+			if (showPreview) {
+				injectCustomThemeStyle(customThemeDraft.variables);
+			}
+		}
+	}
+
 	function handleDraftVarChange(varName: string, value: string) {
 		customThemeDraft.variables[varName] = value;
+		// Update preview immediately if it's showing
+		if (showPreview) {
+			injectCustomThemeStyle(customThemeDraft.variables);
+		}
 	}
 
 	function previewTheme() {
@@ -423,20 +823,23 @@
 <div class="theme-section">
 	<h3>Theme</h3>
 	<div class="theme-selector">
-		<label>
-			Select Theme:
-			<select bind:value={selectedTheme} on:change={handleThemeChange}>
-				{#each BUILTIN_THEMES as theme}
-					<option value={theme.name}>{theme.name}</option>
-				{/each}
-				{#each customThemes as theme}
-					<option value={theme.name}>{theme.name} (Custom)</option>
-				{/each}
-			</select>
-		</label>
+	<label>
+		Select Theme:
+		<select bind:value={selectedTheme} on:change={handleThemeChange}>
+			{#each BUILTIN_THEMES as theme}
+				<option value={theme.name}>{theme.name}</option>
+			{/each}
+			{#each customThemes as theme}
+				<option value={theme.name}>{theme.name} (Custom)</option>
+			{/each}
+		</select>
+	</label>
 		<div class="theme-actions">
-			<button on:click={() => showCreateForm = !showCreateForm} class="create-theme-btn">
+			<button on:click={toggleCreateForm} class="create-theme-btn">
 				{showCreateForm ? 'Cancel' : 'Create New Theme'}
+			</button>
+			<button on:click={exportCurrentThemeToCSS} class="export-theme-btn">
+				📁 Export Theme
 			</button>
 			{#if customThemes.length > 0}
 				<div class="custom-themes-list">
@@ -484,40 +887,154 @@
 			<button on:click={previewTheme} class="preview-btn">
 				{showPreview ? 'Hide Preview' : 'Show Preview'}
 			</button>
+			<button on:click={randomizeTheme} class="randomize-btn">
+				🎨 Randomize Colors
+			</button>
+			<button on:click={exportCurrentThemeToCSS} class="export-theme-btn">
+				📁 Export CSS
+			</button>
 			<button on:click={handleCreateTheme} class="save-theme-btn">Save Theme</button>
 		</div>
 
 		{#if showPreview}
 			<div class="theme-preview">
-				<h5>Theme Preview</h5>
-				<div class="preview-container">
-					<!-- Navbar Preview -->
-					<div class="preview-navbar">
-						<div class="preview-nav-item">Home</div>
-						<div class="preview-nav-item">Stories</div>
-						<div class="preview-nav-item">Characters</div>
-						<div class="preview-nav-item">Blog</div>
+				<h5>Theme Preview Gallery</h5>
+				<div class="preview-gallery">
+					<!-- Navigation Bar Preview -->
+					<div class="preview-section">
+						<h6>Navigation Bar</h6>
+						<div class="preview-navbar">
+							<div class="preview-nav-left">
+								<span class="preview-logo">CalmCoffee</span>
+								<div class="preview-nav-links">
+									<span>Stories</span>
+									<span>Microblogs</span>
+									<span>Characters</span>
+								</div>
+							</div>
+							<div class="preview-nav-right">
+								<div class="preview-search">
+									<input type="text" placeholder="Search tags..." />
+									<button>🔍</button>
+								</div>
+								<div class="preview-user">
+									<div class="preview-avatar">U</div>
+									<span>Username</span>
+								</div>
+							</div>
+						</div>
 					</div>
-					
-					<!-- Content Preview -->
-					<div class="preview-content">
-						<div class="preview-card">
-							<h6>Sample Card</h6>
-							<p>This is how cards will look with your theme colors.</p>
-							<button class="preview-button">Sample Button</button>
+
+					<!-- Login Form Preview -->
+					<div class="preview-section">
+						<h6>Login Form</h6>
+						<div class="preview-login-form">
+							<input type="email" placeholder="Email" />
+							<input type="password" placeholder="Password" />
+							<button type="submit">Login</button>
+							<p>Don't have an account? <a href="#">Sign up here</a></p>
 						</div>
-						
-						<div class="preview-form">
-							<label>Sample Form:</label>
-							<input type="text" placeholder="Sample input" />
-							<button class="preview-button primary">Primary Button</button>
-							<button class="preview-button secondary">Secondary Button</button>
+					</div>
+
+					<!-- Microblog Preview -->
+					<div class="preview-section">
+						<h6>Microblog Post</h6>
+						<div class="preview-microblog">
+							<div class="preview-microblog-header">
+								<img class="preview-microblog-pfp" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiNlNWU3ZWIiLz4KPHN2ZyB4PSI4IiB5PSI4IiB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSI+CjxwYXRoIGQ9Ik0xMiAxMkMxNC4yMDkxIDEyIDE2IDEwLjIwOTEgMTYgOEMxNiA1Ljc5MDg2IDE0LjIwOTEgNCAxMiA0QzkuNzkwODYgNCA4IDUuNzkwODYgOCA4QzggMTAuMjA5MSA5Ljc5MDg2IDEyIDEyIDEyWiIgZmlsbD0iI2E2N2M1MiIvPgo8cGF0aCBkPSJNMTIgMTRDMTUuMzEzNyAxNCAxOCAxNi42ODYzIDE4IDIwSDFDMSAxNi42ODYzIDMuNjg2MyAxNCA3IDE0SDEyWiIgZmlsbD0iI2E2N2M1MiIvPgo8L3N2Zz4KPC9zdmc+" alt="pfp" />
+								<span class="preview-microblog-writer">Username</span>
+							</div>
+							<div class="preview-microblog-content">
+								This is a sample microblog post showing how content will look with your custom theme colors.
+							</div>
+							<div class="preview-microblog-tags">
+								<span class="preview-microblog-tag">sample</span>
+								<span class="preview-microblog-tag">theme</span>
+								<span class="preview-microblog-tag">preview</span>
+							</div>
+							<div class="preview-microblog-reactions">
+								<button class="preview-reaction-btn">💖 2</button>
+								<button class="preview-reaction-btn">👀 1</button>
+								<button class="preview-reaction-btn">😐 0</button>
+								<button class="preview-reaction-btn">🗑️ 0</button>
+							</div>
+							<small class="preview-microblog-date">
+								{new Date().toLocaleString()} | Everyone
+							</small>
 						</div>
-						
-						<div class="preview-tags">
-							<span class="preview-tag">Tag 1</span>
-							<span class="preview-tag">Tag 2</span>
-							<span class="preview-tag">Tag 3</span>
+					</div>
+
+					<!-- Character Card Preview -->
+					<div class="preview-section">
+						<h6>Character Profile</h6>
+						<div class="preview-character-card">
+							<div class="preview-character-avatar">
+								<img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjUwIiBmaWxsPSIjZTRiODg5Ii8+Cjxzdmcgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHg9IjIwIiB5PSIyMCI+CjxwYXRoIGQ9Ik0xMiAxMkMxNC4yMDkxIDEyIDE2IDEwLjIwOTEgMTYgOEMxNiA1Ljc5MDg2IDE0LjIwOTEgNCAxMiA0QzkuNzkwODYgNCA4IDUuNzkwODYgOCA4QzggMTAuMjA5MSA5Ljc5MDg2IDEyIDEyIDEyWiIgZmlsbD0iI2E2N2M1MiIvPgo8cGF0aCBkPSJNMTIgMTRDMTUuMzEzNyAxNCAxOCAxNi42ODYzIDE4IDIwSDFDMSAxNi42ODYzIDMuNjg2MyAxNCA3IDE0SDEyWiIgZmlsbD0iI2E2N2M1MiIvPgo8L3N2Zz4KPC9zdmc+" alt="Avatar" />
+							</div>
+							<div class="preview-character-info">
+								<div><strong>Name:</strong> Sample Character</div>
+								<div><strong>Type:</strong> OC</div>
+								<div><strong>Gender:</strong> 🧙‍♂️ M</div>
+								<div><strong>Created:</strong> {new Date().toLocaleDateString()}</div>
+								<div><strong>Creator:</strong> <a href="#">Username</a></div>
+							</div>
+							<div class="preview-character-reactions">
+								<button class="preview-reaction-btn">💖 3</button>
+								<button class="preview-reaction-btn">👀 1</button>
+								<button class="preview-reaction-btn">😐 0</button>
+								<button class="preview-reaction-btn">🗑️ 0</button>
+							</div>
+						</div>
+					</div>
+
+					<!-- Story Block Preview -->
+					<div class="preview-section">
+						<h6>Story Block</h6>
+						<div class="preview-story-block">
+							<div class="preview-block-content">
+								This is a sample story block showing how your content will appear with the custom theme. It includes <strong>bold text</strong>, <em>italic text</em>, and <a href="#">links</a>.
+							</div>
+							<div class="preview-block-actions">
+								<button class="preview-block-btn">Edit</button>
+								<button class="preview-block-btn">💬 2</button>
+								<small class="preview-block-date">{new Date().toLocaleString()}</small>
+							</div>
+						</div>
+					</div>
+
+					<!-- Form Elements Preview -->
+					<div class="preview-section">
+						<h6>Form Elements</h6>
+						<div class="preview-form-elements">
+							<label>Sample Label:</label>
+							<input type="text" placeholder="Sample input field" />
+							<select>
+								<option>Option 1</option>
+								<option>Option 2</option>
+								<option>Option 3</option>
+							</select>
+							<textarea placeholder="Sample textarea"></textarea>
+							<div class="preview-form-buttons">
+								<button class="preview-btn primary">Primary Button</button>
+								<button class="preview-btn secondary">Secondary Button</button>
+								<button class="preview-btn danger">Danger Button</button>
+							</div>
+						</div>
+					</div>
+
+					<!-- Tag System Preview -->
+					<div class="preview-section">
+						<h6>Tag System</h6>
+						<div class="preview-tag-system">
+							<div class="preview-tag-input">
+								<input type="text" placeholder="Add tag and press Enter" />
+								<button class="preview-add-tag-btn">Add</button>
+							</div>
+							<div class="preview-tag-list">
+								<span class="preview-tag">sample <button class="preview-remove-tag">×</button></span>
+								<span class="preview-tag">theme <button class="preview-remove-tag">×</button></span>
+								<span class="preview-tag">preview <button class="preview-remove-tag">×</button></span>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -528,9 +1045,9 @@
 			{#each Object.entries(VARIABLE_CATEGORIES) as [category, variables]}
 				<div class="theme-category">
 					<h5>{category}</h5>
-					<div class="theme-vars-grid">
+		<div class="theme-vars-grid">
 						{#each variables as varName}
-							<div class="theme-var-row">
+				<div class="theme-var-row">
 								<label title={varName}>{varName.replace('--color-', '')}</label>
 								<input 
 									type="color" 
@@ -763,97 +1280,499 @@
 	margin: 0 0 1rem 0;
 	color: var(--color-text);
 }
-.preview-container {
+.preview-gallery {
 	display: flex;
 	flex-direction: column;
 	gap: 1rem;
 }
-.preview-navbar {
-	display: flex;
-	background: var(--color-navbar-bg);
-	border-bottom: 1px solid var(--color-navbar-border);
-	padding: 0.5rem 1rem;
-	gap: 1rem;
-	box-shadow: 0 2px 4px var(--color-navbar-shadow);
-}
-.preview-nav-item {
-	color: var(--color-navbar-link);
-	cursor: pointer;
-	padding: 0.25rem 0.5rem;
-	border-radius: 4px;
-}
-.preview-nav-item:hover {
-	background: var(--color-navbar-link-hover);
-	color: var(--color-navbar-link-hover);
-}
-.preview-content {
-	display: flex;
-	flex-direction: column;
-	gap: 1rem;
-	padding: 1rem;
-	background: var(--color-bg);
-}
-.preview-card {
-	background: var(--color-card-bg);
-	border: 1px solid var(--color-border);
-	border-radius: 8px;
-	padding: 1rem;
-	box-shadow: 0 2px 4px var(--color-card-shadow);
-}
-.preview-card h6 {
-	margin: 0 0 0.5rem 0;
-	color: var(--color-text);
-}
-.preview-card p {
-	margin: 0 0 1rem 0;
-	color: var(--color-text);
-}
-.preview-form {
-	display: flex;
-	flex-direction: column;
-	gap: 0.5rem;
+.preview-section {
 	padding: 1rem;
 	background: var(--color-section-bg);
 	border: 1px solid var(--color-section-border);
 	border-radius: 6px;
 }
-.preview-form label {
+.preview-section h6 {
+	margin: 0 0 0.8rem 0;
 	color: var(--color-text);
-	font-weight: 500;
+	font-size: 1rem;
+	font-weight: 600;
 }
-.preview-form input {
-	padding: 0.5rem;
+.preview-navbar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 0.8rem 1rem;
+	background: var(--color-navbar-bg);
+	border-bottom: 1px solid var(--color-navbar-border);
+	box-shadow: 0 2px 4px var(--color-navbar-shadow);
+	border-radius: 6px;
+}
+.preview-nav-left {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+}
+.preview-logo {
+	font-weight: 600;
+	color: var(--color-navbar-link);
+}
+.preview-nav-links {
+	display: flex;
+	gap: 1rem;
+}
+.preview-nav-links span {
+	color: var(--color-navbar-link);
+	cursor: pointer;
+	transition: color 0.15s;
+}
+.preview-nav-links span:hover {
+	color: var(--color-navbar-link-hover);
+}
+.preview-nav-right {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+}
+.preview-search {
+	display: flex;
+	align-items: center;
+	gap: 0.3rem;
+}
+.preview-search input {
+	padding: 0.4rem 0.7rem;
 	border: 1px solid var(--color-border);
 	border-radius: 4px;
 	background: var(--color-bg-alt);
 	color: var(--color-text);
+	font-size: 0.9rem;
+	width: 120px;
 }
-.preview-button {
-	padding: 0.5rem 1rem;
+.preview-search input:focus {
+	border-color: var(--color-link);
+	outline: none;
+}
+.preview-search button {
+	padding: 0.4rem 0.6rem;
 	border: none;
 	border-radius: 4px;
 	cursor: pointer;
-	font-size: 0.9em;
-}
-.preview-button.primary {
-	background: var(--color-btn-primary);
-	color: var(--color-btn-primary-text);
-}
-.preview-button.secondary {
 	background: var(--color-secondary);
 	color: var(--color-text);
 }
-.preview-tags {
+.preview-search button:hover {
+	background: var(--color-banner-hover);
+}
+.preview-user {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+.preview-avatar {
+	width: 32px;
+	height: 32px;
+	border-radius: 50%;
+	background: var(--color-character-avatar-bg);
+	color: var(--color-character-avatar-text, var(--color-text));
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-weight: 600;
+	font-size: 0.9rem;
+	border: 1px solid var(--color-character-avatar-border);
+}
+.preview-login-form {
+	display: flex;
+	flex-direction: column;
+	gap: 0.8rem;
+	max-width: 300px;
+}
+.preview-login-form input {
+	padding: 0.8rem;
+	border: 1px solid var(--color-border);
+	border-radius: 4px;
+	background: var(--color-bg-alt);
+	color: var(--color-text);
+	font-size: 1rem;
+}
+.preview-login-form input:focus {
+	border-color: var(--color-link);
+	outline: none;
+	box-shadow: 0 0 5px var(--color-card-shadow);
+}
+.preview-login-form button {
+	padding: 0.8rem;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	background: var(--color-link);
+	color: var(--color-primary-alt);
+	font-size: 1rem;
+	font-weight: 500;
+	transition: background 0.15s;
+}
+.preview-login-form button:hover {
+	background: var(--color-link-hover);
+}
+.preview-login-form p {
+	text-align: center;
+	color: var(--color-text);
+	font-size: 0.9rem;
+	margin: 0;
+}
+.preview-login-form a {
+	color: var(--color-link);
+	text-decoration: underline;
+}
+.preview-login-form a:hover {
+	color: var(--color-link-hover);
+}
+.preview-microblog {
+	padding: 1.2rem;
+	background: var(--color-microblog-bg, var(--color-card-bg));
+	border: 1px solid var(--color-microblog-border, var(--color-border));
+	border-radius: 8px;
+	box-shadow: 0 1px 4px var(--color-microblog-shadow, var(--color-card-shadow));
+}
+.preview-microblog-header {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	margin-bottom: 0.8rem;
+}
+.preview-microblog-pfp {
+	width: 32px;
+	height: 32px;
+	border-radius: 50%;
+	object-fit: cover;
+	border: 1px solid var(--color-border);
+	background: var(--color-bg-alt);
+}
+.preview-microblog-writer {
+	font-weight: 600;
+	font-size: 1.08rem;
+	color: var(--color-link);
+}
+.preview-microblog-content {
+	font-size: 1.05rem;
+	color: var(--color-microblog-text, var(--color-text));
+	margin-bottom: 0.8rem;
+	line-height: 1.4;
+}
+.preview-microblog-tags {
+	display: flex;
+	gap: 0.4rem;
+	flex-wrap: wrap;
+	margin-bottom: 0.8rem;
+}
+.preview-microblog-tag {
+	background: var(--color-microblog-tag-bg, var(--color-bg-hover));
+	color: var(--color-microblog-tag-text, var(--color-accent));
+	font-size: 0.93em;
+	padding: 0.18em 0.7em;
+	border-radius: 999px;
+	font-weight: 500;
+	letter-spacing: 0.01em;
+	border: 1px solid var(--color-microblog-tag-border, var(--color-border));
+	cursor: pointer;
+	transition: background 0.15s, color 0.15s;
+}
+.preview-microblog-tag:hover {
+	background: var(--color-border);
+	color: var(--color-accent);
+}
+.preview-microblog-reactions {
 	display: flex;
 	gap: 0.5rem;
+	margin-bottom: 0.5rem;
+}
+.preview-reaction-btn {
+	background: var(--color-bg-alt);
+	border: 1px solid var(--color-border);
+	border-radius: 999px;
+	padding: 0.18em 0.7em;
+	font-size: 1.1em;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	gap: 0.3em;
+	transition: background 0.15s, border 0.15s;
+}
+.preview-reaction-btn:hover {
+	background: var(--color-secondary);
+	border-color: var(--color-accent);
+}
+.preview-microblog-date {
+	font-size: 0.97em;
+	color: var(--color-secondary);
+}
+.preview-character-card {
+	display: flex;
+	align-items: flex-start;
+	gap: 1.2rem;
+	padding: 1.5rem;
+	background: var(--color-character-card-bg, var(--color-card-bg));
+	border: 1px solid var(--color-character-card-border, var(--color-border));
+	border-radius: 12px;
+	box-shadow: 0 2px 12px var(--color-character-card-shadow, var(--color-card-shadow));
+}
+.preview-character-avatar {
+	width: 100px;
+	height: 100px;
+	border-radius: 50%;
+	background: var(--color-character-avatar-bg);
+	border: 2px solid var(--color-character-avatar-border);
+	box-shadow: 0 2px 8px var(--color-character-avatar-shadow);
+	overflow: hidden;
+}
+.preview-character-avatar img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+.preview-character-info {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 0.7rem;
+	font-size: 1.05rem;
+	color: var(--color-character-info-text, var(--color-text));
+	background: var(--color-character-info-bg, var(--color-bg-alt));
+	border-radius: 10px;
+	padding: 1.1rem 1.2rem;
+	box-shadow: 0 1px 4px var(--color-character-info-shadow, var(--color-card-shadow));
+}
+.preview-character-info div {
+	padding: 0.4rem 0.2rem;
+	border-bottom: 1px solid var(--color-character-info-border, var(--color-border));
+}
+.preview-character-info div:last-child {
+	border-bottom: none;
+}
+.preview-character-info strong {
+	min-width: 110px;
+	font-weight: 600;
+	color: var(--color-character-info-label, var(--color-link));
+	margin-right: 0.7rem;
+}
+.preview-character-info a {
+	color: var(--color-link);
+	text-decoration: underline;
+}
+.preview-character-info a:hover {
+	color: var(--color-link-hover);
+}
+.preview-character-reactions {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+.preview-story-block {
+	padding: 1.5rem;
+	background: var(--color-block-bg, var(--color-card-bg));
+	border: 1px solid var(--color-border);
+	border-radius: 8px;
+	box-shadow: 0 1px 4px var(--color-block-shadow, var(--color-card-shadow));
+}
+.preview-block-content {
+	margin-bottom: 1rem;
+	font-size: 1.08rem;
+	color: var(--color-block-text, var(--color-text));
+	line-height: 1.6;
+}
+.preview-block-content strong {
+	font-weight: 600;
+}
+.preview-block-content em {
+	font-style: italic;
+}
+.preview-block-content a {
+	color: var(--color-link);
+	text-decoration: underline;
+}
+.preview-block-actions {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+.preview-block-btn {
+	background: var(--color-block-btn-bg, var(--color-secondary));
+	color: var(--color-block-btn-text, var(--color-text));
+	border: none;
+	border-radius: 6px;
+	padding: 0.3rem 1rem;
+	font-size: 0.97rem;
+	cursor: pointer;
+	transition: background 0.2s;
+}
+.preview-block-btn:hover {
+	background: var(--color-block-btn-hover, var(--color-accent));
+}
+.preview-block-date {
+	font-size: 0.85rem;
+	color: var(--color-block-date, var(--color-secondary));
+}
+.preview-form-elements {
+	display: flex;
+	flex-direction: column;
+	gap: 0.8rem;
+}
+.preview-form-elements label {
+	font-weight: 600;
+	color: var(--color-text);
+}
+.preview-form-elements input,
+.preview-form-elements select,
+.preview-form-elements textarea {
+	padding: 0.7rem;
+	border: 1px solid var(--color-border);
+	border-radius: 4px;
+	background: var(--color-bg-alt);
+	color: var(--color-text);
+	font-size: 1rem;
+}
+.preview-form-elements input:focus,
+.preview-form-elements select:focus,
+.preview-form-elements textarea:focus {
+	border-color: var(--color-link);
+	outline: none;
+	box-shadow: 0 0 5px var(--color-card-shadow);
+}
+.preview-form-elements textarea {
+	resize: vertical;
+	min-height: 80px;
+}
+.preview-form-buttons {
+	display: flex;
+	gap: 0.8rem;
 	flex-wrap: wrap;
 }
+.preview-btn {
+	padding: 0.7rem 1.2rem;
+	border: none;
+	border-radius: 6px;
+	cursor: pointer;
+	font-size: 1rem;
+	font-weight: 500;
+	transition: background 0.15s;
+}
+.preview-btn.primary {
+	background: var(--color-btn-primary);
+	color: var(--color-btn-primary-text);
+}
+.preview-btn.primary:hover {
+	background: var(--color-btn-primary-hover);
+}
+.preview-btn.secondary {
+	background: var(--color-secondary);
+	color: var(--color-text);
+}
+.preview-btn.secondary:hover {
+	background: var(--color-accent);
+}
+.preview-btn.danger {
+	background: var(--color-danger);
+	color: white;
+}
+.preview-btn.danger:hover {
+	background: var(--color-danger-hover);
+}
+.preview-tag-system {
+	display: flex;
+	flex-direction: column;
+	gap: 0.8rem;
+}
+.preview-tag-input {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+.preview-tag-input input {
+	flex: 1;
+	padding: 0.4em 0.7em;
+	border-radius: 5px;
+	border: 1px solid var(--color-microblog-tag-input-border, var(--color-border));
+	font-size: 1em;
+	background: var(--color-microblog-tag-input-bg, var(--color-bg-alt));
+	color: var(--color-text);
+}
+.preview-tag-input input:focus {
+	border-color: var(--color-microblog-focus, var(--color-link));
+	outline: none;
+}
+.preview-add-tag-btn {
+	background: var(--color-microblog-add-tag-bg, var(--color-accent));
+	color: var(--color-microblog-add-tag-text, white);
+	border: none;
+	border-radius: 5px;
+	padding: 0.35em 1em;
+	font-size: 1em;
+	cursor: pointer;
+	transition: background 0.15s;
+}
+.preview-add-tag-btn:hover {
+	background: var(--color-microblog-add-tag-hover-bg, var(--color-primary));
+}
+.preview-tag-list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5em;
+}
 .preview-tag {
-	background: var(--color-character-tag-bg);
-	color: var(--color-character-tag-text);
-	border: 1px solid var(--color-character-tag-border);
-	padding: 0.25rem 0.5rem;
-	border-radius: 12px;
-	font-size: 0.8em;
+	background: var(--color-microblog-tag-bg, var(--color-bg-hover));
+	color: var(--color-microblog-tag-text, var(--color-accent));
+	font-size: 0.97em;
+	padding: 0.18em 0.7em;
+	border-radius: 999px;
+	font-weight: 500;
+	letter-spacing: 0.01em;
+	border: 1px solid var(--color-microblog-tag-border, var(--color-border));
+	display: flex;
+	align-items: center;
+	gap: 0.3em;
+}
+.preview-remove-tag {
+	background: none;
+	border: none;
+	color: var(--color-microblog-remove-tag, var(--color-accent));
+	font-size: 1.1em;
+	cursor: pointer;
+	padding: 0;
+	line-height: 1;
+	transition: color 0.15s;
+}
+.preview-remove-tag:hover {
+	color: var(--color-microblog-remove-tag-hover, var(--color-danger));
+}
+.randomize-btn {
+	padding: 0.5em 1.5em;
+	background: linear-gradient(135deg, var(--color-accent), var(--color-primary));
+	color: var(--color-primary-alt);
+	border: none;
+	border-radius: 6px;
+	font-size: 1em;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.randomize-btn:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+	background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+}
+.export-theme-btn {
+	padding: 0.5em 1.5em;
+	background: var(--color-success);
+	color: white;
+	border: none;
+	border-radius: 6px;
+	font-size: 1em;
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+.export-theme-btn:hover {
+	background: var(--color-accent);
+	transform: translateY(-1px);
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 </style>
