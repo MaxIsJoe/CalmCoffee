@@ -297,6 +297,11 @@
 	let showDeleteConfirm = false;
 	let themeToDelete: string | null = null;
 	let editingTheme: string | null = null; // Track which theme is being edited
+	let hasRandomized = false; // Track if randomize has been used
+	let showBrightnessSlider = false; // Track if brightness slider should be shown
+	let brightnessAdjustment = 0; // Brightness adjustment value (-100 to 100)
+	let originalPalette: Record<string, string> = {}; // Store the original generated palette
+	let hideSliderTimeout: any = null; // Timeout for hiding the slider
 
 	// Reactive statement to update preview when colors change
 	$: if (showPreview && showCreateForm) {
@@ -625,14 +630,132 @@
 		};
 	}
 
+	function adjustPaletteBrightness(palette: Record<string, string>, adjustment: number): Record<string, string> {
+		const adjustedPalette: Record<string, string> = {};
+		
+		for (const [variable, color] of Object.entries(palette)) {
+			// Skip non-color variables or already processed colors
+			if (!color.startsWith('hsl(') && !color.startsWith('#')) {
+				adjustedPalette[variable] = color;
+				continue;
+			}
+			
+			// Convert hex to HSL if needed
+			let hslColor = color;
+			if (color.startsWith('#')) {
+				hslColor = hexToHsl(color);
+			}
+			
+			// Parse HSL values
+			const match = hslColor.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
+			if (!match) {
+				adjustedPalette[variable] = color;
+				continue;
+			}
+			
+			const [, h, s, l] = match.map(Number);
+			let newLightness = Math.max(0, Math.min(100, l + adjustment));
+			
+			// If the color becomes too dark (below 15% lightness), invert it for better visibility
+			if (newLightness < 15) {
+				// Invert the lightness: 15% becomes 85%, 10% becomes 90%, etc.
+				newLightness = Math.min(95, 100 - newLightness);
+			}
+			
+			adjustedPalette[variable] = `hsl(${h}, ${s}%, ${newLightness}%)`;
+		}
+		
+		return adjustedPalette;
+	}
+
+	function hexToHsl(hex: string): string {
+		// Remove # if present
+		hex = hex.replace('#', '');
+		
+		// Convert hex to RGB
+		const r = parseInt(hex.substr(0, 2), 16) / 255;
+		const g = parseInt(hex.substr(2, 2), 16) / 255;
+		const b = parseInt(hex.substr(4, 2), 16) / 255;
+		
+		const max = Math.max(r, g, b);
+		const min = Math.min(r, g, b);
+		let h = 0, s = 0, l = (max + min) / 2;
+		
+		if (max !== min) {
+			const d = max - min;
+			s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+			
+			switch (max) {
+				case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+				case g: h = (b - r) / d + 2; break;
+				case b: h = (r - g) / d + 4; break;
+			}
+			h /= 6;
+		}
+		
+		return `hsl(${Math.round(h * 360)}, ${Math.round(s * 100)}%, ${Math.round(l * 100)}%)`;
+	}
+
 	function randomizeTheme() {
 		const newPalette = generateColorPalette();
+		originalPalette = { ...newPalette }; // Store the original palette
 		customThemeDraft.variables = { ...customThemeDraft.variables, ...newPalette };
+		hasRandomized = true;
+		brightnessAdjustment = 0; // Reset brightness adjustment
 		
 		// Update preview if it's showing
 		if (showPreview) {
 			injectCustomThemeStyle(customThemeDraft.variables);
 		}
+	}
+
+	function adjustBrightness(value: number) {
+		// Clamp the brightness adjustment to -45 to +45
+		brightnessAdjustment = Math.max(-45, Math.min(45, value));
+		
+		// Adjust the original palette with the new brightness value
+		const adjustedPalette = adjustPaletteBrightness(originalPalette, brightnessAdjustment);
+		customThemeDraft.variables = { ...customThemeDraft.variables, ...adjustedPalette };
+		
+		// Update preview if it's showing
+		if (showPreview) {
+			injectCustomThemeStyle(customThemeDraft.variables);
+		}
+	}
+
+	function handleRandomizeMouseEnter() {
+		if (hasRandomized) {
+			showBrightnessSlider = true;
+			// Clear any existing timeout
+			if (hideSliderTimeout) {
+				clearTimeout(hideSliderTimeout);
+				hideSliderTimeout = null;
+			}
+		}
+	}
+
+	function handleRandomizeMouseLeave() {
+		// Set a timeout to hide the slider after 2 seconds
+		hideSliderTimeout = setTimeout(() => {
+			showBrightnessSlider = false;
+			hideSliderTimeout = null;
+		}, 2000);
+	}
+
+	function handleSliderMouseEnter() {
+		// Clear the timeout when mouse enters the slider area
+		if (hideSliderTimeout) {
+			clearTimeout(hideSliderTimeout);
+			hideSliderTimeout = null;
+		}
+	}
+
+	function handleSliderMouseLeave() {
+		// Set a timeout to hide the slider after 2 seconds when leaving slider area
+		hideSliderTimeout = setTimeout(() => {
+			showBrightnessSlider = false;
+			hideSliderTimeout = null;
+		}, 2000);
 	}
 
 	function exportThemeToCSS(theme: Theme): void {
@@ -1172,9 +1295,31 @@
 			<button on:click={previewTheme} class="preview-btn">
 				{showPreview ? 'Hide Preview' : 'Show Preview'}
 			</button>
-			<button on:click={randomizeTheme} class="randomize-btn">
-				🎨 Randomize Colors
-			</button>
+			<div class="randomize-container">
+				{#if showBrightnessSlider}
+					<div class="brightness-slider-container" on:mouseenter={handleSliderMouseEnter} on:mouseleave={handleSliderMouseLeave}>
+						<div class="brightness-slider">
+							<label for="brightness-slider">Brightness: {brightnessAdjustment > 0 ? '+' : ''}{brightnessAdjustment}%</label>
+							<input 
+								id="brightness-slider"
+								type="range" 
+								min="-45" 
+								max="45" 
+								value={brightnessAdjustment}
+								on:input={(e) => adjustBrightness(parseInt((e.target as HTMLInputElement).value))}
+								class="brightness-range"
+							/>
+							<div class="brightness-labels">
+								<span>Darker</span>
+								<span>Brighter</span>
+							</div>
+						</div>
+					</div>
+				{/if}
+				<button on:click={randomizeTheme} class="randomize-btn" on:mouseenter={handleRandomizeMouseEnter} on:mouseleave={handleRandomizeMouseLeave}>
+					🎨 Randomize Colors
+				</button>
+			</div>
 			<button on:click={exportCurrentThemeToCSS} class="export-theme-btn">
 				📁 Export CSS
 			</button>
@@ -2342,5 +2487,112 @@
 }
 .palette-swatch.link::after {
 	content: 'Link';
+}
+
+/* Brightness Slider Styles */
+.randomize-container {
+	position: relative;
+	display: inline-block;
+}
+
+.brightness-slider-container {
+	position: absolute;
+	bottom: 100%;
+	left: 50%;
+	transform: translateX(-50%);
+	margin-bottom: 10px;
+	z-index: 100;
+	background: var(--color-card-bg);
+	border: 2px solid var(--color-border);
+	border-radius: 8px;
+	padding: 1rem;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+	min-width: 200px;
+}
+
+.brightness-slider {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.brightness-slider label {
+	font-size: 0.9em;
+	font-weight: 600;
+	color: var(--color-text);
+	text-align: center;
+	margin: 0;
+}
+
+.brightness-range {
+	width: 100%;
+	height: 6px;
+	border-radius: 3px;
+	background: linear-gradient(to right, #333, #666, #999, #ccc, #fff);
+	outline: none;
+	cursor: pointer;
+	-webkit-appearance: none;
+	appearance: none;
+}
+
+.brightness-range::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	appearance: none;
+	width: 18px;
+	height: 18px;
+	border-radius: 50%;
+	background: var(--color-accent);
+	cursor: pointer;
+	border: 2px solid var(--color-border);
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.brightness-range::-moz-range-thumb {
+	width: 18px;
+	height: 18px;
+	border-radius: 50%;
+	background: var(--color-accent);
+	cursor: pointer;
+	border: 2px solid var(--color-border);
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.brightness-labels {
+	display: flex;
+	justify-content: space-between;
+	font-size: 0.8em;
+	color: var(--color-muted);
+}
+
+.brightness-labels span {
+	font-weight: 500;
+}
+
+/* Add a subtle arrow pointing down */
+.brightness-slider-container::after {
+	content: '';
+	position: absolute;
+	top: 100%;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 0;
+	height: 0;
+	border-left: 8px solid transparent;
+	border-right: 8px solid transparent;
+	border-top: 8px solid var(--color-border);
+}
+
+.brightness-slider-container::before {
+	content: '';
+	position: absolute;
+	top: 100%;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 0;
+	height: 0;
+	border-left: 6px solid transparent;
+	border-right: 6px solid transparent;
+	border-top: 6px solid var(--color-card-bg);
+	margin-top: 2px;
 }
 </style>
