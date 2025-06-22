@@ -946,6 +946,139 @@
 		themeToDelete = null;
 		showDeleteConfirm = false;
 	}
+
+	function updatePaletteColor(colorName: string, value: string) {
+		// Map color names to their CSS variable names
+		const colorMap: Record<string, string> = {
+			'primary': '--color-primary',
+			'secondary': '--color-secondary',
+			'accent': '--color-accent',
+			'bg': '--color-bg',
+			'text': '--color-text',
+			'link': '--color-link'
+		};
+
+		const variableName = colorMap[colorName];
+		if (!variableName) return;
+
+		// Update the main color
+		customThemeDraft.variables[variableName] = value;
+
+		// Propagate changes to related colors based on the color type
+		if (colorName === 'primary') {
+			// Update primary-related colors
+			customThemeDraft.variables['--color-primary-alt'] = generateLighterVariant(value, 60);
+			customThemeDraft.variables['--color-btn-primary'] = value;
+			customThemeDraft.variables['--color-btn-primary-hover'] = generateDarkerVariant(value, 10);
+			customThemeDraft.variables['--color-navbar-bg'] = generateLighterVariant(value, 30);
+			customThemeDraft.variables['--color-navbar-link'] = generateDarkerVariant(value, 40);
+			customThemeDraft.variables['--color-section-bg'] = generateLighterVariant(value, 42);
+			customThemeDraft.variables['--color-bg-hover'] = generateLighterVariant(value, 25);
+			customThemeDraft.variables['--color-footer-bg'] = generateDarkerVariant(value, 20);
+			customThemeDraft.variables['--color-footer-alt'] = generateDarkerVariant(value, 25);
+			customThemeDraft.variables['--color-footer-text'] = generateLighterVariant(value, 70);
+			customThemeDraft.variables['--color-character-card-bg'] = generateLighterVariant(value, 35);
+			customThemeDraft.variables['--color-character-name'] = generateDarkerVariant(value, 20);
+			customThemeDraft.variables['--color-character-info-text'] = generateDarkerVariant(value, 30);
+			customThemeDraft.variables['--color-character-tag-panel-title'] = generateDarkerVariant(value, 35);
+			customThemeDraft.variables['--color-block-bg'] = generateLighterVariant(value, 40);
+			customThemeDraft.variables['--color-block-editor-bg'] = generateLighterVariant(value, 45);
+			customThemeDraft.variables['--color-block-textarea-bg'] = generateLighterVariant(value, 48);
+			customThemeDraft.variables['--color-editor-bg'] = generateLighterVariant(value, 45);
+			customThemeDraft.variables['--color-editor-header-bg'] = generateLighterVariant(value, 35);
+			customThemeDraft.variables['--color-toolbar-btn-bg'] = generateLighterVariant(value, 40);
+			customThemeDraft.variables['--color-toolbar-btn-active'] = value;
+			customThemeDraft.variables['--color-toolbar-btn-text'] = generateDarkerVariant(value, 30);
+			customThemeDraft.variables['--color-blog-heading'] = generateDarkerVariant(value, 30);
+			customThemeDraft.variables['--color-blog-label'] = generateDarkerVariant(value, 25);
+			customThemeDraft.variables['--color-blog-select-bg'] = generateLighterVariant(value, 45);
+			customThemeDraft.variables['--color-blog-spinner-bg'] = generateLighterVariant(value, 45);
+		} else if (colorName === 'secondary') {
+			// Update secondary-related colors
+			customThemeDraft.variables['--color-bg-alt'] = generateLighterVariant(value, 35);
+			customThemeDraft.variables['--color-character-gender'] = generateDarkerVariant(value, 25);
+			customThemeDraft.variables['--color-character-avatar-bg'] = generateLighterVariant(value, 45);
+			customThemeDraft.variables['--color-block-toggle-bg'] = generateLighterVariant(value, 40);
+			customThemeDraft.variables['--color-block-toggle-text'] = generateDarkerVariant(value, 30);
+			customThemeDraft.variables['--color-block-toggle-hover'] = value;
+			customThemeDraft.variables['--color-block-toggle-hover-border'] = value;
+			customThemeDraft.variables['--color-editor-btn-bg'] = generateLighterVariant(value, 40);
+			customThemeDraft.variables['--color-editor-btn-hover'] = value;
+			customThemeDraft.variables['--color-editor-btn-active'] = value;
+			customThemeDraft.variables['--color-editor-btn-text'] = generateDarkerVariant(value, 30);
+			customThemeDraft.variables['--color-toolbar-bg'] = generateLighterVariant(value, 35);
+			customThemeDraft.variables['--color-toolbar-group-bg'] = generateLighterVariant(value, 40);
+			customThemeDraft.variables['--color-blog-tabs-btn'] = generateLighterVariant(value, 40);
+			customThemeDraft.variables['--color-blog-tabs-btn-active'] = value;
+			customThemeDraft.variables['--color-blog-tabs-btn-active-border'] = value;
+			customThemeDraft.variables['--color-blog-tabs-btn-hover'] = generateDarkerVariant(value, 5);
+		} else if (colorName === 'accent') {
+			// Update accent-related colors
+			customThemeDraft.variables['--color-link-hover'] = generateDarkerVariant(value, 15);
+			customThemeDraft.variables['--color-navbar-link-hover'] = value;
+			customThemeDraft.variables['--color-footer-link'] = generateLighterVariant(value, 50);
+			customThemeDraft.variables['--color-footer-link-hover'] = value;
+			customThemeDraft.variables['--color-banner-bg'] = generateLighterVariant(value, 45);
+			customThemeDraft.variables['--color-banner-text'] = generateDarkerVariant(value, 40);
+			customThemeDraft.variables['--color-banner-hover'] = generateDarkerVariant(value, 10);
+			customThemeDraft.variables['--color-microblog-tag-bg'] = generateLighterVariant(value, 50);
+			customThemeDraft.variables['--color-microblog-tag-text'] = generateDarkerVariant(value, 30);
+			customThemeDraft.variables['--color-microblog-add-tag-bg'] = value;
+			customThemeDraft.variables['--color-microblog-add-tag-text'] = generateLighterVariant(value, 60);
+			customThemeDraft.variables['--color-microblog-add-tag-hover-bg'] = generateDarkerVariant(value, 10);
+			customThemeDraft.variables['--color-microblog-toggle'] = value;
+			customThemeDraft.variables['--color-microblog-toggle-hover'] = generateDarkerVariant(value, 10);
+			customThemeDraft.variables['--color-microblog-focus'] = value;
+			customThemeDraft.variables['--color-microblog-post-bg'] = value;
+			customThemeDraft.variables['--color-microblog-post-text'] = generateLighterVariant(value, 60);
+			customThemeDraft.variables['--color-microblog-post-hover-bg'] = generateDarkerVariant(value, 5);
+			customThemeDraft.variables['--color-character-type'] = value;
+			customThemeDraft.variables['--color-character-tag-bg'] = generateLighterVariant(value, 45);
+			customThemeDraft.variables['--color-character-tag-text'] = generateDarkerVariant(value, 25);
+			customThemeDraft.variables['--color-character-add-tag-bg'] = value;
+			customThemeDraft.variables['--color-character-add-tag-text'] = generateLighterVariant(value, 60);
+			customThemeDraft.variables['--color-character-add-tag-hover-bg'] = generateDarkerVariant(value, 10);
+			customThemeDraft.variables['--color-character-info-label'] = value;
+			customThemeDraft.variables['--color-block-btn-bg'] = generateLighterVariant(value, 40);
+			customThemeDraft.variables['--color-block-btn-hover'] = value;
+			customThemeDraft.variables['--color-block-btn-text'] = generateDarkerVariant(value, 30);
+			customThemeDraft.variables['--color-block-add-btn-bg'] = value;
+			customThemeDraft.variables['--color-block-add-btn-text'] = generateLighterVariant(value, 60);
+			customThemeDraft.variables['--color-block-add-btn-hover'] = generateDarkerVariant(value, 10);
+			customThemeDraft.variables['--color-block-loading'] = value;
+			customThemeDraft.variables['--color-blog-select-focus-border'] = value;
+			customThemeDraft.variables['--color-blog-select-focus-bg'] = generateLighterVariant(value, 55);
+			customThemeDraft.variables['--color-blog-spinner-fg'] = value;
+		} else if (colorName === 'bg') {
+			// Update background-related colors
+			customThemeDraft.variables['--color-card-bg'] = generateLighterVariant(value, 45);
+			customThemeDraft.variables['--color-microblog-textarea-bg'] = generateLighterVariant(value, 48);
+			customThemeDraft.variables['--color-microblog-tag-input-bg'] = generateLighterVariant(value, 45);
+			customThemeDraft.variables['--color-microblog-preview-bg'] = generateLighterVariant(value, 50);
+			customThemeDraft.variables['--color-character-info-bg'] = generateLighterVariant(value, 50);
+			customThemeDraft.variables['--color-character-tag-panel-bg'] = generateLighterVariant(value, 52);
+			customThemeDraft.variables['--color-block-wait-info-bg'] = generateLighterVariant(value, 50);
+			customThemeDraft.variables['--color-toolbar-btn-code-bg'] = generateLighterVariant(value, 50);
+		} else if (colorName === 'text') {
+			// Update text-related colors
+			customThemeDraft.variables['--color-microblog-text'] = value;
+			customThemeDraft.variables['--color-block-text'] = value;
+			customThemeDraft.variables['--color-editor-text'] = value;
+			customThemeDraft.variables['--color-microblog-preview-text'] = value;
+			customThemeDraft.variables['--color-blog-select-text'] = value;
+		} else if (colorName === 'link') {
+			// Update link-related colors
+			customThemeDraft.variables['--color-navbar-link'] = value;
+			customThemeDraft.variables['--color-footer-link'] = generateLighterVariant(value, 50);
+			customThemeDraft.variables['--color-footer-link-hover'] = value;
+			customThemeDraft.variables['--color-character-info-label'] = value;
+		}
+
+		// Update preview immediately if it's showing
+		if (showPreview) {
+			injectCustomThemeStyle(customThemeDraft.variables);
+		}
+	}
 </script>
 
 <h2>Preferences</h2>
@@ -1053,6 +1186,120 @@
 		{#if showPreview}
 			<div class="theme-preview">
 				<h5>Theme Preview Gallery</h5>
+				
+				<!-- Palette Preview Section -->
+				<div class="preview-section">
+					<h6>Color Palette</h6>
+					<div class="palette-preview">
+						<div class="palette-colors">
+							<div class="palette-color-item">
+								<label>Primary</label>
+								<div class="color-picker-group">
+									<input 
+										type="color" 
+										bind:value={customThemeDraft.variables['--color-primary']} 
+										on:input={(e) => updatePaletteColor('primary', (e.target as HTMLInputElement).value)} 
+									/>
+									<input 
+										type="text" 
+										bind:value={customThemeDraft.variables['--color-primary']} 
+										on:input={(e) => updatePaletteColor('primary', (e.target as HTMLInputElement).value)} 
+										size="8" 
+									/>
+								</div>
+							</div>
+							<div class="palette-color-item">
+								<label>Secondary</label>
+								<div class="color-picker-group">
+									<input 
+										type="color" 
+										bind:value={customThemeDraft.variables['--color-secondary']} 
+										on:input={(e) => updatePaletteColor('secondary', (e.target as HTMLInputElement).value)} 
+									/>
+									<input 
+										type="text" 
+										bind:value={customThemeDraft.variables['--color-secondary']} 
+										on:input={(e) => updatePaletteColor('secondary', (e.target as HTMLInputElement).value)} 
+										size="8" 
+									/>
+								</div>
+							</div>
+							<div class="palette-color-item">
+								<label>Accent</label>
+								<div class="color-picker-group">
+									<input 
+										type="color" 
+										bind:value={customThemeDraft.variables['--color-accent']} 
+										on:input={(e) => updatePaletteColor('accent', (e.target as HTMLInputElement).value)} 
+									/>
+									<input 
+										type="text" 
+										bind:value={customThemeDraft.variables['--color-accent']} 
+										on:input={(e) => updatePaletteColor('accent', (e.target as HTMLInputElement).value)} 
+										size="8" 
+									/>
+								</div>
+							</div>
+							<div class="palette-color-item">
+								<label>Background</label>
+								<div class="color-picker-group">
+									<input 
+										type="color" 
+										bind:value={customThemeDraft.variables['--color-bg']} 
+										on:input={(e) => updatePaletteColor('bg', (e.target as HTMLInputElement).value)} 
+									/>
+									<input 
+										type="text" 
+										bind:value={customThemeDraft.variables['--color-bg']} 
+										on:input={(e) => updatePaletteColor('bg', (e.target as HTMLInputElement).value)} 
+										size="8" 
+									/>
+								</div>
+							</div>
+							<div class="palette-color-item">
+								<label>Text</label>
+								<div class="color-picker-group">
+									<input 
+										type="color" 
+										bind:value={customThemeDraft.variables['--color-text']} 
+										on:input={(e) => updatePaletteColor('text', (e.target as HTMLInputElement).value)} 
+									/>
+									<input 
+										type="text" 
+										bind:value={customThemeDraft.variables['--color-text']} 
+										on:input={(e) => updatePaletteColor('text', (e.target as HTMLInputElement).value)} 
+										size="8" 
+									/>
+								</div>
+							</div>
+							<div class="palette-color-item">
+								<label>Link</label>
+								<div class="color-picker-group">
+									<input 
+										type="color" 
+										bind:value={customThemeDraft.variables['--color-link']} 
+										on:input={(e) => updatePaletteColor('link', (e.target as HTMLInputElement).value)} 
+									/>
+									<input 
+										type="text" 
+										bind:value={customThemeDraft.variables['--color-link']} 
+										on:input={(e) => updatePaletteColor('link', (e.target as HTMLInputElement).value)} 
+										size="8" 
+									/>
+								</div>
+							</div>
+						</div>
+						<div class="palette-preview-visual">
+							<div class="palette-swatch primary" style="background-color: {customThemeDraft.variables['--color-primary']}"></div>
+							<div class="palette-swatch secondary" style="background-color: {customThemeDraft.variables['--color-secondary']}"></div>
+							<div class="palette-swatch accent" style="background-color: {customThemeDraft.variables['--color-accent']}"></div>
+							<div class="palette-swatch bg" style="background-color: {customThemeDraft.variables['--color-bg']}"></div>
+							<div class="palette-swatch text" style="background-color: {customThemeDraft.variables['--color-text']}"></div>
+							<div class="palette-swatch link" style="background-color: {customThemeDraft.variables['--color-link']}"></div>
+						</div>
+					</div>
+				</div>
+				
 				<div class="preview-gallery">
 					<!-- Navigation Bar Preview -->
 					<div class="preview-section">
@@ -1998,5 +2245,102 @@
 .preview-zen-editor :global(.preview-column) {
 	max-height: 300px;
 	overflow-y: auto;
+}
+
+/* Palette Preview Styles */
+.palette-preview {
+	display: flex;
+	gap: 2rem;
+	align-items: flex-start;
+}
+.palette-colors {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+	flex: 1;
+}
+.palette-color-item {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 0.8rem;
+	background: var(--color-bg-alt);
+	border: 1px solid var(--color-border);
+	border-radius: 6px;
+}
+.palette-color-item label {
+	font-weight: 600;
+	color: var(--color-text);
+	min-width: 80px;
+}
+.color-picker-group {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+.color-picker-group input[type="color"] {
+	width: 50px;
+	height: 35px;
+	border: 1px solid var(--color-border);
+	border-radius: 4px;
+	cursor: pointer;
+}
+.color-picker-group input[type="text"] {
+	width: 90px;
+	padding: 0.4rem;
+	border: 1px solid var(--color-border);
+	border-radius: 4px;
+	background: var(--color-bg-alt);
+	color: var(--color-text);
+	font-family: monospace;
+	font-size: 0.9em;
+}
+.palette-preview-visual {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	min-width: 120px;
+}
+.palette-swatch {
+	width: 100%;
+	height: 40px;
+	border-radius: 6px;
+	border: 2px solid var(--color-border);
+	position: relative;
+	transition: transform 0.2s ease;
+}
+.palette-swatch:hover {
+	transform: scale(1.05);
+}
+.palette-swatch::after {
+	content: attr(class);
+	position: absolute;
+	bottom: -25px;
+	left: 50%;
+	transform: translateX(-50%);
+	font-size: 0.8em;
+	font-weight: 600;
+	color: var(--color-text);
+	text-transform: capitalize;
+	white-space: nowrap;
+}
+.palette-swatch.primary::after {
+	content: 'Primary';
+}
+.palette-swatch.secondary::after {
+	content: 'Secondary';
+}
+.palette-swatch.accent::after {
+	content: 'Accent';
+}
+.palette-swatch.bg::after {
+	content: 'Background';
+}
+.palette-swatch.text::after {
+	content: 'Text';
+}
+.palette-swatch.link::after {
+	content: 'Link';
 }
 </style>
