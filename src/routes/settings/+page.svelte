@@ -33,7 +33,7 @@
 	/* filepath: f:\projects\websites\CalmCaf\calm-coffee\src\routes\settings\+page.svelte */
 	.settings-container {
 		display: flex;
-		max-width: 700px;
+		max-width: 75%;
 		margin: 2.5rem auto;
 		background: var(--color-card-bg);
 		border-radius: 14px;
