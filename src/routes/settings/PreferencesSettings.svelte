@@ -295,6 +295,7 @@
 	let showPreview = false;
 	let showDeleteConfirm = false;
 	let themeToDelete: string | null = null;
+	let editingTheme: string | null = null; // Track which theme is being edited
 
 	// Reactive statement to update preview when colors change
 	$: if (showPreview && showCreateForm) {
@@ -678,6 +679,109 @@
 		}
 	}
 
+	function importThemeFromCSS(file: File): void {
+		const reader = new FileReader();
+		reader.onload = (e) => {
+			const cssContent = e.target?.result as string;
+			if (!cssContent) return;
+
+			// Parse CSS content to extract theme variables
+			const themeVariables: Record<string, string> = {};
+			const rootMatch = cssContent.match(/:root\s*\{([^}]+)\}/);
+			
+			if (rootMatch) {
+				const rootContent = rootMatch[1];
+				// Extract CSS custom properties
+				const variableMatches = rootContent.matchAll(/--color-[^:]+:\s*([^;]+);/g);
+				
+				for (const match of variableMatches) {
+					const variableName = match[0].split(':')[0].trim();
+					const variableValue = match[1].trim();
+					
+					// Only include variables that are in our THEME_VARIABLES list
+					if (THEME_VARIABLES.includes(variableName)) {
+						themeVariables[variableName] = variableValue;
+					}
+				}
+			}
+
+			// Extract theme name from CSS comments or filename
+			let themeName = file.name.replace(/\.css$/i, '').replace(/[^a-zA-Z0-9\s]/g, ' ').trim();
+			if (!themeName) {
+				themeName = 'Imported Theme';
+			}
+
+			// Check if theme name already exists
+			let finalThemeName = themeName;
+			let counter = 1;
+			while ([...BUILTIN_THEMES, ...customThemes].some(t => t.name === finalThemeName)) {
+				finalThemeName = `${themeName} (${counter})`;
+				counter++;
+			}
+
+			// Create new theme
+			const importedTheme: Theme = {
+				name: finalThemeName,
+				variables: { ...themeVariables },
+				isCustom: true
+			};
+
+			// Add to custom themes
+			customThemes = [...customThemes, importedTheme];
+			saveCustomThemes();
+
+			// Select the imported theme
+			selectedTheme = finalThemeName;
+			applyTheme(importedTheme);
+
+			// Show success message (you could add a toast notification here)
+			alert(`Theme "${finalThemeName}" imported successfully!`);
+		};
+
+		reader.onerror = () => {
+			alert('Error reading CSS file. Please make sure it\'s a valid CSS file.');
+		};
+
+		reader.readAsText(file);
+	}
+
+	function handleFileImport(event: Event): void {
+		const input = event.target as HTMLInputElement;
+		const file = input.files?.[0];
+		
+		if (file) {
+			if (file.type === 'text/css' || file.name.endsWith('.css')) {
+				importThemeFromCSS(file);
+			} else {
+				alert('Please select a valid CSS file.');
+			}
+		}
+		
+		// Reset the input so the same file can be selected again
+		input.value = '';
+	}
+
+	function editTheme(themeName: string): void {
+		const themeToEdit = customThemes.find(t => t.name === themeName);
+		if (!themeToEdit) return;
+
+		// Load the theme into the draft
+		customThemeDraft = {
+			name: themeToEdit.name,
+			variables: { ...themeToEdit.variables },
+			isCustom: true
+		};
+
+		// Set editing mode
+		editingTheme = themeName;
+		showCreateForm = true;
+
+		// Apply the theme to preview if it's showing
+		if (showPreview) {
+			injectCustomThemeStyle(customThemeDraft.variables);
+		}
+	}
+
 	function loadCustomThemes() {
 		const raw = localStorage.getItem('customThemes');
 		customThemes = raw ? JSON.parse(raw) : [];
@@ -749,11 +853,27 @@
 
 	function handleCreateTheme() {
 		if (!customThemeDraft.name.trim()) return;
-		customThemes = [...customThemes, { ...customThemeDraft }];
-		saveCustomThemes();
-		selectedTheme = customThemeDraft.name;
-		applyTheme(customThemeDraft);
+		
+		if (editingTheme) {
+			// Update existing theme
+			const themeIndex = customThemes.findIndex(t => t.name === editingTheme);
+			if (themeIndex !== -1) {
+				customThemes[themeIndex] = { ...customThemeDraft };
+				saveCustomThemes();
+				selectedTheme = customThemeDraft.name;
+				applyTheme(customThemeDraft);
+			}
+		} else {
+			// Create new theme
+			customThemes = [...customThemes, { ...customThemeDraft }];
+			saveCustomThemes();
+			selectedTheme = customThemeDraft.name;
+			applyTheme(customThemeDraft);
+		}
+		
+		// Reset form
 		showCreateForm = false;
+		editingTheme = null;
 		customThemeDraft = {
 			name: '',
 			variables: Object.fromEntries(THEME_VARIABLES.map(v => [v, '#ffffff'])),
@@ -764,14 +884,24 @@
 	function toggleCreateForm() {
 		showCreateForm = !showCreateForm;
 		if (showCreateForm) {
-			// Generate a random theme when opening the create form
-			const randomPalette = generateColorPalette();
-			customThemeDraft.variables = { ...customThemeDraft.variables, ...randomPalette };
+			// Generate a random theme when opening the create form (only if not editing)
+			if (!editingTheme) {
+				const randomPalette = generateColorPalette();
+				customThemeDraft.variables = { ...customThemeDraft.variables, ...randomPalette };
+			}
 			
-			// Apply the random theme to preview if it's showing
+			// Apply the theme to preview if it's showing
 			if (showPreview) {
 				injectCustomThemeStyle(customThemeDraft.variables);
 			}
+		} else {
+			// Reset editing mode when canceling
+			editingTheme = null;
+			customThemeDraft = {
+				name: '',
+				variables: Object.fromEntries(THEME_VARIABLES.map(v => [v, '#ffffff'])),
+				isCustom: true
+			};
 		}
 	}
 
@@ -835,25 +965,46 @@
 		</select>
 	</label>
 		<div class="theme-actions">
-			<button on:click={toggleCreateForm} class="create-theme-btn">
-				{showCreateForm ? 'Cancel' : 'Create New Theme'}
-			</button>
-			<button on:click={exportCurrentThemeToCSS} class="export-theme-btn">
-				📁 Export Theme
-			</button>
+			<div class="theme-action-buttons">
+				<button on:click={toggleCreateForm} class="create-theme-btn">
+					{showCreateForm ? 'Cancel' : 'Create New Theme'}
+				</button>
+				<button on:click={exportCurrentThemeToCSS} class="export-theme-btn">
+					📁 Export Theme
+				</button>
+				<button on:click={() => document.getElementById('import-theme-input')?.click()} class="import-theme-btn">
+					📂 Import Theme
+				</button>
+			</div>
+			<input 
+				id="import-theme-input" 
+				type="file" 
+				accept=".css,text/css" 
+				style="display: none;" 
+				on:change={handleFileImport}
+			/>
 			{#if customThemes.length > 0}
 				<div class="custom-themes-list">
 					<h4>Custom Themes</h4>
 					{#each customThemes as theme}
 						<div class="custom-theme-item">
 							<span>{theme.name}</span>
-							<button 
-								on:click={() => confirmDeleteTheme(theme.name)} 
-								class="delete-theme-btn"
-								title="Delete theme"
-							>
-								🗑️
-							</button>
+							<div class="theme-item-actions">
+								<button 
+									on:click={() => editTheme(theme.name)} 
+									class="edit-theme-btn"
+									title="Edit theme"
+								>
+									✏️
+								</button>
+								<button 
+									on:click={() => confirmDeleteTheme(theme.name)} 
+									class="delete-theme-btn"
+									title="Delete theme"
+								>
+									🗑️
+								</button>
+							</div>
 						</div>
 					{/each}
 				</div>
@@ -893,7 +1044,9 @@
 			<button on:click={exportCurrentThemeToCSS} class="export-theme-btn">
 				📁 Export CSS
 			</button>
-			<button on:click={handleCreateTheme} class="save-theme-btn">Save Theme</button>
+			<button on:click={handleCreateTheme} class="save-theme-btn">
+				{editingTheme ? 'Update Theme' : 'Save Theme'}
+			</button>
 		</div>
 
 		{#if showPreview}
@@ -1060,9 +1213,9 @@
 									on:input={(e) => handleDraftVarChange(varName, (e.target as HTMLInputElement).value)} 
 									size="8" 
 								/>
-							</div>
-						{/each}
-					</div>
+				</div>
+			{/each}
+		</div>
 				</div>
 			{/each}
 		</div>
@@ -1082,6 +1235,12 @@
 	display: flex;
 	flex-direction: column;
 	gap: 1rem;
+}
+.theme-action-buttons {
+	display: flex;
+	gap: 0.8rem;
+	align-items: center;
+	flex-wrap: wrap;
 }
 .create-theme-btn {
 	padding: 0.4em 1em;
@@ -1113,6 +1272,23 @@
 }
 .custom-theme-item span {
 	color: var(--color-text);
+}
+.theme-item-actions {
+	display: flex;
+	gap: 0.3rem;
+}
+.edit-theme-btn {
+	background: none;
+	border: none;
+	cursor: pointer;
+	font-size: 1.2em;
+	padding: 0.2rem;
+	border-radius: 4px;
+	transition: background-color 0.2s;
+}
+.edit-theme-btn:hover {
+	background: var(--color-link);
+	color: var(--color-primary-alt);
 }
 .delete-theme-btn {
 	background: none;
@@ -1772,6 +1948,21 @@
 }
 .export-theme-btn:hover {
 	background: var(--color-accent);
+	transform: translateY(-1px);
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.import-theme-btn {
+	padding: 0.5em 1.5em;
+	background: var(--color-link);
+	color: var(--color-primary-alt);
+	border: none;
+	border-radius: 6px;
+	font-size: 1em;
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+.import-theme-btn:hover {
+	background: var(--color-link-hover);
 	transform: translateY(-1px);
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
