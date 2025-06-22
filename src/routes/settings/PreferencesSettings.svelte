@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import ZenMarkdownEditor from '$lib/comp/markdown/ZenMarkdownEditor.svelte';
 
 	// List of all theme variables to control - updated to match app.css
 	const THEME_VARIABLES = [
@@ -865,10 +866,10 @@
 			}
 		} else {
 			// Create new theme
-			customThemes = [...customThemes, { ...customThemeDraft }];
-			saveCustomThemes();
-			selectedTheme = customThemeDraft.name;
-			applyTheme(customThemeDraft);
+		customThemes = [...customThemes, { ...customThemeDraft }];
+		saveCustomThemes();
+		selectedTheme = customThemeDraft.name;
+		applyTheme(customThemeDraft);
 		}
 		
 		// Reset form
@@ -1188,6 +1189,20 @@
 								<span class="preview-tag">theme <button class="preview-remove-tag">×</button></span>
 								<span class="preview-tag">preview <button class="preview-remove-tag">×</button></span>
 							</div>
+						</div>
+					</div>
+
+					<!-- Zen Markdown Editor Preview -->
+					<div class="preview-section">
+						<h6>Zen Markdown Editor</h6>
+						<div class="preview-zen-editor">
+							<ZenMarkdownEditor 
+								value="# Sample Markdown\n\nThis is a **bold** and *italic* text with [links](https://example.com).\n\n- List item 1\n- List item 2\n- List item 3\n\n```javascript\nconsole.log('Hello, World!');\n```"
+								placeholder="Start writing your markdown content..."
+								maxLength={1000}
+								showPreview={true}
+								zenMode={false}
+							/>
 						</div>
 					</div>
 				</div>
@@ -1965,5 +1980,23 @@
 	background: var(--color-link-hover);
 	transform: translateY(-1px);
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.preview-remove-tag:hover {
+	color: var(--color-microblog-remove-tag-hover, var(--color-danger));
+}
+.preview-zen-editor {
+	max-height: 400px;
+	overflow: hidden;
+}
+.preview-zen-editor :global(.zen-editor) {
+	max-height: 350px;
+	overflow: hidden;
+}
+.preview-zen-editor :global(.editor-main) {
+	max-height: 300px;
+}
+.preview-zen-editor :global(.preview-column) {
+	max-height: 300px;
+	overflow-y: auto;
 }
 </style>
