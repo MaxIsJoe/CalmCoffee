@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import ZenMarkdownEditor from '$lib/comp/markdown/ZenMarkdownEditor.svelte';
+	import WordInfoCacheManager from '$lib/comp/common/WordInfoCacheManager.svelte';
 
 	// List of all theme variables to control - updated to match app.css
 	const THEME_VARIABLES = [
@@ -1206,6 +1207,8 @@
 
 <h2>Preferences</h2>
 <p>Customize your Calm Coffee experience.</p>
+
+<WordInfoCacheManager />
 
 <div class="theme-section">
 	<h3>Theme</h3>
