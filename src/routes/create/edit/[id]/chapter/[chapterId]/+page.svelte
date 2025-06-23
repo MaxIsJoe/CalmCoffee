@@ -4,7 +4,6 @@
 	import { page } from '$app/stores';
 	import { coffeeMarkdown, defaultStyles } from '$lib/md/coffeeMarkdown';
 	import type { Database } from '../../../../../../../database.types';
-	import BlockList from '$lib/comp/markdown/BlockList.svelte';
 	import BlockEditor from '$lib/comp/markdown/BlockEditor.svelte';
 	import BlockPreview from '$lib/comp/markdown/BlockPreview.svelte';
 
@@ -241,6 +240,8 @@
 				on:cancel={handleCancel}
 				loading={editorLoading}
 				error={error}
+				draftKey={`block-editor-draft-${chapterId}-add`}
+				showDraftStatus={true}
 			/>
 		{/if}
 		<ul class="block-list">
@@ -255,6 +256,8 @@
 							on:cancel={handleCancel}
 							loading={editorLoading}
 							error={error}
+							draftKey={`block-editor-draft-${chapterId}-${block.id}`}
+							showDraftStatus={true}
 						/>
 					{:else}
 						<BlockPreview

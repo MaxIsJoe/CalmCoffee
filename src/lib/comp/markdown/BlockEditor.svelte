@@ -1,7 +1,7 @@
 <script lang="ts">
   import ZenMarkdownEditor from './ZenMarkdownEditor.svelte';
   import { defaultStyles } from '$lib/md/coffeeMarkdown';
-  import { createEventDispatcher } from 'svelte';
+  import { createEventDispatcher, onMount, onDestroy } from 'svelte';
 
   export let value: string = '';
   export let styles: string = JSON.stringify(defaultStyles, null, 2);
@@ -9,16 +9,64 @@
   export let isEditing: boolean = false;
   export let loading: boolean = false;
   export let error: string = '';
+  export let draftKey: string | undefined;
+  export let showDraftStatus: boolean = false;
 
   const dispatch = createEventDispatcher();
 
   let showStyles = false;
+  let draftSaveTimeout: any = null;
+  let isSavingDraft = false;
+  let lastDraftSave: Date | null = null;
+  let prevValue = value;
+  let prevStyles = styles;
+
+  onMount(() => {
+    if (draftKey) {
+      const draft = localStorage.getItem(draftKey);
+      if (draft) {
+        try {
+          const { value: v, styles: s, lastSaved } = JSON.parse(draft);
+          value = v ?? value;
+          styles = s ?? styles;
+          if (lastSaved) lastDraftSave = new Date(lastSaved);
+        } catch {}
+      }
+    }
+  });
+
+  $: if (draftKey && (value !== prevValue || styles !== prevStyles)) {
+    if (draftSaveTimeout) clearTimeout(draftSaveTimeout);
+    isSavingDraft = true;
+    draftSaveTimeout = setTimeout(() => {
+      lastDraftSave = new Date();
+      localStorage.setItem(draftKey!, JSON.stringify({ value, styles, lastSaved: lastDraftSave.toISOString() }));
+      isSavingDraft = false;
+      prevValue = value;
+      prevStyles = styles;
+    }, 1500);
+  }
+
+  function clearDraft() {
+    if (draftKey) localStorage.removeItem(draftKey);
+  }
 
   function handleSave() {
+    clearDraft();
     dispatch('save', { value, styles });
   }
   function handleCancel() {
+    clearDraft();
     dispatch('cancel');
+  }
+
+  onDestroy(() => {
+    if (draftSaveTimeout) clearTimeout(draftSaveTimeout);
+  });
+
+  function formatTime(date: Date | null): string {
+    if (!date) return '';
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   }
 </script>
 
@@ -48,6 +96,15 @@
   </div>
   {#if error}
     <div class="block-editor-error">{error}</div>
+  {/if}
+  {#if showDraftStatus}
+    <div class="draft-status">
+      {#if isSavingDraft}
+        <span>Saving…</span>
+      {:else if lastDraftSave}
+        <span>Saved at {formatTime(lastDraftSave)}</span>
+      {/if}
+    </div>
   {/if}
 </div>
 
@@ -122,5 +179,13 @@
     color: var(--color-block-error);
     margin-top: 0.7rem;
     font-size: 1.01rem;
+  }
+  .draft-status {
+    font-size: 0.93em;
+    color: var(--color-muted, #888);
+    margin-bottom: 0.5rem;
+    margin-top: -0.5rem;
+    text-align: right;
+    min-height: 1.2em;
   }
 </style> 
