@@ -281,7 +281,7 @@
 			variables: {}, // Uses [data-theme="dark"]
 		},
 		{
-			name: 'Caramel',
+			name: 'Blueberry Frost',
 			variables: {}, // Uses [data-theme="caramel"]
 		},
 	];
@@ -925,10 +925,10 @@
 			document.documentElement.setAttribute('data-theme', 'dark');
 			removeCustomThemeStyle();
 			localStorage.setItem('theme', 'Dark Chocolate');
-		} else if (theme.name === 'Caramel') {
+		} else if (theme.name === 'Blueberry Frost') {
 			document.documentElement.setAttribute('data-theme', 'caramel');
 			removeCustomThemeStyle();
-			localStorage.setItem('theme', 'Caramel');
+			localStorage.setItem('theme', 'Blueberry Frost');
 		} else {
 			document.documentElement.setAttribute('data-theme', 'custom');
 			injectCustomThemeStyle(theme.variables);
@@ -1162,40 +1162,18 @@
 			customThemeDraft.variables['--color-character-add-tag-bg'] = value;
 			customThemeDraft.variables['--color-character-add-tag-text'] = generateLighterVariant(value, 60);
 			customThemeDraft.variables['--color-character-add-tag-hover-bg'] = generateDarkerVariant(value, 10);
-			customThemeDraft.variables['--color-character-info-label'] = value;
-			customThemeDraft.variables['--color-block-btn-bg'] = generateLighterVariant(value, 40);
-			customThemeDraft.variables['--color-block-btn-hover'] = value;
-			customThemeDraft.variables['--color-block-btn-text'] = generateDarkerVariant(value, 30);
-			customThemeDraft.variables['--color-block-add-btn-bg'] = value;
-			customThemeDraft.variables['--color-block-add-btn-text'] = generateLighterVariant(value, 60);
-			customThemeDraft.variables['--color-block-add-btn-hover'] = generateDarkerVariant(value, 10);
-			customThemeDraft.variables['--color-block-loading'] = value;
-			customThemeDraft.variables['--color-blog-select-focus-border'] = value;
-			customThemeDraft.variables['--color-blog-select-focus-bg'] = generateLighterVariant(value, 55);
-			customThemeDraft.variables['--color-blog-spinner-fg'] = value;
-		} else if (colorName === 'bg') {
-			// Update background-related colors
-			customThemeDraft.variables['--color-card-bg'] = generateLighterVariant(value, 45);
-			customThemeDraft.variables['--color-microblog-textarea-bg'] = generateLighterVariant(value, 48);
-			customThemeDraft.variables['--color-microblog-tag-input-bg'] = generateLighterVariant(value, 45);
-			customThemeDraft.variables['--color-microblog-preview-bg'] = generateLighterVariant(value, 50);
+			customThemeDraft.variables['--color-character-remove-tag'] = generateDarkerVariant(value, 20);
+			customThemeDraft.variables['--color-character-remove-tag-hover'] = dangerColor;
+			customThemeDraft.variables['--color-character-tag-warning'] = generateMonochromaticVariant(dangerColor, 0, 20);
+			customThemeDraft.variables['--color-character-art-hint'] = mutedColor;
+			customThemeDraft.variables['--color-character-info-text'] = generateDarkerVariant(value, 30);
 			customThemeDraft.variables['--color-character-info-bg'] = generateLighterVariant(value, 50);
-			customThemeDraft.variables['--color-character-tag-panel-bg'] = generateLighterVariant(value, 52);
-			customThemeDraft.variables['--color-block-wait-info-bg'] = generateLighterVariant(value, 50);
-			customThemeDraft.variables['--color-toolbar-btn-code-bg'] = generateLighterVariant(value, 50);
-		} else if (colorName === 'text') {
-			// Update text-related colors
-			customThemeDraft.variables['--color-microblog-text'] = value;
-			customThemeDraft.variables['--color-block-text'] = value;
-			customThemeDraft.variables['--color-editor-text'] = value;
-			customThemeDraft.variables['--color-microblog-preview-text'] = value;
-			customThemeDraft.variables['--color-blog-select-text'] = value;
-		} else if (colorName === 'link') {
-			// Update link-related colors
-			customThemeDraft.variables['--color-navbar-link'] = value;
-			customThemeDraft.variables['--color-footer-link'] = generateLighterVariant(value, 50);
-			customThemeDraft.variables['--color-footer-link-hover'] = value;
 			customThemeDraft.variables['--color-character-info-label'] = value;
+			customThemeDraft.variables['--color-character-info-border'] = borderColor;
+			customThemeDraft.variables['--color-character-info-shadow'] = generateMonochromaticVariant(borderColor, 0, -5);
+			customThemeDraft.variables['--color-character-relationship-bg'] = generateLighterVariant(secondaryColor, 45);
+			customThemeDraft.variables['--color-character-relationship-shadow'] = generateMonochromaticVariant(borderColor, 0, -8);
+			customThemeDraft.variables['--color-character-tag-panel-bg'] = generateLighterVariant(primaryColor, 52);
 		}
 
 		// Update preview immediately if it's showing
