@@ -24,6 +24,7 @@ export type CoffeeMarkdownStyles = {
 	table?: string; // Table style
 	th?: string;    // Table header cell style
 	td?: string;    // Table data cell style
+	checkbox?: string; // Style for rendered checkboxes
 };
 
 export const defaultStyles: Required<CoffeeMarkdownStyles> = {
@@ -52,6 +53,7 @@ export const defaultStyles: Required<CoffeeMarkdownStyles> = {
 	table: 'border-collapse:collapse;width:100%;margin:1.2em 0;background:var(--color-bg-alt);border-radius:8px;overflow:hidden;box-shadow:0 1px 4px var(--color-card-shadow);',
 	th: 'padding:0.6em 1em;background:var(--color-link);color:#fff;font-weight:700;text-align:left;border-bottom:2px solid var(--color-link);',
 	td: 'padding:0.6em 1em;border-bottom:1px solid var(--color-bg);',
+	checkbox: 'display:inline-block;width:1.1em;height:1.1em;margin-right:0.5em;vertical-align:-0.15em;border:2px solid var(--color-link);border-radius:4px;background:var(--color-bg);',
 };
 
 //background-image: url('https://wallpaperaccess.com/full/781336.jpg')
@@ -94,6 +96,8 @@ export function coffeeMarkdown(md: string, styles: CoffeeMarkdownStyles = {}): s
 	// 4. Paragraphs last
 	html = handleParagraphs(html, mergedStyles);
 	html = handlePoetry(html, mergedStyles);
+
+	html = handleCheckboxes(html, mergedStyles);
 
 	return html;
 }
@@ -259,13 +263,10 @@ function handleParagraphs(html: string, mergedStyles: Required<CoffeeMarkdownSty
 
 	// Process paragraphs: look for blocks of text separated by two or more newlines, or at the start of the string.
 	// This regex captures the separator (if any) and the content of the "paragraph".
-	// The content ([^\n<][^\n]*) can contain single newlines.
-	return html.replace(/(^|(?:\n{2,}))([^\n<][^\n]*)/g, (m, sep, lineContent) => {
+	// The content ([^\n]*) can contain single newlines.
+	return html.replace(/(^|(?:\n{2,}))([^\n]*)/g, (m, sep, lineContent) => {
 		// If the "lineContent" starts with an already-processed HTML block tag,
 		// we don't want to wrap it in a <p> or process its newlines.
-		if (/^\s*<(h\d|ul|ol|li|pre|blockquote|img|p|code|div|u|b|i)/.test(lineContent)) {
-			return m;
-		}
 
 		// Within the lineContent (which is effectively a paragraph),
 		// replace single newlines with <br>.
@@ -281,7 +282,7 @@ function processListItems(items: string[], isOrdered: boolean, mergedStyles: Req
 	return items.map((item: string, index: number) => {
 		const nestedUl = item.match(/(\n\s*[-*] .+)/g);
 		const nestedOl = item.match(/(\n\s*\d+\. .+)/g);
-		const content = item.replace(/\n[\s\S]*/g, '').trim();
+		let content = item.replace(/\n[\s\S]*/g, '').trim();
 		let nested = '';
 		if (nestedUl) {
 			const nestedItems = nestedUl[0].trim().split(/\n\s*[-*] /).map((nestedItem: string, nestedIndex: number) => nestedIndex === 0 ? nestedItem.replace(/^[-*] /, '') : nestedItem);
@@ -291,7 +292,17 @@ function processListItems(items: string[], isOrdered: boolean, mergedStyles: Req
 			nested = `<ol style="${mergedStyles.ol}">${processListItems(nestedItems, true, mergedStyles, level + 1)}</ol>`;
 		}
 		const bullet = isOrdered ? `<span style="margin-right:0.5em;color:#a5b4fc;">${index + 1}.</span>` : `<span style="margin-right:0.5em;color:#a5b4fc;">•</span>`;
-		return `<li style="${mergedStyles.li}">${bullet}${content}${nested}</li>`;
+
+		// Checkbox detection at the start of the content
+		let checkbox = '';
+		const checkboxMatch = content.match(/^\[([ xX])\]\s*/);
+		if (checkboxMatch) {
+			const isChecked = checkboxMatch[1].toLowerCase() === 'x';
+			checkbox = `<span style="${mergedStyles.checkbox};background:${isChecked ? 'var(--color-link);color:#fff;' : 'var(--color-bg);'};text-align:center;">${isChecked ? '&#10003;' : ''}</span>`;
+			content = content.replace(/^\[[ xX]\]\s*/, '');
+		}
+
+		return `<li style="${mergedStyles.li}">${bullet}${checkbox}${processInlineMarkdown(content, mergedStyles)}${nested}</li>`;
 	}).join('');
 }
 
@@ -313,6 +324,15 @@ function handleOrderedLists(html: string, mergedStyles: Required<CoffeeMarkdownS
 			return `${sep}<ol style="${mergedStyles.ol}">${processListItems(items, true, mergedStyles)}</ol>`;
 		}
 	);
+}
+
+function handleCheckboxes(html: string, mergedStyles: Required<CoffeeMarkdownStyles>): string {
+	// Replace - [ ] and - [x] or - [X] at the start of <li> content
+	return html.replace(/<li([^>]*)>(\s*)\[([ xX])\](\s*)([\s\S]*?)<\/li>/g, (_m, liAttrs, preSpace, checked, postSpace, content) => {
+		const isChecked = checked.toLowerCase() === 'x';
+		const checkbox = `<span style="${mergedStyles.checkbox};background:${isChecked ? 'var(--color-link);color:#fff;' : 'var(--color-bg);'};text-align:center;">${isChecked ? '&#10003;' : ''}</span>`;
+		return `<li${liAttrs}>${preSpace}${checkbox}${postSpace}${content}</li>`;
+	});
 }
 
 // New internal helper function to recursively process markdown within a block
@@ -408,7 +428,7 @@ function handleTables(html: string, mergedStyles: Required<CoffeeMarkdownStyles>
 		const alignLine: string = lines[1];
 		const rows: string[] = lines.slice(2);
 
-		const headers: string[] = header.split('|').slice(1, -1).map((h: string) => h.trim());
+		const headers: string[] = header.split('|').slice(1, -1).map((h: string) => processInlineMarkdown(h.trim(), mergedStyles));
 		const aligns: (string | undefined)[] = alignLine.split('|').slice(1, -1).map((a: string) => {
 			if (/^:-+:$/.test(a.trim())) return 'center';
 			if (/^-+:$/.test(a.trim())) return 'right';
@@ -416,11 +436,31 @@ function handleTables(html: string, mergedStyles: Required<CoffeeMarkdownStyles>
 			return undefined;
 		});
 
-		const rowCells: string[][] = rows.map((row: string) => row.split('|').slice(1, -1).map((cell: string) => cell.trim()));
+		const rowCells: string[][] = rows.map((row: string) => row.split('|').slice(1, -1).map((cell: string) => processInlineMarkdown(cell.trim(), mergedStyles)));
 
 		const thead = `<thead><tr>${headers.map((h: string, i: number) => `<th style="${mergedStyles.th}${aligns[i] ? `text-align:${aligns[i]};` : ''}">${h}</th>`).join('')}</tr></thead>`;
 		const tbody = `<tbody>${rowCells.map((cells: string[]) => `<tr>${cells.map((cell: string, i: number) => `<td style="${mergedStyles.td}${aligns[i] ? `text-align:${aligns[i]};` : ''}">${cell}</td>`).join('')}</tr>`).join('')}</tbody>`;
 
 		return `${sep}<table style="${mergedStyles.table}">${thead}${tbody}</table>`;
 	});
+}
+
+function renderCheckboxesInline(text: string, mergedStyles: Required<CoffeeMarkdownStyles>): string {
+	// Only replace [ ] or [x]/[X] at the start of a line (not inside <li> for lists)
+	return text.replace(/(^|\s)\[([ xX])\](?=\s|$)/g, (m, pre, checked) => {
+		const isChecked = checked.toLowerCase() === 'x';
+		const checkbox = `<span style="${mergedStyles.checkbox};background:${isChecked ? 'var(--color-link);color:#fff;' : 'var(--color-bg);'};text-align:center;">${isChecked ? '&#10003;' : ''}</span>`;
+		return `${pre}${checkbox}`;
+	});
+}
+
+function processInlineMarkdown(text: string, mergedStyles: Required<CoffeeMarkdownStyles>): string {
+	let html = text;
+	html = renderCheckboxesInline(html, mergedStyles);
+	html = handleLinks(html, mergedStyles);
+	html = handleBold(html, mergedStyles);
+	html = handleUnderline(html);
+	html = handleItalic(html, mergedStyles);
+	html = handleEscapedNewlines(html);
+	return html;
 }
