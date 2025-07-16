@@ -7,6 +7,7 @@
 	import { user } from '$lib/stores/user';
 	import { onMount } from 'svelte';
 	import { createCharacter } from '$lib/db/characters';
+	import { fetchStoreContent, StoreContentType, type StoreContent } from '$lib/db/content-shop';
 
 	type CharacterInsert = Database['public']['Tables']['characters']['Insert'];
 
@@ -22,6 +23,12 @@
 	let loading = false;
 
 	let descTextarea: HTMLTextAreaElement | null = null;
+
+	let showTemplateModal = false;
+	let templateSearch = '';
+	let templateResults: StoreContent[] = [];
+	let templateLoading = false;
+	let templateError: string | null = null;
 
 	function insertDescAtCursor(before: string, after: string = '', placeholder: string = '') {
 		if (!descTextarea) return;
@@ -142,6 +149,34 @@
 		}
 		loading = false;
 	}
+
+	async function openTemplateModal() {
+		showTemplateModal = true;
+		templateSearch = '';
+		await searchTemplates();
+	}
+
+	async function searchTemplates() {
+		templateLoading = true;
+		templateError = null;
+		try {
+			const { data } = await fetchStoreContent({ limit: 50, offset: 0 });
+			templateResults = (data || []).filter(t => t.type === StoreContentType.TEMPLATE &&
+				(t.name.toLowerCase().includes(templateSearch.toLowerCase()) ||
+				 t.description.toLowerCase().includes(templateSearch.toLowerCase())
+				)
+			);
+		} catch (e) {
+			templateError = e instanceof Error ? e.message : 'Failed to load templates.';
+		} finally {
+			templateLoading = false;
+		}
+	}
+
+	function insertTemplateContent(content: string) {
+		insertDescAtCursor(content, '', '');
+		showTemplateModal = false;
+	}
 </script>
 
 <h1>Create New Character</h1>
@@ -160,8 +195,40 @@
 					on:insert={(e) =>
 						insertDescAtCursor(e.detail.before, e.detail.after, e.detail.placeholder)}
 				/>
+				<button type="button" class="browse-templates-btn" on:click={openTemplateModal}>Browse Templates</button>
 				<textarea bind:this={descTextarea} bind:value={character_desc} required></textarea>
 			</label>
+			{#if showTemplateModal}
+				<div class="template-modal-backdrop" on:click={() => showTemplateModal = false}></div>
+				<div class="template-modal">
+					<div class="template-modal-header">
+						<span>Browse Templates</span>
+						<button class="close-modal-btn" on:click={() => showTemplateModal = false}>&times;</button>
+					</div>
+					<input class="template-search-input" type="text" placeholder="Search templates..." bind:value={templateSearch} on:input={searchTemplates} />
+					{#if templateLoading}
+						<div class="template-modal-status">Loading...</div>
+					{:else if templateError}
+						<div class="template-modal-status error">{templateError}</div>
+					{:else if templateResults.length === 0}
+						<div class="template-modal-status">No templates found.</div>
+					{:else}
+						<ul class="template-modal-list">
+							{#each templateResults as t}
+								<li class="template-modal-item">
+									<div class="template-modal-name">{t.name}</div>
+									<div class="template-modal-desc">{t.description}</div>
+									<pre class="template-modal-preview">{t.content.slice(0, 200)}{t.content.length > 200 ? '...' : ''}</pre>
+									<div class="template-modal-actions">
+										<button class="insert-template-btn" on:click={() => insertTemplateContent(t.content)}>Insert</button>
+										<a class="goto-templates-btn" href="/templates" target="_blank" title="Go to templates page">See all</a>
+									</div>
+								</li>
+							{/each}
+						</ul>
+					{/if}
+				</div>
+			{/if}
 			<label>
 				<div>Type: <span class="required-indicator">*</span></div>
 				<select bind:value={character_type} required>
@@ -287,7 +354,6 @@
 					</div>
 				{/if}
 			</div>
-			<!-- ...existing code for .character-profile if needed... -->
 		</div>
 	</div>
 </div>
@@ -771,5 +837,136 @@
 		flex-wrap: wrap;
 		gap: 0.5em;
 		margin-top: 0.2em;
+	}
+	.browse-templates-btn {
+		margin: 0.5em 0 0.5em 0;
+		background: var(--color-btn-primary, #4f46e5);
+		color: var(--color-btn-primary-text, #fff);
+		border: none;
+		border-radius: 4px;
+		padding: 0.4em 1.2em;
+		font-weight: 500;
+		cursor: pointer;
+		transition: background 0.2s;
+	}
+	.browse-templates-btn:hover {
+		background: var(--color-btn-primary-hover, #3730a3);
+	}
+	.template-modal-backdrop {
+		position: fixed;
+		top: 0; left: 0; right: 0; bottom: 0;
+		background: rgba(0,0,0,0.3);
+		z-index: 1000;
+	}
+	.template-modal {
+		position: fixed;
+		top: 50%; left: 50%;
+		transform: translate(-50%, -50%);
+		background: var(--color-block-bg, #fff);
+		border-radius: 10px;
+		box-shadow: 0 2px 16px var(--color-card-shadow, rgba(0,0,0,0.18));
+		padding: 2em 2em 1.5em 2em;
+		z-index: 1001;
+		min-width: 340px;
+		max-width: 95vw;
+		max-height: 80vh;
+		overflow-y: auto;
+	}
+	.template-modal-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		font-size: 1.2em;
+		font-weight: 600;
+		margin-bottom: 1em;
+	}
+	.close-modal-btn {
+		background: none;
+		border: none;
+		font-size: 1.5em;
+		color: var(--color-danger, #dc2626);
+		cursor: pointer;
+		margin-left: 1em;
+	}
+	.template-search-input {
+		width: 100%;
+		padding: 0.5em;
+		border-radius: 4px;
+		border: 1px solid var(--color-border, #e0d7ce);
+		margin-bottom: 1em;
+		font-size: 1em;
+	}
+	.template-modal-status {
+		color: var(--color-muted, #888);
+		margin: 1em 0;
+	}
+	.template-modal-status.error {
+		color: var(--color-error, #c00);
+	}
+	.template-modal-list {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+	.template-modal-item {
+		border-bottom: 1px solid var(--color-border, #e0d7ce);
+		padding-bottom: 1em;
+		margin-bottom: 1em;
+	}
+	.template-modal-name {
+		font-weight: 600;
+		color: var(--color-primary, #4b2e19);
+		font-size: 1.1em;
+	}
+	.template-modal-desc {
+		color: var(--color-muted, #888);
+		font-size: 0.97em;
+		margin-bottom: 0.5em;
+	}
+	.template-modal-preview {
+		background: var(--color-block-bg, #fff);
+		padding: 0.7em;
+		border-radius: 4px;
+		font-size: 0.95em;
+		overflow-x: auto;
+		margin-bottom: 0.5em;
+		box-shadow: 0 1px 2px var(--color-block-shadow, rgba(0,0,0,0.03));
+		max-height: 7em;
+	}
+	.insert-template-btn {
+		background: var(--color-btn-primary, #4f46e5);
+		color: var(--color-btn-primary-text, #fff);
+		border: none;
+		border-radius: 4px;
+		padding: 0.3em 1em;
+		font-weight: 500;
+		cursor: pointer;
+		transition: background 0.2s;
+	}
+	.insert-template-btn:hover {
+		background: var(--color-btn-primary-hover, #3730a3);
+	}
+	.template-modal-actions {
+		display: flex;
+		gap: 0.5em;
+		align-items: center;
+		margin-top: 0.2em;
+	}
+	.goto-templates-btn {
+		font-size: 0.92em;
+		color: var(--color-muted, #888);
+		background: var(--color-block-btn-bg, #e0e7ff);
+		border-radius: 4px;
+		padding: 0.2em 0.7em;
+		text-decoration: none;
+		border: none;
+		opacity: 0.7;
+		transition: background 0.2s, color 0.2s, opacity 0.2s;
+		margin-left: 0.2em;
+	}
+	.goto-templates-btn:hover {
+		background: var(--color-block-btn-hover, #c7d2fe);
+		color: var(--color-link-hover, #3730a3);
+		opacity: 1;
 	}
 </style>
