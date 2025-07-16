@@ -5,6 +5,7 @@
 	import { user as userStore } from '$lib/stores/user';
 	import type { Database } from '../../../../database.types';
 	import { slide } from 'svelte/transition';
+	import NotificationButton from './NotificationButton.svelte';
 
 	type Notification = Database['public']['Tables']['notifications']['Row'];
 
@@ -16,6 +17,7 @@
 	let notifications: Notification[] = [];
 	let unreadCount = 0;
 	let mobileMenuOpen = false;
+	let navLoading = true;
 
 	// Theme logic (sync with PreferencesSettings)
 	const THEME_VARIABLES = [
@@ -103,8 +105,10 @@
 		let channel: any;
 
 		async function setup() {
+			navLoading = true;
 			await RefreshStore();
 			await fetchNotifications();
+			navLoading = false;
 
 			// Listen for auth changes
 			supabase.auth.onAuthStateChange(async (_event, session) => {
@@ -295,105 +299,61 @@
 				</svg>
 			</button>
 		</div>
-		{#if $userStore}
-			<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-			<div class="notification-dropdown" tabindex="0" on:blur={closeNotificationDropdown}>
-				<button class="notification-btn" on:click={toggleNotificationDropdown} aria-label="Notifications">
-					<svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-						<path
-							d="M10 2C7.23858 2 5 4.23858 5 7V10.5858L3.29289 12.2929C3.10536 12.4804 3 12.7348 3 13V14C3 14.5523 3.44772 15 4 15H16C16.5523 15 17 14.5523 17 14V13C17 12.7348 16.8946 12.4804 16.7071 12.2929L15 10.5858V7C15 4.23858 12.7614 2 10 2Z"
-							stroke="#3730a3"
-							stroke-width="2"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-						/>
-						<path
-							d="M7 15V16C7 17.1046 7.89543 18 9 18H11C12.1046 18 13 17.1046 13 16V15"
-							stroke="#3730a3"
-							stroke-width="2"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-						/>
-					</svg>
-					{#if unreadCount > 0}
-						<span class="notification-badge">{unreadCount}</span>
-					{/if}
-				</button>
-				{#if notificationDropdownOpen}
-					<div class="notification-menu">
-						<div class="notification-header">
-							<h3>Notifications</h3>
-							<a href="/notifications" class="view-all">View all</a>
-						</div>
-						{#if notifications.length === 0}
-							<div class="empty-notifications">No notifications</div>
-						{:else}
-							<div class="notification-list">
-								{#each notifications as notification}
-									<div class="notification-item">
-										<div class="notification-icon" class:unread={!notification.read}>
-											{@html getNotificationIcon(notification.type)}
-										</div>
-										<div class="notification-content">
-											<p class="notification-message">{notification.message}</p>
-											<time class="notification-time" datetime={notification.created_at}>
-												{new Date(notification.created_at).toLocaleDateString()}
-											</time>
-										</div>
-									</div>
-								{/each}
-							</div>
-						{/if}
-					</div>
-				{/if}
-			</div>
-			<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-			<div class="user-dropdown" tabindex="0" on:blur={closeDropdown}>
-				<button class="user-btn" on:click={toggleDropdown} aria-label="User menu">
-					{#if avatarUrl}
-						<img class="avatar" src={avatarUrl} alt="avatar" />
-					{:else}
-						<div class="avatar avatar-fallback">
-							{username ? username.charAt(0).toUpperCase() : '?'}
-						</div>
-					{/if}
-					<span class="username">{username}</span>
-					<svg class="chevron" width="18" height="18" viewBox="0 0 20 20" fill="none">
-						<path
-							d="M6 8l4 4 4-4"
-							stroke="#3730a3"
-							stroke-width="2"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-						/>
-					</svg>
-				</button>
-				{#if dropdownOpen}
-					<!-- svelte-ignore a11y_no_static_element_interactions -->
-					<div class="dropdown-menu" on:mousedown|preventDefault>
-						<div class="dropdown-header">
-							{#if avatarUrl}
-								<img class="avatar" src={avatarUrl} alt="avatar" />
-							{:else}
-								<div class="avatar avatar-fallback">
-									{username ? username.charAt(0).toUpperCase() : '?'}
-								</div>
-							{/if}
-							<div>
-								<div class="dropdown-username">{username}</div>
-								<div class="dropdown-email">{$userStore.usr?.email}</div>
-							</div>
-						</div>
-						<a href={`/profile/${username}`} class="dropdown-link" on:click={closeDropdown}
-							>Profile</a
-						>
-						<a href="/settings" class="dropdown-link" on:click={closeDropdown}>Settings</a>
-						<button class="dropdown-link logout" on:click={logout}>Logout</button>
-					</div>
-				{/if}
+		{#if navLoading}
+			<div class="nav-loading-spinner" aria-label="Loading user info">
+				<div class="spinner"></div>
 			</div>
 		{:else}
-			<a href="/account/login" class="login-btn" data-sveltekit-reload>Login</a>
+			{#if $userStore}
+				<NotificationButton userId={$userStore.usr?.id} />
+				<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+				<div class="user-dropdown" tabindex="0" on:blur={closeDropdown}>
+					<button class="user-btn" on:click={toggleDropdown} aria-label="User menu">
+						{#if avatarUrl}
+							<img class="avatar" src={avatarUrl} alt="avatar" />
+						{:else}
+							<div class="avatar avatar-fallback">
+								{username ? username.charAt(0).toUpperCase() : '?'}
+							</div>
+						{/if}
+						<span class="username">{username}</span>
+						<svg class="chevron" width="18" height="18" viewBox="0 0 20 20" fill="none">
+							<path
+								d="M6 8l4 4 4-4"
+								stroke="#3730a3"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+							/>
+						</svg>
+					</button>
+					{#if dropdownOpen}
+						<!-- svelte-ignore a11y_no_static_element_interactions -->
+						<div class="dropdown-menu" on:mousedown|preventDefault>
+							<div class="dropdown-header">
+								{#if avatarUrl}
+									<img class="avatar" src={avatarUrl} alt="avatar" />
+								{:else}
+									<div class="avatar avatar-fallback">
+										{username ? username.charAt(0).toUpperCase() : '?'}
+									</div>
+								{/if}
+								<div>
+									<div class="dropdown-username">{username}</div>
+									<div class="dropdown-email">{$userStore.usr?.email}</div>
+								</div>
+							</div>
+							<a href={`/profile/${username}`} class="dropdown-link" on:click={closeDropdown}
+								>Profile</a
+							>
+							<a href="/settings" class="dropdown-link" on:click={closeDropdown}>Settings</a>
+							<button class="dropdown-link logout" on:click={logout}>Logout</button>
+						</div>
+					{/if}
+				</div>
+			{:else}
+				<a href="/account/login" class="login-btn" data-sveltekit-reload>Login</a>
+			{/if}
 		{/if}
 		<div class="theme-quick-switch desktop-theme-switch">
 			<button class="theme-btn" aria-label="Theme" on:click={openThemeModal}>
@@ -1048,5 +1008,24 @@
 			width: 98vw;
 			padding: 1.1rem 0.5rem 0.7rem 0.5rem;
 		}
+	}
+	.nav-loading-spinner {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 48px;
+		min-height: 48px;
+	}
+	.spinner {
+		width: 28px;
+		height: 28px;
+		border: 4px solid #e0e7ff;
+		border-top: 4px solid #6366f1;
+		border-radius: 50%;
+		animation: spin 1s linear infinite;
+	}
+	@keyframes spin {
+		0% { transform: rotate(0deg); }
+		100% { transform: rotate(360deg); }
 	}
 </style>

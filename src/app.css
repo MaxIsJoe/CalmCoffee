@@ -180,6 +180,8 @@
   --color-blog-tabs-btn-active-border: #6366f1;
   --color-blog-tabs-btn-hover: #374151;
   --color-blog-error: #b91c1c;
+  --color-notification-btn-bg: #e0e7ff;
+  --color-notification-btn-bg-hover: #c7d2fe;
 }
 
 [data-theme="dark"] {
@@ -362,6 +364,8 @@
   --color-blog-tabs-btn-active-border: #bfa07a;
   --color-blog-tabs-btn-hover: #d4c2b8;
   --color-blog-error: #ff6b6b;
+  --color-notification-btn-bg: #3e2723;
+  --color-notification-btn-bg-hover: #4b2e19;
 }
 
 [data-theme="caramel"] {
@@ -544,4 +548,6 @@
   --color-blog-tabs-btn-active-border: #4fc3f7;
   --color-blog-tabs-btn-hover: #81d4fa;
   --color-blog-error: #ff6b6b;
+  --color-notification-btn-bg: rgba(79, 195, 247, 0.15);
+  --color-notification-btn-bg-hover: rgba(79, 195, 247, 0.25);
 }
