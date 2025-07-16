@@ -1,6 +1,7 @@
 <script lang="ts">
 	import '../app.css';
 	import Navbar from '$lib/comp/nav/Navbar.svelte';
+	import FirstTimeVisitorPopup from '$lib/comp/common/FirstTimeVisitorPopup.svelte';
 	import { slide } from 'svelte/transition';
 	import { onMount } from 'svelte';
 	import WordInfoPopup from '$lib/comp/common/WordInfoPopup.svelte';
@@ -174,6 +175,7 @@
 </script>
 
 <Navbar />
+<FirstTimeVisitorPopup />
 {#if showBanner}
 	<div class="banner" transition:slide>
 		<span>Calm Coffee is still in pre-alpha. Learn more <a href="/roadmap">here</a></span>
