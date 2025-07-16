@@ -21,6 +21,9 @@ export type CoffeeMarkdownStyles = {
 	align?: string; // Add this new style for alignment
 	section?: string; // New style for the overall section container
 	poetry?: string; // Add poetry style for <poetry> blocks
+	table?: string; // Table style
+	th?: string;    // Table header cell style
+	td?: string;    // Table data cell style
 };
 
 export const defaultStyles: Required<CoffeeMarkdownStyles> = {
@@ -46,6 +49,9 @@ export const defaultStyles: Required<CoffeeMarkdownStyles> = {
 	align: 'text-align:center;', // Default alignment style
 	section: 'margin:1em 0; overflow:hidden;', // Default style for sections
 	poetry: 'font-family:serif;font-style:italic;white-space:pre-line;padding:1em 1.5em;margin:1.2em 0;line-height:1.7;', // Default poetry style
+	table: 'border-collapse:collapse;width:100%;margin:1.2em 0;background:var(--color-bg-alt);border-radius:8px;overflow:hidden;box-shadow:0 1px 4px var(--color-card-shadow);',
+	th: 'padding:0.6em 1em;background:var(--color-link);color:#fff;font-weight:700;text-align:left;border-bottom:2px solid var(--color-link);',
+	td: 'padding:0.6em 1em;border-bottom:1px solid var(--color-bg);',
 };
 
 //background-image: url('https://wallpaperaccess.com/full/781336.jpg')
@@ -69,6 +75,7 @@ export function coffeeMarkdown(md: string, styles: CoffeeMarkdownStyles = {}): s
 	html = handleAlignment(html, mergedStyles);
 
 	// 2. Standard block elements
+	html = handleTables(html, mergedStyles);
 	html = handleCodeBlocks(html, mergedStyles);
 	html = handleInlineCode(html, mergedStyles);
 	html = handleImages(html, mergedStyles);
@@ -387,4 +394,33 @@ function handlePoetry(html: string, mergedStyles: Required<CoffeeMarkdownStyles>
 			return `<div style="${mergedStyles.poetry}">${noPTags}</div>`;
 		}
 	);
+}
+
+function handleTables(html: string, mergedStyles: Required<CoffeeMarkdownStyles>): string {
+	// Regex to match markdown tables (header, separator, at least one row)
+	const tableRegex = /(^|\n)(\|[^\n]+\|[ \t]*\n\|[ \t]*(:?-+:?\|)+[ \t]*\n(?:\|[^\n]+\|[ \t]*(?:\n|$))+)/gm;
+
+	return html.replace(tableRegex, (match: string, sep: string, tableBlock: string) => {
+		const lines: string[] = tableBlock.trim().split(/\n/).map((l: string) => l.trim());
+		if (lines.length < 2) return match; // Not a valid table
+
+		const header: string = lines[0];
+		const alignLine: string = lines[1];
+		const rows: string[] = lines.slice(2);
+
+		const headers: string[] = header.split('|').slice(1, -1).map((h: string) => h.trim());
+		const aligns: (string | undefined)[] = alignLine.split('|').slice(1, -1).map((a: string) => {
+			if (/^:-+:$/.test(a.trim())) return 'center';
+			if (/^-+:$/.test(a.trim())) return 'right';
+			if (/^:-+$/.test(a.trim())) return 'left';
+			return undefined;
+		});
+
+		const rowCells: string[][] = rows.map((row: string) => row.split('|').slice(1, -1).map((cell: string) => cell.trim()));
+
+		const thead = `<thead><tr>${headers.map((h: string, i: number) => `<th style="${mergedStyles.th}${aligns[i] ? `text-align:${aligns[i]};` : ''}">${h}</th>`).join('')}</tr></thead>`;
+		const tbody = `<tbody>${rowCells.map((cells: string[]) => `<tr>${cells.map((cell: string, i: number) => `<td style="${mergedStyles.td}${aligns[i] ? `text-align:${aligns[i]};` : ''}">${cell}</td>`).join('')}</tr>`).join('')}</tbody>`;
+
+		return `${sep}<table style="${mergedStyles.table}">${thead}${tbody}</table>`;
+	});
 }
