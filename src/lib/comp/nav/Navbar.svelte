@@ -14,8 +14,6 @@
 	let dropdownOpen = false;
 	let navSearchTerm = '';
 	let notificationDropdownOpen = false;
-	let notifications: Notification[] = [];
-	let unreadCount = 0;
 	let mobileMenuOpen = false;
 	let navLoading = true;
 
@@ -69,45 +67,11 @@
 		}
 	}
 
-	async function fetchNotifications() {
-		if (!$userStore?.usr) return;
-
-		const { data, error } = await supabase
-			.from('notifications')
-			.select('*')
-			.eq('user_id', $userStore.usr.id)
-			.eq('read', false)
-			.order('created_at', { ascending: false })
-			.limit(20);
-
-		if (error) {
-			console.error('Error fetching notifications:', error);
-			return;
-		}
-
-		notifications = data;
-		unreadCount = data.filter(n => !n.read).length;
-	}
-
-	function toggleNotificationDropdown() {
-		notificationDropdownOpen = !notificationDropdownOpen;
-		if (notificationDropdownOpen) {
-			fetchNotifications();
-		}
-	}
-
-	function closeNotificationDropdown() {
-		notificationDropdownOpen = false;
-	}
-
 	// Subscribe to real-time notifications
 	onMount(() => {
-		let channel: any;
-
 		async function setup() {
 			navLoading = true;
 			await RefreshStore();
-			await fetchNotifications();
 			navLoading = false;
 
 			// Listen for auth changes
@@ -115,39 +79,13 @@
 				const supaUser = session?.user ?? null;
 				if (supaUser) {
 					RefreshStore();
-					fetchNotifications();
 				} else {
 					userStore.set(null);
-					notifications = [];
-					unreadCount = 0;
 				}
 			});
-
-			// Subscribe to notifications
-			channel = supabase
-				.channel('notifications')
-				.on(
-					'postgres_changes',
-					{
-						event: 'INSERT',
-						schema: 'public',
-						table: 'notifications',
-						filter: `user_id=eq.${$userStore?.usr?.id}`
-					},
-					() => {
-						fetchNotifications();
-					}
-				)
-				.subscribe();
 		}
 
 		setup();
-
-		return () => {
-			if (channel) {
-				channel.unsubscribe();
-			}
-		};
 	});
 
 	$userStore; // subscribe for reactivity
@@ -172,28 +110,6 @@
 		if (navSearchTerm.trim()) {
 			goto(`/search?tag=${encodeURIComponent(navSearchTerm.trim())}`);
 			navSearchTerm = '';
-		}
-	}
-
-	function getNotificationIcon(type: string) {
-		switch (type) {
-			case 'comment':
-				return `<svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-					<path d="M10 2C5.58172 2 2 5.58172 2 10C2 11.8728 2.64175 13.6052 3.75736 14.9645L2.5 17.5L5.03553 16.2426C6.39484 17.3582 8.12721 18 10 18C14.4183 18 18 14.4183 18 10C18 5.58172 14.4183 2 10 2Z" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-				</svg>`;
-			case 'watch_inform':
-				return `<svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-					<path d="M10 2C5.58172 2 2 5.58172 2 10C2 14.4183 5.58172 18 10 18C14.4183 18 18 14.4183 18 10C18 5.58172 14.4183 2 10 2Z" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-					<path d="M10 6V10L13 12" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-				</svg>`;
-			case 'like':
-				return `<svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-					<path d="M10 17.5C10 17.5 17.5 12.5 17.5 7.5C17.5 4.5 15 2 12 2C10.5 2 9.5 2.5 8.5 3.5C7.5 2.5 6.5 2 5 2C2 2 0 4.5 0 7.5C0 12.5 7.5 17.5 10 17.5Z" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-				</svg>`;
-			default:
-				return `<svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-					<path d="M10 17.5C10 17.5 17.5 12.5 17.5 7.5C17.5 4.5 15 2 12 2C10.5 2 9.5 2.5 8.5 3.5C7.5 2.5 6.5 2 5 2C2 2 0 4.5 0 7.5C0 12.5 7.5 17.5 10 17.5Z" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-				</svg>`;
 		}
 	}
 
@@ -270,9 +186,9 @@
 	<div class="nav-left">
 		<button class="mobile-menu-btn" on:click={toggleMobileMenu} aria-label="Toggle menu">
 			<svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-				<path d="M3 12H21" stroke="#3730a3" stroke-width="2" stroke-linecap="round"/>
-				<path d="M3 6H21" stroke="#3730a3" stroke-width="2" stroke-linecap="round"/>
-				<path d="M3 18H21" stroke="#3730a3" stroke-width="2" stroke-linecap="round"/>
+				<path d="M3 12H21" stroke="var(--color-navbar-icon)" stroke-width="2" stroke-linecap="round"/>
+				<path d="M3 6H21" stroke="var(--color-navbar-icon)" stroke-width="2" stroke-linecap="round"/>
+				<path d="M3 18H21" stroke="var(--color-navbar-icon)" stroke-width="2" stroke-linecap="round"/>
 			</svg>
 		</button>
 		<a href="/" class="logo desktop-logo" data-sveltekit-reload>CalmCoffee</a>
@@ -294,8 +210,8 @@
 			/>
 			<button on:click={navSearch} aria-label="Search">
 				<svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-					<circle cx="9" cy="9" r="7" stroke="#7c5e48" stroke-width="2" />
-					<path d="M15 15L18 18" stroke="#7c5e48" stroke-width="2" stroke-linecap="round" />
+					<circle cx="9" cy="9" r="7" stroke="var(--color-navbar-search-icon)" stroke-width="2" />
+					<path d="M15 15L18 18" stroke="var(--color-navbar-search-icon)" stroke-width="2" stroke-linecap="round" />
 				</svg>
 			</button>
 		</div>
@@ -320,7 +236,7 @@
 						<svg class="chevron" width="18" height="18" viewBox="0 0 20 20" fill="none">
 							<path
 								d="M6 8l4 4 4-4"
-								stroke="#3730a3"
+								stroke="var(--color-navbar-icon)"
 								stroke-width="2"
 								stroke-linecap="round"
 								stroke-linejoin="round"
@@ -363,7 +279,9 @@
 	</div>
 </nav>
 
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 {#if mobileMenuOpen}
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
 	<div class="mobile-menu" transition:slide={{ duration: 200 }} on:click|self={closeMobileMenu}>
 		<div class="mobile-menu-content">
 			<div class="mobile-menu-header">
@@ -393,6 +311,8 @@
 {/if}
 
 {#if showThemeModal}
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div class="theme-modal-backdrop" on:click={closeThemeModal} tabindex="-1">
 		<div class="theme-modal" on:click|stopPropagation>
 			<div class="theme-modal-header">
@@ -401,6 +321,7 @@
 			</div>
 			<div class="theme-list">
 				{#each [...BUILTIN_THEMES, ...customThemes] as theme}
+					<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 					<div class="theme-list-item {selectedTheme === theme.name ? 'selected' : ''}" on:click={() => selectTheme(theme.name)} tabindex="0" aria-current={selectedTheme === theme.name}>
 						<div class="theme-list-name">{theme.name}{theme.isCustom ? ' (Custom)' : ''}</div>
 						<div class="theme-list-swatches">
@@ -576,13 +497,13 @@
 		color: var(--color-link-hover);
 	}
 	.dropdown-link.logout {
-		color: #b91c1c;
+		color: var(--color-danger, #b91c1c);
 		font-weight: 500;
 	}
 	.dropdown-link.logout:hover,
 	.dropdown-link.logout:focus {
-		background: #fee2e2;
-		color: #b91c1c;
+		background: var(--color-danger-hover, #fee2e2);
+		color: var(--color-danger, #b91c1c);
 	}
 	@media (max-width: 600px) {
 		.dropdown-menu {
@@ -635,121 +556,19 @@
 	.nav-search-bar svg {
 		display: block;
 	}
-	.nav-right button {
-		background: #f0d4a1;
-		color: #fff;
+	.nav-right button,
+	.login-btn {
+		background: var(--color-navbar-btn-bg);
+		color: var(--color-navbar-btn-text);
 		border: none;
 		padding: 0.5rem 1rem;
 		border-radius: 4px;
 		cursor: pointer;
+		transition: background 0.15s, color 0.15s;
 	}
-	.nav-right button:hover {
-		background: #bb9a7a;
-	}
-	.notification-dropdown {
-		position: relative;
-		margin-right: 1rem;
-	}
-	.notification-btn {
-		background: none;
-		border: none;
-		cursor: pointer;
-		padding: 0.5rem;
-		border-radius: 6px;
-		position: relative;
-		transition: background 0.15s;
-	}
-	.notification-btn:hover {
-		background: #e0e7ff;
-	}
-	.notification-badge {
-		position: absolute;
-		top: 0;
-		right: 0;
-		background: #ef4444;
-		color: white;
-		font-size: 0.75rem;
-		font-weight: 600;
-		padding: 0.15rem 0.35rem;
-		border-radius: 999px;
-		transform: translate(50%, -50%);
-	}
-	.notification-menu {
-		position: absolute;
-		right: 0;
-		top: 110%;
-		background: white;
-		border-radius: 12px;
-		box-shadow: 0 8px 32px rgba(99, 102, 241, 0.18), 0 1.5px 8px rgba(0, 0, 0, 0.07);
-		width: 320px;
-		z-index: 100;
-		animation: dropdown-fade-in 0.18s cubic-bezier(0.4, 1.4, 0.6, 1) both;
-	}
-	.notification-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 1rem;
-		border-bottom: 1px solid #e0e7ff;
-	}
-	.notification-header h3 {
-		margin: 0;
-		font-size: 1.1rem;
-		color: #3730a3;
-	}
-	.view-all {
-		color: #4f46e5;
-		text-decoration: none;
-		font-size: 0.9rem;
-	}
-	.view-all:hover {
-		text-decoration: underline;
-	}
-	.empty-notifications {
-		padding: 2rem;
-		text-align: center;
-		color: #666;
-	}
-	.notification-list {
-		max-height: 400px;
-		overflow-y: auto;
-	}
-	.notification-item {
-		display: flex;
-		align-items: flex-start;
-		gap: 1rem;
-		padding: 1rem;
-		border-bottom: 1px solid #f1f5f9;
-	}
-	.notification-item:last-child {
-		border-bottom: none;
-	}
-	.notification-icon {
-		flex-shrink: 0;
-		width: 32px;
-		height: 32px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		background: #eef2ff;
-		border-radius: 8px;
-		padding: 6px;
-	}
-	.notification-icon.unread {
-		background: #e0e7ff;
-	}
-	.notification-content {
-		flex-grow: 1;
-	}
-	.notification-message {
-		margin: 0 0 0.5rem 0;
-		color: #333;
-		font-size: 0.95rem;
-		line-height: 1.4;
-	}
-	.notification-time {
-		color: #666;
-		font-size: 0.8rem;
+	.nav-right button:hover,
+	.login-btn:hover {
+		background: var(--color-navbar-btn-hover);
 	}
 	.mobile-menu-btn {
 		display: none;
@@ -779,19 +598,19 @@
 		bottom: 0;
 		width: 80%;
 		max-width: 300px;
-		background: white;
+		background: var(--color-card-bg, white);
 		padding: 0;
 		display: flex;
 		flex-direction: column;
-		box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+		box-shadow: 2px 0 8px var(--color-card-shadow, rgba(0, 0, 0, 0.1));
 	}
 	.mobile-menu-header {
 		padding: 1.5rem;
-		border-bottom: 1px solid #e0e7ff;
-		background: #f8fafc;
+		border-bottom: 1px solid var(--color-border, #e0e7ff);
+		background: var(--color-bg-alt, #f8fafc);
 	}
 	.mobile-menu-logo {
-		color: #3730a3;
+		color: var(--color-navbar-mobile-link);
 		text-decoration: none;
 		font-size: 1.4rem;
 		font-weight: bold;
@@ -803,7 +622,7 @@
 		gap: 1rem;
 	}
 	.mobile-menu-links a {
-		color: #3730a3;
+		color: var(--color-navbar-mobile-link);
 		text-decoration: none;
 		font-size: 1.1rem;
 		padding: 0.5rem 0;
@@ -811,64 +630,11 @@
 	.mobile-logout {
 		background: none;
 		border: none;
-		color: #b91c1c;
+		color: var(--color-danger, #b91c1c);
 		text-align: left;
 		font-size: 1.1rem;
 		padding: 0.5rem 0;
 		cursor: pointer;
-	}
-	.login-btn {
-		padding: 0.5rem 1rem;
-		background: #f0d4a1;
-		color: #fff;
-		border-radius: 4px;
-		text-decoration: none;
-	}
-	@media (max-width: 768px) {
-		nav {
-			padding: 0.8rem 1rem;
-		}
-		.mobile-menu-btn {
-			display: block;
-		}
-		.desktop-nav {
-			display: none;
-		}
-		.nav-search-bar {
-			display: none;
-		}
-		.nav-right {
-			gap: 0.8em;
-		}
-		.notification-dropdown {
-			margin-right: 0.5rem;
-		}
-		.user-btn {
-			padding: 0.2rem 0.4rem 0.2rem 0.2rem;
-		}
-		.username {
-			display: none;
-		}
-		.dropdown-menu {
-			right: -1rem;
-		}
-
-		.desktop-logo {
-			display: none;
-		}
-	}
-	@media (max-width: 480px) {
-		.logo {
-			font-size: 1.1rem;
-		}
-		.notification-menu {
-			width: 280px;
-			right: -1rem;
-		}
-
-		.mobile-menu-logo {
-			font-size: 1.4rem;
-		}
 	}
 	.theme-quick-switch {
 		display: flex;
@@ -877,8 +643,8 @@
 		margin-left: 1rem;
 	}
 	.theme-btn {
-		background: var(--color-card-bg);
-		color: var(--color-text);
+		background: var(--color-navbar-btn-bg);
+		color: var(--color-navbar-btn-text);
 		border: 1px solid var(--color-border);
 		border-radius: 8px;
 		padding: 0.3em 0.7em;
@@ -888,26 +654,8 @@
 		transition: background 0.2s, color 0.2s;
 	}
 	.theme-btn:hover {
-		background: var(--color-primary);
-		color: var(--color-primary-alt);
-	}
-	.theme-dropdown {
-		position: absolute;
-		top: 120%;
-		left: 0;
-		background: var(--color-card-bg);
-		border: 1px solid var(--color-border);
-		border-radius: 8px;
-		box-shadow: 0 2px 8px var(--color-card-shadow);
-		z-index: 200;
-		padding: 0.5em 1em;
-	}
-	.theme-dropdown select {
-		font-size: 1em;
-		background: var(--color-card-bg);
-		color: var(--color-text);
-		border: none;
-		outline: none;
+		background: var(--color-navbar-btn-hover);
+		color: var(--color-navbar-btn-text);
 	}
 	.desktop-theme-switch {
 		display: flex;
@@ -1019,8 +767,8 @@
 	.spinner {
 		width: 28px;
 		height: 28px;
-		border: 4px solid #e0e7ff;
-		border-top: 4px solid #6366f1;
+		border: 4px solid var(--color-card-bg, #e0e7ff);
+		border-top: 4px solid var(--color-accent, #6366f1);
 		border-radius: 50%;
 		animation: spin 1s linear infinite;
 	}

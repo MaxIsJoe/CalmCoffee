@@ -182,6 +182,12 @@
   --color-blog-error: #b91c1c;
   --color-notification-btn-bg: #e0e7ff;
   --color-notification-btn-bg-hover: #c7d2fe;
+  --color-navbar-icon: #4b2e19;
+  --color-navbar-search-icon: #a67c52;
+  --color-navbar-mobile-link: #4f46e5;
+  --color-navbar-btn-bg: #e0d7ce;
+  --color-navbar-btn-text: #4b2e19;
+  --color-navbar-btn-hover: #d4c2b8;
 }
 
 [data-theme="dark"] {
@@ -316,11 +322,11 @@
   --color-muted: #b39c8f;
   --color-error: #ff6b6b;
   --color-character-card-bg: #23201b;
-  --color-character-card-shadow: rgba(0,0,0,0.18);
+  --color-character-card-shadow: rgba(0, 0, 0, 0.18);
   --color-character-card-border: #3e2723;
   --color-character-avatar-bg: #3e2723;
   --color-character-avatar-border: #a67c52;
-  --color-character-avatar-shadow: rgba(0,0,0,0.18);
+  --color-character-avatar-shadow: rgba(0, 0, 0, 0.18);
   --color-character-name: #bfa07a;
   --color-character-type: #d4c2b8;
   --color-character-gender: #b39c8f;
@@ -366,6 +372,12 @@
   --color-blog-error: #ff6b6b;
   --color-notification-btn-bg: #3e2723;
   --color-notification-btn-bg-hover: #4b2e19;
+  --color-navbar-icon: #a67c52;
+  --color-navbar-search-icon: #d4c2b8;
+  --color-navbar-mobile-link: #bfa07a;
+  --color-navbar-btn-bg: #4b2e19;
+  --color-navbar-btn-text: #fffdd0;
+  --color-navbar-btn-hover: #a67c52;
 }
 
 [data-theme="caramel"] {
@@ -529,7 +541,7 @@
   --color-character-info-border: rgba(79, 195, 247, 0.2);
   --color-character-info-shadow: rgba(0, 0, 0, 0.3);
   --color-character-relationship-bg: rgba(13, 17, 23, 0.9);
-  --color-character-relationship-shadow: rgba(0, 0, 0, 0.25);
+  --color-character-relationship-shadow: rgba(0,0,0,0.25);
   --color-character-tag-panel-bg: rgba(26, 31, 46, 0.8);
   --color-character-tag-panel-shadow: rgba(79, 195, 247, 0.2);
   --color-character-tag-panel-title: #4fc3f7;
@@ -550,4 +562,10 @@
   --color-blog-error: #ff6b6b;
   --color-notification-btn-bg: rgba(79, 195, 247, 0.15);
   --color-notification-btn-bg-hover: rgba(79, 195, 247, 0.25);
+  --color-navbar-icon: #4fc3f7;
+  --color-navbar-search-icon: #00bcd4;
+  --color-navbar-mobile-link: #29b6f6;
+  --color-navbar-btn-bg: rgba(79, 195, 247, 0.15);
+  --color-navbar-btn-text: #065084;
+  --color-navbar-btn-hover: rgba(79, 195, 247, 0.45);
 }
