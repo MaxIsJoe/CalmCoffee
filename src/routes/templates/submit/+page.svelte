@@ -3,6 +3,7 @@ import { createStoreContent, StoreContentType } from '$lib/db/content-shop';
 import { goto } from '$app/navigation';
 import { defaultStyles, coffeeMarkdown } from '$lib/md/coffeeMarkdown';
 import { onMount } from 'svelte';
+	import { user } from '$lib/stores/user';
 
 let name = '';
 let description = '';
@@ -21,24 +22,30 @@ function handleTypeChange(e: Event) {
 }
 
 async function handleSubmit() {
-  error = null;
-  success = false;
-  loading = true;
-  try {
-    await createStoreContent({
-      name,
-      description,
-      content,
-      type,
-      created_by: 'me' // TODO: Replace with actual user info
-    });
-    success = true;
-    setTimeout(() => goto('/templates'), 1200);
-  } catch (e) {
-    error = e instanceof Error ? e.message : 'Failed to submit template.';
-  } finally {
-    loading = false;
-  }
+    if ($user === null || $user.usr === null)
+    {
+        error = "User not logged in";
+        return
+    }
+    error = null;
+    success = false;
+    loading = true;
+    try {
+        await createStoreContent({
+        name,
+        description,
+        content,
+        type,
+        created_by: $user.usr.id // TODO: Replace with actual user info
+        });
+        success = true;
+        setTimeout(() => goto('/templates'), 1200);
+    } catch (e) {
+        console.log(e)
+        error = e instanceof Error ? e.message : 'Failed to submit template.';
+    } finally {
+        loading = false;
+    }
 }
 </script>
 

@@ -16,12 +16,12 @@
 
 ## <align center>🎲 Stats</align>
 
-| Attribute    | Value |
-| ------------ | ----- |
-| **Force**    |       |
-| **Instinct** |       |
-| **Subtlety** |       |
-| **Tech**     |       |
+| Attribute    | Value  |
+| ------------ | ------ |
+| **Force**    | `____` |
+| **Instinct** | `____` |
+| **Subtlety** | `____` |
+| **Tech**     | `____` |
 
 ---
 
@@ -37,13 +37,9 @@
 <bgc bg:var(--color-bg-alt)>
 ## <align center>📦 Loadout</align>
 
-- [ ] Ration Pack
-- [ ] Medkit
-- [ ] Grappling Hook
-- [ ] Ammo (x3)
-- [ ] Lockpicks
-- [ ] Flashlight
-- [ ] Binoculars
+- Lockpicks
+- Binoculars
+
 </bgc>
 
 <bgc bg:var(--color-bg-alt)>

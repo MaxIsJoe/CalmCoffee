@@ -3,9 +3,9 @@ import { supabase } from '../supabaseClient';
 const STORE = "ContentStore";
 
 export enum StoreContentType {
-    TEMPLATE,
-    STYLE
-} 
+    TEMPLATE = 'TEMPLATE',
+    STYLE = 'STYLE'
+}
 
 export type StoreContent = {
     name: string,

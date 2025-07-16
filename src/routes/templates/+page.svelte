@@ -10,6 +10,7 @@ let error: string | null = null;
 let page = 1;
 let pageSize = 10;
 let total = 0;
+let openTemplateId: number | null = null;
 
 async function loadTemplates() {
     loading = true;
@@ -178,6 +179,19 @@ function copyTemplate(content: string) {
   background: var(--color-block-btn-hover, #c7d2fe);
   color: var(--color-link-hover, #3730a3);
 }
+.template-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  padding: 0.5em 0;
+  user-select: none;
+}
+.template-toggle {
+  margin-left: 1em;
+  font-size: 1.2em;
+  color: var(--color-link, #4f46e5);
+}
 </style>
 
 <div class="experimental-tag">
@@ -200,18 +214,21 @@ function copyTemplate(content: string) {
   <ul class="templates-list">
     {#each templates as template}
       <li class="template-item">
-        <div>
+        <div class="template-header" on:click={() => openTemplateId = openTemplateId === template.id ? null : template.id}>
           <span class="template-name">{template.name}</span>
           <span class="template-description">{template.description}</span>
+          <span class="template-toggle">{openTemplateId === template.id ? '▲' : '▼'}</span>
         </div>
-        <pre class="template-content">{template.content}</pre>
-        <div class="template-actions">
-          <button class="button-copy" on:click={() => copyTemplate(template.content)}>Copy</button>
-          {#if $user && $user.profile && template.created_by === $user.profile.account_id}
-            <a class="button-copy" href={`/templates/edit/${template.id}`}>Edit</a>
-            <a class="button-copy" href={`/templates/remove/${template.id}`}>Remove</a>
-          {/if}
-        </div>
+        {#if openTemplateId === template.id}
+          <pre class="template-content">{template.content}</pre>
+          <div class="template-actions">
+            <button class="button-copy" on:click={() => copyTemplate(template.content)}>Copy</button>
+            {#if $user && $user.profile && template.created_by === $user.profile.account_id}
+              <a class="button-copy" href={`/templates/edit/${template.id}`}>Edit</a>
+              <a class="button-copy" href={`/templates/remove/${template.id}`}>Remove</a>
+            {/if}
+          </div>
+        {/if}
       </li>
     {/each}
   </ul>
