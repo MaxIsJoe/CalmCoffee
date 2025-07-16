@@ -30,12 +30,28 @@ async function fetchNotifications() {
 	notifications = data;
 	unreadCount = data.filter(n => !n.read).length;
 	dispatch('unread', { unreadCount });
+	return data;
+}
+
+async function markAllAsRead() {
+	if (!userId) return;
+	if (!notifications.some(n => !n.read)) return;
+	const { error } = await supabase
+		.from('notifications')
+		.update({ read: true })
+		.eq('user_id', userId)
+		.eq('read', false);
+	if (!error) {
+		notifications = notifications.map(n => ({ ...n, read: true }));
+		unreadCount = 0;
+		dispatch('unread', { unreadCount });
+	}
 }
 
 function toggleNotificationDropdown() {
 	notificationDropdownOpen = !notificationDropdownOpen;
 	if (notificationDropdownOpen) {
-		fetchNotifications();
+		fetchNotifications().then(() => markAllAsRead());
 	}
 }
 
@@ -71,6 +87,7 @@ $: if (userId) {
 </script>
 
 <!-- Notification Button UI -->
+<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 <div class="notification-dropdown" tabindex="0" on:blur={closeNotificationDropdown}>
 	<button class="notification-btn" on:click={toggleNotificationDropdown} aria-label="Notifications">
 		<svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -102,7 +119,7 @@ $: if (userId) {
 			{#if loading}
 				<div class="empty-notifications">Loading...</div>
 			{:else if notifications.length === 0}
-				<div class="empty-notifications">No notifications</div>
+				<div class="empty-notifications">No new notifications</div>
 			{:else}
 				<div class="notification-list">
 					{#each notifications as notification}
