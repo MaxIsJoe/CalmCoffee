@@ -25,6 +25,7 @@ export type CoffeeMarkdownStyles = {
 	th?: string;    // Table header cell style
 	td?: string;    // Table data cell style
 	checkbox?: string; // Style for rendered checkboxes
+	background?: string; // Style for <background> tag
 };
 
 export const defaultStyles: Required<CoffeeMarkdownStyles> = {
@@ -54,6 +55,7 @@ export const defaultStyles: Required<CoffeeMarkdownStyles> = {
 	th: 'padding:0.6em 1em;background:var(--color-link);color:#fff;font-weight:700;text-align:left;border-bottom:2px solid var(--color-link);',
 	td: 'padding:0.6em 1em;border-bottom:1px solid var(--color-bg);',
 	checkbox: 'display:inline-block;width:1.1em;height:1.1em;margin-right:0.5em;vertical-align:-0.15em;border:2px solid var(--color-link);border-radius:4px;background:var(--color-bg);',
+	background: '', // Default style for <background>
 };
 
 //background-image: url('https://wallpaperaccess.com/full/781336.jpg')
@@ -73,6 +75,7 @@ export function coffeeMarkdown(md: string, styles: CoffeeMarkdownStyles = {}): s
 		// 1. Custom block containers
 	html = handleColumns(html, mergedStyles);
 	html = handleBgc(html, mergedStyles);
+	html = handleBackground(html, mergedStyles);
 	html = handleCustom(html, mergedStyles);
 	html = handleAlignment(html, mergedStyles);
 
@@ -103,7 +106,7 @@ export function coffeeMarkdown(md: string, styles: CoffeeMarkdownStyles = {}): s
 }
 
 function escapeHtml(md: string): string {
-	const allowedTags = ['u', 'b', 'i', 'code', 'pre', 'custom', 'bgc', 'url', 'br', 'align', 'columns', 'poetry'];
+	const allowedTags = ['u', 'b', 'i', 'code', 'pre', 'custom', 'bgc', 'url', 'br', 'align', 'columns', 'poetry', 'background'];
 
 	return md.replace(/<([^>]+)>/g, (match, tagContent) => {
 		const tagNameMatch = tagContent.match(/^\/?([a-zA-Z0-9-]+)/);
@@ -463,4 +466,34 @@ function processInlineMarkdown(text: string, mergedStyles: Required<CoffeeMarkdo
 	html = handleItalic(html, mergedStyles);
 	html = handleEscapedNewlines(html);
 	return html;
+}
+
+function handleBackground(html: string, mergedStyles: Required<CoffeeMarkdownStyles>): string {
+	return html.replace(
+		/<background(?:\s+([^>]*?))?>([\s\S]*?)<\/background>/gi,
+		(_, attrs = '', content) => {
+			attrs = attrs.trim();
+			let bg = '';
+			let img = '';
+			let gradient = '';
+			let text = '';
+			// Support quoted or unquoted values, and allow colons/slashes in URLs
+			const bgMatch = attrs.match(/color\s*:\s*(?:"([^"]+)"|'([^']+)'|([^\s;]+))/i);
+			const imgMatch = attrs.match(/image\s*:\s*(?:"([^"]+)"|'([^']+)'|([^\s;]+))/i);
+			const gradMatch = attrs.match(/gradient\s*:\s*(?:"([^"]+)"|'([^']+)'|([^\s;]+))/i);
+			const textMatch = attrs.match(/text\s*:\s*(?:"([^"]+)"|'([^']+)'|([^\s;]+))/i);
+			if (bgMatch) bg = bgMatch[1] || bgMatch[2] || bgMatch[3] || '';
+			if (imgMatch) img = imgMatch[1] || imgMatch[2] || imgMatch[3] || '';
+			if (gradMatch) gradient = gradMatch[1] || gradMatch[2] || gradMatch[3] || '';
+			if (textMatch) text = textMatch[1] || textMatch[2] || textMatch[3] || '';
+			const userStyle = [
+				bg ? `background:${bg};` : '',
+				gradient ? `background-image:${gradient};` : '',
+				img ? `background-image:url('${img}');background-size:cover;background-position:center;` : '',
+				text ? `color:${text};` : ''
+			].join('');
+			const style = `${mergedStyles.background}${userStyle}`;
+			return `<div style="${style}">${content}</div>`;
+		}
+	);
 }
