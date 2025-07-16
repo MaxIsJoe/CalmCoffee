@@ -13,7 +13,7 @@
 	import ArtUploadButton from '$lib/comp/characters/ArtUploadButton.svelte';
 	import { fetchCharacterById, updateCharacter, deleteCharacter } from '$lib/db/characters';
 	import type { Character } from '$lib/db/characters';
-	import type { Database } from '../../../../database.types';
+	import type { Database } from '../../../../../database.types';
 
 	let id: string = '';
 	let character: Character | null = null;

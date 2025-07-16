@@ -6,7 +6,7 @@
 	import { get } from 'svelte/store';
 	import { user } from '$lib/stores/user';
 	import { onMount } from 'svelte';
-	import { createCharacter, CharacterInsert } from '$lib/db/characters';
+	import { createCharacter } from '$lib/db/characters';
 
 	type CharacterInsert = Database['public']['Tables']['characters']['Insert'];
 
