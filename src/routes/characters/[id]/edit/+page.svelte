@@ -75,22 +75,6 @@
 		loading = false;
 	});
 
-	function insertAtCursor(before: string, after: string = '', placeholder = '') {
-		if (!descTextarea) return;
-		const start = descTextarea.selectionStart;
-		const end = descTextarea.selectionEnd;
-		const value = descTextarea.value;
-		const selected = value.slice(start, end) || placeholder;
-		const newValue = value.slice(0, start) + before + selected + after + value.slice(end);
-		character_desc = newValue;
-		// Move cursor inside the inserted text
-		setTimeout(() => {
-			const pos = start + before.length + selected.length + after.length;
-			descTextarea?.focus();
-			descTextarea?.setSelectionRange(pos, pos);
-		}, 0);
-	}
-
 	function onRelationshipsChange(newGraph: RelationshipGraph) {
 		relationships = newGraph;
 		relationshipsJson = JSON.stringify(newGraph);
