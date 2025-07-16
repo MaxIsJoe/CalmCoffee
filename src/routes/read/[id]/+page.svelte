@@ -9,6 +9,7 @@
 	import StoryContent from '$lib/comp/story/StoryContent.svelte';
 	import CommentsPanel from '$lib/comp/story/CommentsPanel.svelte';
 	import { saveLastReadChapter } from '$lib/utils/readingProgress';
+	import { slugify } from '$lib/utils/slugify';
 
 	let story: Story | null = null;
 	let chapters: Chapter[] = [];
@@ -42,6 +43,11 @@
 			if (story.user_id) {
 				loadingMessage = 'Loading author...';
 				author = await fetchAuthorByStoryUserId(story.user_id);
+				if (author && author.username) {
+					const slug = slugify(story.title);
+					window.location.replace(`/read/${author.username}/${slug}`);
+					return;
+				}
 			}
 			loadingMessage = 'Loading chapters...';
 			chapters = await fetchChaptersByStoryId(storyId);

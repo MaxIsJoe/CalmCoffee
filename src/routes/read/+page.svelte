@@ -6,6 +6,7 @@
 	import { coffeeMarkdown } from '$lib/md/coffeeMarkdown';
 	import { usernameCache } from '$lib/stores/username_cache';
 	import StoryReactions from '$lib/comp/story/StoryReactions.svelte';
+	import { slugify } from '$lib/utils/slugify';
 
 	let stories: Story[] = [];
 	let authors: Record<string, string> = {};
@@ -94,7 +95,14 @@
 		});
 
 	function goToStory(id: string) {
-		window.location.href = `/read/${id}`;
+		const story = stories.find((s) => s.id === id);
+		const author = story && story.user_id ? authors[story.user_id] : null;
+		const slug = story ? slugify(story.title) : '';
+		if (author && slug) {
+			window.location.href = `/read/${author}/${slug}`;
+		} else {
+			window.location.href = `/read/${id}`;
+		}
 	}
 
 	function goToPage(page: number) {

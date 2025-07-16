@@ -1,5 +1,6 @@
 import { supabase } from '../supabaseClient';
 import type { Database } from '../../../database.types';
+import { slugify } from '../utils/slugify';
 
 export type Story = Database['public']['Tables']['stories']['Row'] & {
   tags?: string[];
@@ -198,4 +199,29 @@ export async function updateBlock(blockId: string, updateData: Partial<Block>) {
     .single();
   if (error) throw new Error(error.message);
   return data as Block;
+}
+
+// Fetch a story by author username and slug (from title)
+export async function fetchStoryByAuthorAndSlug(username: string, slug: string) {
+  // Get the author's account_id from the username
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('account_id')
+    .eq('username', username)
+    .single();
+  if (profileError || !profile) throw new Error('Author not found');
+
+  // Get the story by user_id and slugified title
+  const { data: stories, error: storyError } = await supabase
+    .from('stories')
+    .select('*')
+    .eq('user_id', profile.account_id)
+    .eq('is_published', true);
+  if (storyError) throw new Error(storyError.message);
+  if (!stories || stories.length === 0) throw new Error('Story not found');
+
+  // Find the story with the matching slug
+  const story = stories.find((s) => slugify(s.title) === slug);
+  if (!story) throw new Error('Story not found');
+  return story as Story;
 } 

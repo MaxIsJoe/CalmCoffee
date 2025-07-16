@@ -6,6 +6,7 @@
 	import { usernameCache } from '$lib/stores/username_cache';
 	import { user } from '$lib/stores/user';
 	import { coffeeMarkdown } from '$lib/md/coffeeMarkdown';
+	import { slugify } from '$lib/utils/slugify';
 
 	export let profile: ProfileType;
 
@@ -228,7 +229,7 @@
 						</div>
 						<div class="stories-grid">
 							{#each getPaginatedItems(watchedStories) as story}
-								<a href="/read/{story.id}" class="story-card">
+								<a href={'/read/' + (story.user_id && authors[story.user_id] ? authors[story.user_id] + '/' + slugify(story.title) : story.id)} class="story-card">
 									<h3>{story.title}</h3>
 									<p class="author">by {authors[story.user_id || ''] || 'Unknown'}</p>
 									{#if story.description}
@@ -288,7 +289,7 @@
 						</div>
 						<div class="stories-grid">
 							{#each getPaginatedItems(likedStories) as story}
-								<a href="/read/{story.id}" class="story-card">
+								<a href={'/read/' + (story.user_id && authors[story.user_id] ? authors[story.user_id] + '/' + slugify(story.title) : story.id)} class="story-card">
 									<h3>{story.title}</h3>
 									<p class="author">by {authors[story.user_id || ''] || 'Unknown'}</p>
 									{#if story.description}

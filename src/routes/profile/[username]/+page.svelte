@@ -27,6 +27,7 @@
 	let error: string = '';
 	let stories: Story[] = [];
 	let username: string = '';
+	let authors: Record<string, string> = {};
 	$: username = $page.params.username as string;
 	const tabs: { key: string; label: string; component: any }[] = [
 		{ key: 'overview', label: 'Overview', component: ProfileOverview },
@@ -63,6 +64,16 @@
 				newAvatarUrl = profile.avatar_url || '';
 				loadingStep = 'Fetching stories...';
 				stories = await fetchStoriesByUserId(profile.account_id ?? '');
+				// Populate authors map
+				const userIds = Array.from(new Set(stories.map((s) => s.user_id).filter(Boolean)));
+				authors = {};
+				await Promise.all(
+					userIds.map(async (id) => {
+						if (id === null) return;
+						const username = await usernameCache.getUsername(id);
+						if (username) authors[id] = username;
+					})
+				);
 				loadingStep = 'Fetching recent comments...';
 				loadingComments = true;
 				userComments = await fetchRecentCommentsByAccountId(profile.account_id ?? '', 6);
@@ -307,6 +318,7 @@
 							{username}
 							{userComments}
 							{loadingComments}
+							{authors}
 						/>
 					</div>
 				{/key}

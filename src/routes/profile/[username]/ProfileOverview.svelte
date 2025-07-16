@@ -4,10 +4,12 @@
 	import { fetchLatestBlogByAccountId, fetchLatestCharactersByAccountId, fetchProfileStats } from '$lib/db/profile';
 	import type { Profile, ProfileComment } from '$lib/db/profile';
 	import type { BlogType } from '$lib/types/blog';
+	import { slugify } from '$lib/utils/slugify';
 
 	export let profile: Profile | null;
 	export let stories: any[] = [];
 	export let userComments: ProfileComment[] = [];
+	export let authors: Record<string, string> = {};
 
 	let latestBlog: BlogType | null = null;
 	let latestCharacters: any[] = [];
@@ -46,7 +48,7 @@
 			<ul class="overview-works-list">
 				{#each stories.slice(0, 2) as story}
 					<li class="overview-story-item">
-						<a href={'/read/' + story.id} class="overview-story-link">
+						<a href={'/read/' + (story.user_id && authors[story.user_id] ? authors[story.user_id] + '/' + slugify(story.title) : story.id)} class="overview-story-link">
 							<strong class="overview-story-title">{story.title}</strong>
 						</a>
 						{#if story.description}
@@ -126,10 +128,10 @@
 					{#each userComments.slice(0, 3) as c}
 						<li>
 							<span class="overview-comment-meta">
-								{#if c.story_id}
-									<a href={'/read/' + c.story_id} class="comment-story"
-										>{c.story_title || 'Story'}</a
-									>
+								{#if c.user_id}
+									<a href={'/read/' + (authors[c.user_id] ? authors[c.user_id] + '/' + slugify(c.story_title) : c.story_id)} class="comment-story">
+										{c.story_title || 'Story'}
+									</a>
 								{/if}
 								<span class="comment-date">{new Date(c.created_at).toLocaleString()}</span>
 							</span>

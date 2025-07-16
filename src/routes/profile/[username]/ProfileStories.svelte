@@ -1,5 +1,7 @@
 <script lang="ts">
+	import { slugify } from '$lib/utils/slugify';
 	export let stories = [];
+	export let authors = {};
 </script>
 
 <h3>All Stories</h3>
@@ -8,7 +10,7 @@
 		{#each stories as story}
 			<div class="work-card">
 				<div class="work-info">
-					<a href={'/read/' + story.id}><strong>{story.title}</strong></a>
+					<a href={'/read/' + (story.user_id && authors[story.user_id] ? authors[story.user_id] + '/' + slugify(story.title) : story.id)}><strong>{story.title}</strong></a>
 					{#if story.description}
 						<p>{story.description}</p>
 					{/if}

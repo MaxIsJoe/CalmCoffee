@@ -5,6 +5,7 @@
 	import { page as pageStore } from '$app/stores';
 	import { coffeeMarkdown } from '$lib/md/coffeeMarkdown';
 	import { usernameCache } from '$lib/stores/username_cache';
+	import { slugify } from '$lib/utils/slugify';
 
 	let searchTerm = '';
 	let characters = [];
@@ -185,7 +186,14 @@
 	$: if (stories && stories.length) fetchStoryAuthors(stories);
 
 	function goToStory(id) {
-		window.location.href = `/read/${id}`;
+		const story = stories.find((s) => s.id === id);
+		const author = story && story.user_id ? storyAuthors[story.user_id] : null;
+		const slug = story ? slugify(story.title) : '';
+		if (author && slug) {
+			window.location.href = `/read/${author}/${slug}`;
+		} else {
+			window.location.href = `/read/${id}`;
+		}
 	}
 </script>
 
