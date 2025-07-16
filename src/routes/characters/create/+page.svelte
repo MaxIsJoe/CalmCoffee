@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { supabase } from '$lib/supabaseClient';
 	import { goto } from '$app/navigation';
 	import type { Database } from '../../../../database.types';
 	import MarkdownToolbar from '$lib/comp/markdown/MarkdownToolbar.svelte';
@@ -7,6 +6,7 @@
 	import { get } from 'svelte/store';
 	import { user } from '$lib/stores/user';
 	import { onMount } from 'svelte';
+	import { createCharacter, CharacterInsert } from '$lib/db/characters';
 
 	type CharacterInsert = Database['public']['Tables']['characters']['Insert'];
 
@@ -16,7 +16,7 @@
 	let date_of_birth = '';
 	let character_avatar = '';
 	let art_links = '';
-	let gender = '';
+	let gender: CharacterInsert['gender'] = 'NB';
 	let pronouns = '';
 	let error: string | null = null;
 	let loading = false;
@@ -55,7 +55,7 @@
 				date_of_birth = d.date_of_birth ?? '';
 				character_avatar = d.character_avatar ?? '';
 				art_links = d.art_links ?? '';
-				gender = d.gender ?? '';
+				gender = d.gender ?? 'NB';
 				pronouns = d.pronouns ?? '';
 			} catch {}
 		}
@@ -111,7 +111,7 @@
 		}
 	}
 
-	async function createCharacter() {
+	async function createCharacterHandler() {
 		loading = true;
 		error = null;
 		const insertData: CharacterInsert = {
@@ -131,22 +131,16 @@
 			pronouns,
 			tags
 		};
-
-		const { data, error: err } = await supabase
-			.from('characters')
-			.insert([insertData])
-			.select()
-			.single();
-
-		loading = false;
-		if (err) {
-			error = err.message;
-		} else if (data) {
+		try {
+			const data = await createCharacter(insertData);
 			if (typeof localStorage !== 'undefined') {
-				localStorage.removeItem(DRAFT_KEY); // Clear draft on submit
+				localStorage.removeItem(DRAFT_KEY);
 			}
 			goto(`/characters/${data.id}`);
+		} catch (err) {
+			error = (err as Error).message;
 		}
+		loading = false;
 	}
 </script>
 
@@ -155,7 +149,7 @@
 <div class="create-character-layout">
 	<div class="create-character-form-col">
 		<!-- Move the form here for side-by-side layout -->
-		<form class="character-form" on:submit|preventDefault={createCharacter}>
+		<form class="character-form" on:submit|preventDefault={createCharacterHandler}>
 			<div>Name: <span class="required-indicator">*</span></div>
 			<label>
 				<input bind:value={character_name} required minlength="3" />

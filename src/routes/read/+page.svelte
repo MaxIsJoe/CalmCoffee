@@ -1,16 +1,11 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { supabase } from '$lib/supabaseClient';
-	import type { Database } from '../../../database.types';
+	import type { Story } from '$lib/db/story';
+	import { fetchStories } from '$lib/db/story';
 	import { user } from '$lib/stores/user';
 	import { coffeeMarkdown } from '$lib/md/coffeeMarkdown';
 	import { usernameCache } from '$lib/stores/username_cache';
 	import StoryReactions from '$lib/comp/story/StoryReactions.svelte';
-
-	type Story = Database['public']['Tables']['stories']['Row'] & {
-		tags?: string[];
-		reaction_counts?: Record<string, number>;
-	};
 
 	let stories: Story[] = [];
 	let authors: Record<string, string> = {};
@@ -34,95 +29,41 @@
 
 	const ageRatings = ['Everyone', 'Teens', 'Mature', 'Adult'];
 
-	async function fetchStories() {
+	async function fetchStoriesAndAuthors() {
 		loading = true;
 		loadingStep = 'Fetching stories...';
-		
-		// First get total count
-		let countQuery = supabase
-			.from('stories')
-			.select('id', { count: 'exact', head: true })
-			.eq('is_published', true);
-
-		if (ageRating) {
-			countQuery = countQuery.eq('age_rating', ageRating);
-		}
-
-		const { count, error: countError } = await countQuery;
-		if (countError) {
-			error = countError.message;
-			stories = [];
-			loading = false;
-			return;
-		}
-
-		totalItems = count || 0;
-		totalPages = Math.ceil(totalItems / itemsPerPage);
-
-		// Then fetch the actual stories
-		let query = supabase
-			.from('stories')
-			.select(`
-				id, 
-				title, 
-				short_description,
-				age_rating, 
-				created_at, 
-				user_id, 
-				tags, 
-				updated_at,
-				stories_reactions (
-					reaction
-				)
-			`)
-			.eq('is_published', true)
-			.range((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage - 1);
-
-		if (ageRating) {
-			query = query.eq('age_rating', ageRating);
-		}
-
-		// Apply sorting
-		if (sort === 'newest') {
-			query = query.order('created_at', { ascending: false });
-		} else if (sort === 'oldest') {
-			query = query.order('created_at', { ascending: true });
-		} else if (sort === 'recently-updated') {
-			query = query.order('updated_at', { ascending: false });
-		}
-
-		const { data, error: fetchError } = await query;
-		if (fetchError) {
-			error = fetchError.message;
-			stories = [];
-		} else {
-			stories = (data || []).map(story => {
-				// Count reactions
-				const reactionCounts: Record<string, number> = {};
-				(story.stories_reactions || []).forEach((r: { reaction: string }) => {
-					reactionCounts[r.reaction] = (reactionCounts[r.reaction] || 0) + 1;
-				});
-				return {
-					...story,
-					reaction_counts: reactionCounts
-				};
-			}) as Story[];
+		error = '';
+		try {
+			const { stories: fetchedStories, totalItems: count, totalPages: pages } = await fetchStories({
+				ageRating,
+				sort,
+				currentPage,
+				itemsPerPage
+			});
+			stories = fetchedStories;
+			totalItems = count;
+			totalPages = pages;
 			loadingStep = 'Fetching author usernames...';
 			const userIds = Array.from(new Set(stories.map((s) => s.user_id).filter(Boolean)));
 			authors = {};
 			await Promise.all(
 				userIds.map(async (id) => {
-					if (id === null) return; // Skip if already fetched
+					if (id === null) return;
 					const username = await usernameCache.getUsername(id);
 					if (username) authors[id] = username;
 				})
 			);
+		} catch (e) {
+			error = e instanceof Error ? e.message : String(e);
+			stories = [];
+			totalItems = 0;
+			totalPages = 1;
 		}
 		loading = false;
 		loadingStep = '';
 	}
 
-	onMount(fetchStories);
+	onMount(fetchStoriesAndAuthors);
 
 	$: filteredStories = stories
 		.filter(
@@ -159,12 +100,12 @@
 	function goToPage(page: number) {
 		if (page < 1 || page > totalPages) return;
 		currentPage = page;
-		fetchStories();
+		fetchStoriesAndAuthors();
 	}
 
 	$: if (search || ageRating || sort) {
-		currentPage = 1; // Reset to first page when filters change
-		fetchStories();
+		currentPage = 1;
+		fetchStoriesAndAuthors();
 	}
 </script>
 
@@ -193,13 +134,13 @@
 		bind:value={search}
 		class="search-input"
 	/>
-	<select bind:value={ageRating} on:change={() => { currentPage = 1; fetchStories(); }}>
+	<select bind:value={ageRating} on:change={() => { currentPage = 1; fetchStoriesAndAuthors(); }}>
 		<option value="">All Age Ratings</option>
 		{#each ageRatings as rating}
 			<option value={rating}>{rating}</option>
 		{/each}
 	</select>
-	<select bind:value={sort} on:change={() => { currentPage = 1; fetchStories(); }}>
+	<select bind:value={sort} on:change={() => { currentPage = 1; fetchStoriesAndAuthors(); }}>
 		<option value="newest">Newest</option>
 		<option value="oldest">Oldest</option>
 		<option value="recently-updated">Recently Updated</option>

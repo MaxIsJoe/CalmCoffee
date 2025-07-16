@@ -1,15 +1,10 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { supabase } from '$lib/supabaseClient';
-	import type { Database } from '../../../database.types';
+	import { fetchCharacters, fetchMyCharacters } from '$lib/db/characters';
 	import { user } from '$lib/stores/user';
 	import { get } from 'svelte/store';
+	import type { Character } from '$lib/db/characters';
 
-	type Character = Database['public']['Tables']['characters']['Row'] & {
-		profiles: { username: string } | null;
-		characters_reactions: { reaction: string }[] | null;
-		reaction_counts: Record<string, number>;
-	};
 	const CHARACTER_TYPES = ['OC', 'SONA'];
 
 	let characters: Character[] = [];
@@ -24,85 +19,23 @@
 	let totalItems = 0;
 	let totalPages = 1;
 
-	async function fetchCharacters() {
+	async function loadCharacters() {
 		loading = true;
 		error = null;
-
-		// First get total count
-		let countQuery = supabase
-			.from('characters')
-			.select('id', { count: 'exact', head: true });
-
-		if (search.trim()) {
-			countQuery = countQuery.ilike('character_name', `%${search.trim()}%`);
-		}
-		if (typeFilter) {
-			countQuery = countQuery.eq('character_type', typeFilter);
-		}
-
-		const { count, error: countError } = await countQuery;
-		if (countError) {
-			error = countError.message;
-			characters = [];
-			loading = false;
-			return;
-		}
-
-		totalItems = count || 0;
-		totalPages = Math.ceil(totalItems / itemsPerPage);
-
-		// Then fetch the actual characters with reactions
-		let query = supabase
-			.from('characters')
-			.select(`
-				*,
-				profiles:creator(username),
-				characters_reactions (
-					reaction
-				)
-			`)
-			.range((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage - 1);
-
-		if (search.trim()) {
-			query = query.ilike('character_name', `%${search.trim()}%`);
-		}
-		if (typeFilter) {
-			query = query.eq('character_type', typeFilter);
-		}
-
-		// Apply sorting
-		if (sort === 'newest') {
-			query = query.order('created_at', { ascending: false });
-		} else if (sort === 'popular') {
-			// For popular sorting, we'll need to do it client-side since we need to count reactions
-			query = query.order('created_at', { ascending: false });
-		}
-
-		const { data, error: err } = await query;
-		if (err) {
-			error = err.message;
-			characters = [];
-		} else {
-			// Process the data to add reaction counts
-			characters = (data || []).map((char: any) => {
-				const reactionCounts: Record<string, number> = {};
-				(char.characters_reactions || []).forEach((r: { reaction: string }) => {
-					reactionCounts[r.reaction] = (reactionCounts[r.reaction] || 0) + 1;
-				});
-				return {
-					...char,
-					reaction_counts: reactionCounts
-				} as Character; // Cast to Character to ensure type compatibility
+		try {
+			const result = await fetchCharacters({
+				search,
+				typeFilter,
+				sort: sort as 'popular' | 'newest',
+				currentPage,
+				itemsPerPage
 			});
-
-			// Sort by popularity if needed
-			if (sort === 'popular') {
-				characters.sort((a, b) => {
-					const aPositiveReactions = ((a.reaction_counts || {})['0'] || 0) + ((a.reaction_counts || {})['1'] || 0);
-					const bPositiveReactions = ((b.reaction_counts || {})['0'] || 0) + ((b.reaction_counts || {})['1'] || 0);
-					return bPositiveReactions - aPositiveReactions;
-				});
-			}
+			characters = result.characters;
+			totalItems = result.totalItems;
+			totalPages = result.totalPages;
+		} catch (e) {
+			error = (e as Error).message;
+			characters = [];
 		}
 		loading = false;
 	}
@@ -110,37 +43,22 @@
 	function goToPage(page: number) {
 		if (page < 1 || page > totalPages) return;
 		currentPage = page;
-		fetchCharacters();
+		loadCharacters();
 	}
 
 	$: if (search || typeFilter || sort) {
 		currentPage = 1; // Reset to first page when filters change
-		fetchCharacters();
+		loadCharacters();
 	}
 
 	let myCharacters: Character[] = [];
-
-	async function fetchMyCharacters() {
-		const currentUser = get(user);
-		if (!currentUser) {
-			myCharacters = [];
-			return;
-		}
-		const { data, error: err } = await supabase
-			.from('characters')
-			.select('*,profiles:creator(username)')
-			.eq('creator', currentUser.usr?.id)
-			.order('created_at', { ascending: false });
-		if (err) {
-			myCharacters = [];
-		} else {
-			myCharacters = data ?? [];
-		}
+	async function loadMyCharacters() {
+		myCharacters = await fetchMyCharacters();
 	}
 
 	onMount(async () => {
-		await fetchCharacters();
-		await fetchMyCharacters();
+		await loadCharacters();
+		await loadMyCharacters();
 	});
 </script>
 

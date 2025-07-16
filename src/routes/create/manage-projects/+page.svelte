@@ -1,30 +1,33 @@
 <script lang="ts">
-	import { supabase } from '$lib/supabaseClient';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import type { Database } from '$lib/types/database.types';
+	import { user } from '$lib/stores/user';
+	import type { Story } from '$lib/db/story';
+	import { fetchStories } from '$lib/db/story';
 
-	let projects: Database['public']['Tables']['stories']['Row'][] = [];
+	let projects: Story[] = [];
 	let loading = true;
 	let error = '';
 
 	onMount(async () => {
-		const { data: userData } = await supabase.auth.getUser();
-		const user = userData.user;
-		if (!user) {
+		let userId: string | undefined;
+		if ($user?.usr?.id) {
+			userId = $user.usr.id;
+		} else {
+			const { data: userData } = await import('$lib/supabaseClient').then(m => m.supabase.auth.getUser());
+			userId = userData.user?.id;
+		}
+		if (!userId) {
 			error = 'You must be logged in.';
 			loading = false;
 			return;
 		}
-		const { data, error: fetchError } = await supabase
-			.from('stories')
-			.select('*')
-			.eq('user_id', user.id)
-			.order('created_at', { ascending: false });
-		if (fetchError) {
-			error = fetchError.message;
-		} else {
-			projects = data || [];
+		try {
+			const { stories } = await fetchStories({ currentPage: 1, itemsPerPage: 1000 });
+			projects = stories.filter(s => s.user_id === userId);
+		} catch (e) {
+			error = e instanceof Error ? e.message : String(e);
+			projects = [];
 		}
 		loading = false;
 	});

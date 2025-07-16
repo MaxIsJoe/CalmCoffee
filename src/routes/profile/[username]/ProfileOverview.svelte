@@ -1,42 +1,16 @@
 <script lang="ts">
-	export let profile: Database['public']['Tables']['profiles']['Row'] | null;
-	export let stories: Database['public']['Tables']['stories']['Row'][] = [];
-	export let userComments = [];
+	import MicroBlogItem from '$lib/comp/microblog/MicroBlogItem.svelte';
+	import { onMount } from 'svelte';
+	import { fetchLatestBlogByAccountId, fetchLatestCharactersByAccountId, fetchProfileStats } from '$lib/db/profile';
+	import type { Profile, ProfileComment } from '$lib/db/profile';
+	import type { BlogType } from '$lib/types/blog';
+
+	export let profile: Profile | null;
+	export let stories: any[] = [];
+	export let userComments: ProfileComment[] = [];
 
 	let latestBlog: BlogType | null = null;
 	let latestCharacters: any[] = [];
-
-	import MicroBlogItem from '$lib/comp/microblog/MicroBlogItem.svelte';
-	import type { BlogType } from '$lib/types/blog';
-	import { supabase } from '$lib/supabaseClient';
-	import { onMount } from 'svelte';
-	import type { Database } from '../../../../database.types';
-
-	async function fetchMicroblogs() {
-		const { data, error: fetchError } = await supabase
-			.from('microblogs')
-			.select('*')
-			.eq('writer', profile?.account_id)
-			.order('created_at', { ascending: false })
-			.limit(1);
-		console.log('Fetched latest blog:', data);
-		if (fetchError) {
-			return null;
-		}
-		return data;
-	}
-
-	async function fetchLatestCharacters() {
-		const { data, error } = await supabase
-			.from('characters')
-			.select('id,character_name,character_avatar,character_type')
-			.eq('creator', profile?.account_id)
-			.order('created_at', { ascending: false })
-			.limit(6);
-		if (error) return [];
-		return data;
-	}
-
 	let stats = {
 		totalStories: 0,
 		totalCharacters: 0,
@@ -45,43 +19,11 @@
 		joined: ''
 	};
 
-	async function fetchStats() {
-		if (!profile?.account_id) return;
-		const [storiesRes, charsRes, blogsRes, commentsRes, profileRes] = await Promise.all([
-			supabase
-				.from('stories')
-				.select('*', { count: 'exact', head: true })
-				.eq('user_id', profile.account_id)
-				.eq('is_published', true),
-			supabase
-				.from('characters')
-				.select('*', { count: 'exact', head: true })
-				.eq('creator', profile.account_id),
-			supabase
-				.from('microblogs')
-				.select('*', { count: 'exact', head: true })
-				.eq('writer', profile.account_id),
-			supabase
-				.from('story_block_comments')
-				.select('*', { count: 'exact', head: true })
-				.eq('commenter_id', profile.account_id),
-			supabase.from('profiles').select('created_at').eq('account_id', profile.account_id).single()
-		]);
-		stats.totalStories = storiesRes.count || 0;
-		stats.totalCharacters = charsRes.count || 0;
-		stats.totalMicroblogs = blogsRes.count || 0;
-		stats.totalComments = commentsRes.count || 0;
-		stats.joined = profileRes.data?.created_at
-			? new Date(profileRes.data.created_at).toLocaleDateString()
-			: '';
-	}
-
 	onMount(async () => {
 		if (profile) {
-			const latest = await fetchMicroblogs();
-			latestBlog = latest ? latest[0] : null;
-			latestCharacters = await fetchLatestCharacters();
-			await fetchStats();
+			latestBlog = await fetchLatestBlogByAccountId(profile.account_id ?? '');
+			latestCharacters = await fetchLatestCharactersByAccountId(profile.account_id ?? '', 6);
+			stats = await fetchProfileStats(profile.account_id ?? '');
 		}
 	});
 </script>

@@ -1,32 +1,20 @@
 <script lang="ts">
-	import { supabase } from '$lib/supabaseClient';
 	import { onMount } from 'svelte';
-
-	type Profile = {
-		id: number;
-		username: string;
-		email: string;
-		bio?: string;
-		avatar_url?: string;
-	};
+	import { fetchAllProfiles } from '$lib/db/profile';
+	import type { Profile } from '$lib/db/profile';
 
 	let profiles: Profile[] = [];
-	let error = '';
-	let loading = true;
-	let search = '';
+	let error: string = '';
+	let loading: boolean = true;
+	let search: string = '';
 
 	let filteredProfiles: Profile[] = [];
 
 	onMount(async () => {
-		const { data, error: fetchError } = await supabase
-			.from('profiles')
-			.select('*')
-			.order('username', { ascending: true });
-
-		if (fetchError) {
-			error = fetchError.message;
-		} else if (data) {
-			profiles = data;
+		try {
+			profiles = await fetchAllProfiles();
+		} catch (e) {
+			error = (e as Error).message;
 		}
 		loading = false;
 	});

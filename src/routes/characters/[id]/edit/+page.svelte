@@ -1,8 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
-	import { supabase } from '$lib/supabaseClient';
-	import type { Database } from '../../../../../database.types';
 	import { goto } from '$app/navigation';
 	import { user } from '$lib/stores/user';
 	import { get } from 'svelte/store';
@@ -13,8 +11,9 @@
 	import CharacterProfile from '$lib/comp/characters/CharacterProfile.svelte';
 	import ZenMarkdownEditor from '$lib/comp/markdown/ZenMarkdownEditor.svelte';
 	import ArtUploadButton from '$lib/comp/characters/ArtUploadButton.svelte';
-
-	type Character = Database['public']['Tables']['characters']['Row'];
+	import { fetchCharacterById, updateCharacter, deleteCharacter } from '$lib/db/characters';
+	import type { Character } from '$lib/db/characters';
+	import type { Database } from '../../../../database.types';
 
 	let id: string = '';
 	let character: Character | null = null;
@@ -25,7 +24,7 @@
 
 	let character_name = '';
 	let character_avatar = '';
-	let character_type = '';
+	let character_type: 'OC' | 'SONA' | 'FROM-MEDIA' | undefined = 'OC';
 	let character_desc = '';
 	let date_of_birth = '';
 	let art_links: string = '';
@@ -50,36 +49,29 @@
 
 	onMount(async () => {
 		id = $page.params.id;
-		const { data, error: err } = await supabase
-			.from('characters')
-			.select('*')
-			.eq('id', id)
-			.single();
-
-		if (err || !data) {
-			error = err?.message ?? 'Character not found.';
-			loading = false;
-			return;
+		try {
+			character = await fetchCharacterById(id);
+			if (!character) {
+				error = 'Character not found.';
+				loading = false;
+				return;
+			}
+			character_name = character.character_name ?? '';
+			character_avatar = character.character_avatar ?? '';
+			character_type = (character.character_type as 'OC' | 'SONA' | 'FROM-MEDIA' | undefined) ?? 'OC';
+			character_desc = character.character_desc ?? '';
+			date_of_birth = character.date_of_birth ?? '';
+			art_links = (character.art_links ?? []).join('\n');
+			gender = character.gender ?? '';
+			pronouns = character.pronouns ?? '';
+			tags = Array.isArray(character.tags) ? [...character.tags] : [];
+			relationships = character.relations
+				? JSON.parse(character.relations.toLocaleString())
+				: { categories: {}, nodes: [] };
+			relationshipsJson = character.relations?.toLocaleString() ?? '';
+		} catch (err) {
+			error = (err as Error).message;
 		}
-		character = data;
-		if (!character) {
-			error = 'Character not found.';
-			loading = false;
-			return;
-		}
-		character_name = character.character_name ?? '';
-		character_avatar = character.character_avatar ?? '';
-		character_type = character.character_type ?? '';
-		character_desc = character.character_desc ?? '';
-		date_of_birth = character.date_of_birth ?? '';
-		art_links = (character.art_links ?? []).join('\n');
-		gender = character.gender ?? '';
-		pronouns = character.pronouns ?? '';
-		tags = Array.isArray(character.tags) ? [...character.tags] : [];
-		relationships = character.relations
-			? JSON.parse(character.relations.toLocaleString())
-			: { categories: {}, nodes: [] };
-		relationshipsJson = character.relations?.toLocaleString() ?? '';
 		loading = false;
 	});
 
@@ -148,9 +140,8 @@
 			saving = false;
 			return;
 		}
-		const { error: updateError } = await supabase
-			.from('characters')
-			.update({
+		try {
+			await updateCharacter(id, {
 				character_name,
 				character_avatar,
 				character_type,
@@ -164,18 +155,15 @@
 					.filter(Boolean),
 				relations: relationships ? JSON.stringify(relationships) : null,
 				tags
-			})
-			.eq('id', id);
-
-		if (updateError) {
-			saveError = updateError.message;
-		} else {
+			});
 			goto(`/characters/${id}`);
+		} catch (err) {
+			saveError = (err as Error).message;
 		}
 		saving = false;
 	}
 
-	async function deleteCharacter() {
+	async function deleteCharacterHandler() {
 		if (!confirm('Are you sure you want to delete this character? This cannot be undone.')) return;
 		saving = true;
 		saveError = null;
@@ -185,11 +173,11 @@
 			saving = false;
 			return;
 		}
-		const { error: deleteError } = await supabase.from('characters').delete().eq('id', id);
-		if (deleteError) {
-			saveError = deleteError.message;
-		} else {
+		try {
+			await deleteCharacter(id);
 			goto('/characters');
+		} catch (err) {
+			saveError = (err as Error).message;
 		}
 		saving = false;
 	}
@@ -304,7 +292,7 @@
 					<button
 						type="button"
 						class="btn-danger"
-						on:click={deleteCharacter}
+						on:click={deleteCharacterHandler}
 						disabled={saving}
 						style="margin-left:auto"
 					>

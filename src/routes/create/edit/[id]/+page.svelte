@@ -1,13 +1,14 @@
 <script lang="ts">
-	import { supabase } from '$lib/supabaseClient';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
-	import type { Database } from '../../../../../database.types';
 	import { coffeeMarkdown, defaultStyles } from '$lib/md/coffeeMarkdown';
+	import { user } from '$lib/stores/user';
+	import type { Story, Chapter } from '$lib/db/story';
+	import { fetchStoryById, fetchChaptersByStoryId, addChapter, updateStory, deleteStory } from '$lib/db/story';
 
-	let story: Database['public']['Tables']['stories']['Row'] | null = null;
-	let chapters: Database['public']['Tables']['chapters']['Row'][] = [];
+	let story: Story | null = null;
+	let chapters: Chapter[] = [];
 	let error = '';
 	let loading = true;
 	let newChapterTitle = '';
@@ -20,70 +21,53 @@
 
 	onMount(async () => {
 		loadingStep = 1; // Authenticating user
-		const { data: userData } = await supabase.auth.getUser();
-		const user = userData.user;
-		if (!user) {
+		let userId: string | undefined;
+		if ($user?.usr?.id) {
+			userId = $user.usr.id;
+		} else {
+			const { data: userData } = await import('$lib/supabaseClient').then(m => m.supabase.auth.getUser());
+			userId = userData.user?.id;
+		}
+		if (!userId) {
 			error = 'You must be logged in.';
 			loading = false;
 			return;
 		}
 		loadingStep = 2; // Fetching story
-		const { data: storyData, error: storyError } = await supabase
-			.from('stories')
-			.select('*')
-			.eq('id', storyId)
-			.eq('user_id', user.id)
-			.single();
-		if (storyError || !storyData) {
-			error = 'Story not found.';
+		try {
+			story = await fetchStoryById(storyId);
+			if (!story || story.user_id !== userId) throw new Error('Story not found.');
+			loadingStep = 3; // Fetching chapters
+			chapters = await fetchChaptersByStoryId(storyId);
+		} catch (e) {
+			error = e instanceof Error ? e.message : String(e);
+			story = null;
+			chapters = [];
+		} finally {
 			loading = false;
-			return;
 		}
-		story = storyData;
-		loadingStep = 3; // Fetching chapters
-		const { data: chapterData, error: chapterError } = await supabase
-			.from('chapters')
-			.select('*')
-			.eq('story_id', storyId)
-			.order('created_at', { ascending: true });
-		if (chapterError) {
-			error = chapterError.message;
-		} else {
-			chapters = chapterData || [];
-		}
-		loading = false;
 	});
 
-	async function addChapter() {
+	async function addChapterHandler() {
 		if (!newChapterTitle.trim()) return;
-		const { data: userData } = await supabase.auth.getUser();
-		const user = userData.user;
-		if (!user) {
-			error = 'You must be logged in.';
-			return;
+		let userId: string | undefined;
+		if ($user?.usr?.id) {
+			userId = $user.usr.id;
+		} else {
+			const { data: userData } = await import('$lib/supabaseClient').then(m => m.supabase.auth.getUser());
+			userId = userData.user?.id;
 		}
-		// Double check story ownership before insert
-		const { data: storyData, error: storyError } = await supabase
-			.from('stories')
-			.select('id')
-			.eq('id', storyId)
-			.eq('user_id', user.id)
-			.single();
-		if (storyError || !storyData) {
+		if (!userId || !story || story.user_id !== userId) {
 			error = 'You do not own this story.';
 			return;
 		}
-		const { data, error: insertError } = await supabase
-			.from('chapters')
-			.insert({ title: newChapterTitle, story_id: storyId, user_id: user.id })
-			.select()
-			.single();
-		if (insertError) {
-			error = insertError.message;
-			return;
+		try {
+			const chapter = await addChapter(storyId, userId, newChapterTitle);
+			chapters = [...chapters, chapter];
+			newChapterTitle = '';
+		} catch (e) {
+			error = e instanceof Error ? e.message : String(e);
 		}
-		chapters = [...chapters, data];
-		newChapterTitle = '';
 	}
 
 	function editChapter(chapterId: string) {
@@ -114,116 +98,89 @@
 
 	async function saveDescription() {
 		if (!story) return;
-		const { error: updateError } = await supabase
-			.from('stories')
-			.update({ description: editedDescription })
-			.eq('id', story.id);
-		if (updateError) {
-			error = updateError.message;
-			return;
+		try {
+			const updated = await updateStory(story.id, { description: editedDescription });
+			story = { ...story, description: updated.description };
+			editingDescription = false;
+		} catch (e) {
+			error = e instanceof Error ? e.message : String(e);
 		}
-		story = { ...story, description: editedDescription };
-		editingDescription = false;
 	}
 
 	async function saveShortDescription() {
 		if (!story) return;
-		const { error: updateError } = await supabase
-			.from('stories')
-			.update({ short_description: editedShortDescription })
-			.eq('id', story.id);
-		if (updateError) {
-			error = updateError.message;
-			return;
+		try {
+			const updated = await updateStory(story.id, { short_description: editedShortDescription });
+			story = { ...story, short_description: updated.short_description };
+			editingShortDescription = false;
+		} catch (e) {
+			error = e instanceof Error ? e.message : String(e);
 		}
-		story = { ...story, short_description: editedShortDescription };
-		editingShortDescription = false;
 	}
 
 	async function saveTitle() {
 		if (!story || !editedTitle.trim()) return;
-		const { error: updateError } = await supabase
-			.from('stories')
-			.update({ title: editedTitle })
-			.eq('id', story.id);
-		if (updateError) {
-			error = updateError.message;
-			return;
+		try {
+			const updated = await updateStory(story.id, { title: editedTitle });
+			story = { ...story, title: updated.title };
+			editingTitle = false;
+		} catch (e) {
+			error = e instanceof Error ? e.message : String(e);
 		}
-		story = { ...story, title: editedTitle };
-		editingTitle = false;
 	}
 
 	async function togglePublishStatus() {
 		if (!story) return;
-		loading = true; // Show loading spinner
-		loadingStep = 4; // Indicate publishing/unpublishing step
-		const { data: userData } = await supabase.auth.getUser();
-		const user = userData.user;
-
-		if (!user) {
-			error = 'You must be logged in to change publish status.';
-			loading = false;
-			return;
+		loading = true;
+		loadingStep = 4;
+		let userId: string | undefined;
+		if ($user?.usr?.id) {
+			userId = $user.usr.id;
+		} else {
+			const { data: userData } = await import('$lib/supabaseClient').then(m => m.supabase.auth.getUser());
+			userId = userData.user?.id;
 		}
-
-		// Verify user owns the story
-		if (story.user_id !== user.id) {
+		if (!userId || story.user_id !== userId) {
 			error = 'You do not have permission to modify this story.';
 			loading = false;
 			return;
 		}
-
 		const newPublishStatus = !story.is_published;
-		const { error: updateError } = await supabase
-			.from('stories')
-			.update({ is_published: newPublishStatus })
-			.eq('id', story.id)
-			.eq('user_id', user.id); // Double-check ownership on update for security
-
-		if (updateError) {
-			error = updateError.message;
-		} else {
-			story = { ...story, is_published: newPublishStatus };
-			error = ''; // Clear any previous error
+		try {
+			const updated = await updateStory(story.id, { is_published: newPublishStatus });
+			story = { ...story, is_published: updated.is_published };
+			error = '';
+		} catch (e) {
+			error = e instanceof Error ? e.message : String(e);
+		} finally {
+			loading = false;
 		}
-		loading = false;
 	}
 
-	async function deleteStory() {
+	async function deleteStoryHandler() {
 		if (!story) return;
 		loading = true;
-		loadingStep = 5; // Indicate deletion step
-		const { data: userData } = await supabase.auth.getUser();
-		const user = userData.user;
-
-		if (!user) {
-			error = 'You must be logged in to delete a story.';
-			loading = false;
-			return;
+		loadingStep = 5;
+		let userId: string | undefined;
+		if ($user?.usr?.id) {
+			userId = $user.usr.id;
+		} else {
+			const { data: userData } = await import('$lib/supabaseClient').then(m => m.supabase.auth.getUser());
+			userId = userData.user?.id;
 		}
-
-		// Verify user owns the story
-		if (story.user_id !== user.id) {
+		if (!userId || story.user_id !== userId) {
 			error = 'You do not have permission to delete this story.';
 			loading = false;
 			return;
 		}
-
-		const { error: deleteError } = await supabase
-			.from('stories')
-			.delete()
-			.eq('id', story.id)
-			.eq('user_id', user.id); // Double-check ownership on delete for security
-
-		if (deleteError) {
-			error = deleteError.message;
+		try {
+			await deleteStory(story.id, userId);
+			goto('/create');
+		} catch (e) {
+			error = e instanceof Error ? e.message : String(e);
+		} finally {
 			loading = false;
-			return;
 		}
-
-		// Redirect to create page after successful deletion
-		goto('/create');
 	}
 </script>
 
@@ -328,7 +285,7 @@
 				</ul>
 				<div class="add-chapter">
 					<input type="text" bind:value={newChapterTitle} placeholder="New chapter title" />
-					<button on:click={addChapter}>Add Chapter</button>
+					<button on:click={addChapterHandler}>Add Chapter</button>
 				</div>
 			</div>
 		</div>
@@ -342,7 +299,7 @@
 			<p>Are you sure you want to delete "{story?.title}"? This action cannot be undone.</p>
 			<div class="modal-actions">
 				<button class="cancel-btn" on:click={() => (showDeleteConfirm = false)}>Cancel</button>
-				<button class="confirm-delete-btn" on:click={deleteStory}>Delete Story</button>
+				<button class="confirm-delete-btn" on:click={deleteStoryHandler}>Delete Story</button>
 			</div>
 		</div>
 	</div>

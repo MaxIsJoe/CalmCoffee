@@ -1,47 +1,34 @@
 <script lang="ts">
-	import { supabase } from '$lib/supabaseClient';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
-	import type { User } from '@supabase/supabase-js';
-	import type { Story } from '$lib/types/story';
 	import { usernameCache } from '$lib/stores/username_cache';
 	import { slide } from 'svelte/transition';
-
-	// Tab components
 	import ProfileOverview from './ProfileOverview.svelte';
 	import ProfileStories from './ProfileStories.svelte';
 	import ProfileComments from './ProfileComments.svelte';
 	import ProfileBlog from './ProfileBlog.svelte';
-	import type { ProfileType } from '$lib/types/profile';
 	import ProfileCharacters from './ProfileCharacters.svelte';
 	import ProfileLikes from './ProfileLikes.svelte';
+	import { fetchProfileByUsername, fetchProfileById, fetchStoriesByUserId, fetchRecentCommentsByAccountId, updateProfileByUsername, updateProfileInterests } from '$lib/db/profile';
+	import type { Profile, Story, ProfileComment } from '$lib/db/profile';
+	import { user } from '$lib/stores/user';
+	import type { UserStoreType } from '$lib/stores/user';
+	import type { ProfileType } from '$lib/types/profile';
 
-	let userComments: {
-		comment: string;
-		created_at: string;
-		block_id: string;
-		story_id: string;
-		story_title: string;
-	}[] = [];
-
-	let loadingComments = false;
-	let profile: ProfileType | null = null;
-	let user: User | null = null;
-	let editing = false;
-	let bio = '';
+	let userComments: ProfileComment[] = [];
+	let loadingComments: boolean = false;
+	let profile: Profile | null = null;
+	let editing: boolean = false;
+	let bio: string = '';
 	let age: number | null = null;
 	let birthdate: string = '';
-	let newUsername = '';
-	let newAvatarUrl = '';
-	let error = '';
-
+	let newUsername: string = '';
+	let newAvatarUrl: string = '';
+	let error: string = '';
 	let stories: Story[] = [];
-
-	let username: string;
-	$: username = $page.params.username;
-
-	// Tabs
-	const tabs = [
+	let username: string = '';
+	$: username = $page.params.username as string;
+	const tabs: { key: string; label: string; component: any }[] = [
 		{ key: 'overview', label: 'Overview', component: ProfileOverview },
 		{ key: 'stories', label: 'Stories', component: ProfileStories },
 		{ key: 'characters', label: 'Characters', component: ProfileCharacters },
@@ -49,184 +36,84 @@
 		{ key: 'comments', label: 'Comments', component: ProfileComments },
 		{ key: 'likes', label: 'Likes', component: ProfileLikes }
 	];
-	let selectedTab = 'overview';
-
-	function isNumeric(str: string) {
+	let selectedTab: string = 'overview';
+	function isNumeric(str: string): boolean {
 		return /^\d+$/.test(str);
 	}
-
 	let loadingStep: string | null = null;
-
+	let newInterest: string = '';
 	onMount(async () => {
 		error = '';
 		profile = null;
 		loadingStep = 'Fetching profile...';
-
-		// Try fetching by username first (case-insensitive)
-		const { data: userData, error: userError } = await supabase
-			.from('profiles')
-			.select('*')
-			.ilike('username', username.trim())
-			.maybeSingle<ProfileType>();
-
-		if (userError) {
-			error = userError.message;
-		} else if (userData) {
-			profile = userData;
-			bio = profile.bio || '';
-			newUsername = profile.username;
-			birthdate = profile.bd ? profile.bd.slice(0, 10) : '';
-			age = calculateAge(profile.bd || '');
-			newAvatarUrl = profile.avatar_url || '';
-		} else if (isNumeric(username)) {
-			loadingStep = 'Fetching profile by ID...';
-			const id = Number(username);
-			const { data: idData, error: idError } = await supabase
-				.from('profiles')
-				.select('*')
-				.eq('id', id)
-				.maybeSingle<ProfileType>();
-			if (idError) {
-				error = idError.message;
-			} else if (idData) {
-				profile = idData;
+		try {
+			let userData: Profile | null = null;
+			if (!isNumeric(username ?? '')) {
+				userData = await fetchProfileByUsername(username ?? '');
+			} else {
+				const id = Number(username ?? '0');
+				userData = await fetchProfileById(id);
+			}
+			if (userData) {
+				profile = userData;
 				bio = profile.bio || '';
 				newUsername = profile.username;
 				birthdate = profile.bd ? profile.bd.slice(0, 10) : '';
 				age = calculateAge(profile.bd || '');
 				newAvatarUrl = profile.avatar_url || '';
+				loadingStep = 'Fetching stories...';
+				stories = await fetchStoriesByUserId(profile.account_id ?? '');
+				loadingStep = 'Fetching recent comments...';
+				loadingComments = true;
+				userComments = await fetchRecentCommentsByAccountId(profile.account_id ?? '', 6);
+				loadingComments = false;
 			} else {
 				error = `Profile "${username}" not found`;
 			}
-		} else {
-			error = `Profile "${username}" not found`;
+		} catch (e) {
+			error = (e as Error).message;
 		}
-
-		// Fetch stories by user id if profile found
-		if (profile) {
-			loadingStep = 'Fetching stories...';
-			const { data: storiesData, error: storiesError } = await supabase
-				.from('stories')
-				.select('*')
-				.eq('user_id', profile.account_id)
-				.eq('is_published', true);
-
-			if (!storiesError && storiesData) {
-				stories = storiesData;
-			}
-		}
-
-		loadingStep = 'Checking authentication...';
-		const { data: authData } = await supabase.auth.getUser();
-		user = authData.user;
-
-		// Fetch comments left by this user (by account_id)
-		if (profile) {
-			loadingStep = 'Fetching recent comments...';
-			loadingComments = true;
-			const { data: commentData, error: commentError } = await supabase
-				.from('story_block_comments')
-				.select(
-					`
-					id,
-					comment,
-					created_at,
-					blocks(
-						id,
-						chapter_id,
-						chapters(
-							id,
-							story_id,
-							stories(
-								id,
-								title
-							)
-						)
-					)
-				`
-				)
-				.eq('commenter_id', profile.account_id)
-				.order('created_at', { ascending: false })
-				.limit(6);
-
-			if (commentError) {
-				console.error('Error fetching comments:', commentError);
-			}
-			if (!commentError && commentData) {
-				userComments = commentData.map((c: any) => ({
-					comment: c.comment,
-					created_at: c.created_at,
-					block_id: c.blocks?.id || '',
-					story_id: c.blocks?.chapters?.stories?.id || '',
-					story_title: c.blocks?.chapters?.stories?.title || ''
-				}));
-			}
-			loadingComments = false;
-		}
-
-		if (profile) {
-			loadingStep = 'Fetching latest blog...';
-		}
-
 		loadingStep = null;
 	});
-
 	async function saveProfile() {
 		if (!newUsername.trim()) {
 			error = 'Username cannot be empty.';
 			return;
 		}
-
 		if (newUsername.trim().length < 3) {
 			error = 'Username must be at least 3 characters long.';
 			return;
 		}
-
-		let updateFields: any = { bio: bio, username: newUsername.trim() };
+		let updateFields: Partial<Profile> = { bio: bio, username: newUsername.trim() };
 		if (typeof newAvatarUrl === 'string') {
 			updateFields.avatar_url = newAvatarUrl.trim();
 		}
-
-		let updateQuery = supabase.from('profiles').update(updateFields);
-		updateQuery = updateQuery.eq('username', username);
-
-		const { data, error: updateError } = await updateQuery.select(); // select() returns updated rows
-
-		if (updateError) {
-			if (updateError.code === '23505') {
+		try {
+			const updated = await updateProfileByUsername(username, updateFields);
+			if (!updated) {
+				error = 'Update failed. Please try again.';
+				return;
+			}
+			editing = false;
+			profile = updated;
+			bio = profile?.bio || '';
+			newUsername = profile?.username || '';
+			newAvatarUrl = profile?.avatar_url || '';
+			if (profile?.account_id) {
+				usernameCache.clearExpired();
+				usernameCache.getUsername(profile.account_id).then(() => {});
+			}
+			if (username !== newUsername) {
+				window.location.href = `/profile/${newUsername}`;
+			}
+		} catch (e) {
+			if ((e as Error).message.includes('23505')) {
 				error = 'That username is already taken.';
 			} else {
-				error = updateError.message;
+				error = (e as Error).message;
 			}
-			return;
-		}
-
-		console.log('Profile updated:', data);
-
-		if (!data || !data[0]) {
-			error = 'Update failed. Please try again.';
-			return;
-		}
-
-		editing = false;
-		profile = data[0];
-		bio = profile.bio || '';
-		newUsername = profile.username;
-		newAvatarUrl = profile.avatar_url || '';
-
-		// Invalidate username cache for this account_id (if username changed)
-		if (profile?.account_id) {
-			usernameCache.clearExpired(); // Optionally clear expired first
-			// Remove the cached username for this account_id so it will be refreshed
-			usernameCache.getUsername(profile.account_id).then(() => {});
-		}
-
-		// If the username changed, update the URL
-		if (username !== newUsername) {
-			window.location.href = `/profile/${newUsername}`;
 		}
 	}
-
 	function calculateAge(bd: string | null): number | null {
 		if (!bd) return null;
 		const birth = new Date(bd);
@@ -238,8 +125,10 @@
 		}
 		return years;
 	}
-
-	let newInterest = '';
+	// Add a helper function for user id equality
+	function isCurrentUserProfile(user: UserStoreType | null, profile: Profile | null): boolean {
+		return !!user?.usr?.id && !!profile?.account_id && user.usr.id === profile.account_id;
+	}
 </script>
 
 {#if error}
@@ -332,7 +221,7 @@
 							<span>{profile!.bio || 'No bio yet.'}</span>
 						{/if}
 					</div>
-					{#if !editing && user && user.email === profile!.email}
+					{#if !editing && isCurrentUserProfile($user, profile)}
 						<button class="edit-btn" on:click={() => (editing = true)}>Edit</button>
 					{/if}
 				</div>
@@ -353,16 +242,17 @@
 								style="cursor:pointer;"
 							>
 								{interest}
-								{#if user && user.email === profile!.email}
+								{#if $user && profile && isCurrentUserProfile($user, profile)}
 									<button
 										class="remove-interest-btn"
 										on:click|stopPropagation={async () => {
-											const updated = profile!.interests.filter((_, idx) => idx !== i);
-											const { error: updateError } = await supabase
-												.from('profiles')
-												.update({ interests: updated })
-												.eq('account_id', profile!.account_id);
-											if (!updateError) profile!.interests = updated;
+											if (!profile?.account_id || !profile?.interests) return;
+											const updated = profile.interests.filter((_, idx) => idx !== i);
+											try {
+												profile.interests = await updateProfileInterests(profile.account_id, updated);
+											} catch (e) {
+												error = (e as Error).message;
+											}
 										}}
 										title="Remove">&times;</button
 									>
@@ -373,19 +263,18 @@
 				{:else}
 					<p class="no-interests">No interests listed.</p>
 				{/if}
-				{#if user && profile && user.email === profile!.email}
+				{#if $user && profile && isCurrentUserProfile($user, profile)}
 					<form
 						class="add-interest-form"
 						on:submit|preventDefault={async () => {
+							if (!profile?.account_id) return;
 							if (!newInterest.trim()) return;
-							const updated = [...(profile!.interests || []), newInterest.trim()];
-							const { error: updateError } = await supabase
-								.from('profiles')
-								.update({ interests: updated })
-								.eq('account_id', profile!.account_id);
-							if (!updateError) {
-								profile!.interests = updated;
+							const updated = [...(profile.interests || []), newInterest.trim()];
+							try {
+								profile.interests = await updateProfileInterests(profile.account_id, updated);
 								newInterest = '';
+							} catch (e) {
+								error = (e as Error).message;
 							}
 						}}
 					>
@@ -413,7 +302,7 @@
 						<svelte:component
 							this={tabs.find((t) => t.key === selectedTab)?.component}
 							profile={profile!}
-							user={user!}
+							user={$user!}
 							{stories}
 							{username}
 							{userComments}

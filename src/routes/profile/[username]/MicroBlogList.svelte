@@ -1,42 +1,28 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { supabase } from '$lib/supabaseClient';
-	import type { AgeRating } from '$lib/types/story';
-	import type { ProfileType } from '$lib/types/profile';
+	import { fetchMicroblogsByAccountId } from '$lib/db/profile';
+	import type { Profile } from '$lib/db/profile';
 	import MicroBlogItem from '$lib/comp/microblog/MicroBlogItem.svelte';
+	import type { BlogType } from '$lib/types/blog';
 
-	export let profile: ProfileType;
+	export let profile: Profile;
 	let microblogs: BlogType[] = [];
-	let loading = true;
-	let error = '';
+	let loading: boolean = true;
+	let error: string = '';
 
-	interface BlogType {
-		age_rating: AgeRating;
-		content: string;
-		created_at: string;
-		edited_at: string;
-		post_id: number;
-		styles: any;
-		writer: string;
-	}
-
-	async function fetchMicroblogs() {
+	async function loadMicroblogs() {
 		loading = true;
-		const { data, error: fetchError } = await supabase
-			.from('microblogs')
-			.select('*')
-			.eq('writer', profile.account_id)
-			.order('created_at', { ascending: false })
-			.limit(10);
-		if (fetchError) {
-			error = fetchError.message;
-		} else {
-			microblogs = data || [];
+		try {
+			microblogs = await fetchMicroblogsByAccountId(profile.account_id ?? '', 10);
+			error = '';
+		} catch (e) {
+			error = (e as Error).message;
+			microblogs = [];
 		}
 		loading = false;
 	}
 
-	onMount(fetchMicroblogs);
+	onMount(loadMicroblogs);
 </script>
 
 <div class="microblog-list">

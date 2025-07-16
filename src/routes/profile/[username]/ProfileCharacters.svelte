@@ -1,18 +1,19 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { supabase } from '$lib/supabaseClient';
-	import type { Database } from '../../../../database.types';
+	import { fetchCharactersByCreator } from '$lib/db/characters';
+	import type { Character } from '$lib/db/characters';
+	import type { Profile } from '$lib/db/profile';
 
-	export let profile;
+	export let profile: Profile | null;
 
-	let characters: Database['public']['Tables']['characters']['Row'][] = [];
-	let loading = true;
+	let characters: Character[] = [];
+	let loading: boolean = true;
 	let error: string | null = null;
 
-	let page = 1;
-	let pageSize = 12;
-	let total = 0;
-	let totalPages = 1;
+	let page: number = 1;
+	let pageSize: number = 12;
+	let total: number = 0;
+	let totalPages: number = 1;
 
 	const genderFlags = {
 		M: '🧙‍♂️',
@@ -21,38 +22,26 @@
 		I: '⚪'
 	};
 
-	async function fetchCharacters() {
+	async function loadCharacters() {
 		if (!profile?.account_id) return;
 		loading = true;
 		error = null;
-		const from = (page - 1) * pageSize;
-		const to = from + pageSize - 1;
-		const {
-			data,
-			error: err,
-			count
-		} = await supabase
-			.from('characters')
-			.select('*', { count: 'exact' })
-			.eq('creator', profile.account_id)
-			.order('created_at', { ascending: false })
-			.range(from, to);
-
-		if (err) {
-			error = err.message;
+		try {
+			const result = await fetchCharactersByCreator(profile.account_id, page, pageSize);
+			characters = result.data;
+			total = result.total;
+			totalPages = result.totalPages;
+		} catch (e) {
+			error = (e as Error).message;
 			characters = [];
 			total = 0;
 			totalPages = 1;
-		} else {
-			characters = data || [];
-			total = count || 0;
-			totalPages = Math.max(1, Math.ceil(total / pageSize));
 		}
 		loading = false;
 	}
 
-	$: if (profile) fetchCharacters();
-	$: if (page) fetchCharacters();
+	$: if (profile) loadCharacters();
+	$: if (page) loadCharacters();
 
 	function prevPage() {
 		if (page > 1) page -= 1;

@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { supabase } from '$lib/supabaseClient';
 	import { page } from '$app/stores';
-	import type { Database } from '../../../../database.types';
+	import type { Story, Chapter, Block } from '$lib/db/story';
+	import { fetchStoryById, fetchAuthorByStoryUserId, fetchChaptersByStoryId, fetchBlocksByChapterIds, fetchCommentsForBlocks } from '$lib/db/story';
 	import StoryOverview from '$lib/comp/story/StoryOverview.svelte';
 	import StoryHeader from '$lib/comp/story/StoryHeader.svelte';
 	import ReadingControls from '$lib/comp/story/ReadingControls.svelte';
@@ -10,9 +10,9 @@
 	import CommentsPanel from '$lib/comp/story/CommentsPanel.svelte';
 	import { saveLastReadChapter } from '$lib/utils/readingProgress';
 
-	let story: Database['public']['Tables']['stories']['Row'] | null = null;
-	let chapters: Database['public']['Tables']['chapters']['Row'][] = [];
-	let blocks: Database['public']['Tables']['blocks']['Row'][] = [];
+	let story: Story | null = null;
+	let chapters: Chapter[] = [];
+	let blocks: Block[] = [];
 	let author: { username: string } | null = null;
 	let error = '';
 	let loading = true;
@@ -29,66 +29,48 @@
 	let startWidth = 0;
 	let isFullScreen = true;
 
-	let comments: Record<
-		string,
-		{ id: string; commenter_id: string; comment: string; username?: string }[]
-	> = {};
+	let comments: Record<string, { id: string; commenter_id: string; comment: string; username?: string }[]> = {};
 	let openCommentsBlockId: string | null = null;
 
 	onMount(async () => {
 		loading = true;
 		loadingMessage = 'Loading story...';
-		const { data: storyData, error: storyError } = await supabase
-			.from('stories')
-			.select('*')
-			.eq('id', storyId)
-			.single();
-		if (storyError || !storyData) {
-			error = 'Story not found.';
-			loading = false;
-			return;
-		}
-		story = storyData;
-		// Fetch author profile
-		if (story && story.user_id) {
-			loadingMessage = 'Loading author...';
-			const { data: authorData, error: authorError } = await supabase
-				.from('profiles')
-				.select('username')
-				.eq('account_id', story.user_id)
-				.single();
-			author = authorData || null;
-		}
-		loadingMessage = 'Loading chapters...';
-		const { data: chapterData, error: chapterError } = await supabase
-			.from('chapters')
-			.select('*')
-			.eq('story_id', storyId)
-			.order('created_at', { ascending: true });
-		if (chapterError) {
-			error = chapterError.message;
-			loading = false;
-			return;
-		}
-		chapters = chapterData || [];
-		if (chapters.length > 0) {
-			loadingMessage = 'Loading blocks...';
-			const chapterIds = chapters.map((c) => c.id);
-			const { data: blockData, error: blockError } = await supabase
-				.from('blocks')
-				.select('*')
-				.in('chapter_id', chapterIds)
-				.order('created_at', { ascending: true });
-			if (blockError) {
-				error = blockError.message;
-			} else {
-				blocks = blockData || [];
-				// Fetch comments for all blocks
-				await fetchCommentsForBlocks(blocks.map((b) => b.id));
+		error = '';
+		try {
+			story = await fetchStoryById(storyId);
+			if (!story) throw new Error('Story not found.');
+			if (story.user_id) {
+				loadingMessage = 'Loading author...';
+				author = await fetchAuthorByStoryUserId(story.user_id);
 			}
+			loadingMessage = 'Loading chapters...';
+			chapters = await fetchChaptersByStoryId(storyId);
+			if (chapters.length > 0) {
+				loadingMessage = 'Loading blocks...';
+				const chapterIds = chapters.map((c) => c.id);
+				blocks = await fetchBlocksByChapterIds(chapterIds);
+				await fetchCommentsForBlocksWrapper(blocks.map((b) => b.id));
+			}
+		} catch (e) {
+			error = e instanceof Error ? e.message : String(e);
+			story = null;
+			chapters = [];
+			blocks = [];
 		}
 		loading = false;
 	});
+
+	async function fetchCommentsForBlocksWrapper(blockIds: string[]) {
+		if (!blockIds || !Array.isArray(blockIds) || blockIds.length === 0) {
+			comments = {};
+			return;
+		}
+		try {
+			comments = await fetchCommentsForBlocks(blockIds);
+		} catch (e) {
+			comments = {};
+		}
+	}
 
 	function startResize(e: MouseEvent) {
 		resizing = true;
@@ -110,44 +92,14 @@
 		document.body.style.cursor = '';
 	}
 
-	// Only attach listeners in the browser
 	import { browser } from '$app/environment';
 
-	// Attach/detach mousemove/mouseup listeners for resizing
 	$: if (browser && resizing) {
 		window.addEventListener('mousemove', onResize);
 		window.addEventListener('mouseup', stopResize);
 	} else if (browser) {
 		window.removeEventListener('mousemove', onResize);
 		window.removeEventListener('mouseup', stopResize);
-	}
-
-	async function fetchCommentsForBlocks(blockIds: string[]) {
-		if (!blockIds || !Array.isArray(blockIds) || blockIds.length === 0) {
-			comments = {};
-			return;
-		}
-		const { data, error } = await supabase
-			.from('story_block_comments')
-			.select('id, commenter_id, comment, created_at, profiles(username)')
-			.in('id', blockIds)
-			.order('created_at', { ascending: true });
-		if (!error && data) {
-			comments = {};
-			for (const c of data) {
-				const blockId = c.id;
-				if (!comments[blockId]) comments[blockId] = [];
-				comments[blockId].push({
-					id: c.id,
-					commenter_id: c.commenter_id,
-					comment: c.comment,
-					username: (c.profiles as { username: string }[])[0]?.username
-				});
-			}
-		}
-		if (error) {
-			console.error('Error fetching comments:', error);
-		}
 	}
 
 	function toggleComments(blockId: string) {
@@ -162,7 +114,6 @@
 		}
 	}
 
-	// Watch for chapter changes to save progress
 	$: if (selectedChapterId && isReading) {
 		saveLastReadChapter(storyId, selectedChapterId);
 	}

@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { supabase } from '$lib/supabaseClient';
 	import { goto } from '$app/navigation';
+	import { createStory } from '$lib/db/story';
+	import { user } from '$lib/stores/user';
 	import type { Database } from '../../../../database.types';
 
 	let title = '';
@@ -44,34 +45,35 @@
 		error = '';
 		loading = true;
 		loadingMessage = 'Creating your story...';
-		const { data: userData } = await supabase.auth.getUser();
-		const user = userData.user;
-		if (!user) {
+		let userId: string | undefined;
+		if ($user?.usr?.id) {
+			userId = $user.usr.id;
+		} else {
+			const { data: userData } = await import('$lib/supabaseClient').then(m => m.supabase.auth.getUser());
+			userId = userData.user?.id;
+		}
+		if (!userId) {
 			error = 'You must be logged in to create a project.';
 			loading = false;
 			return;
 		}
 		loadingMessage = 'Setting up your story...';
-		const { data, error: insertError } = await supabase
-			.from('stories')
-			.insert({
+		try {
+			const story = await createStory({
 				title,
 				description,
 				short_description,
 				age_rating,
-				user_id: user.id,
+				user_id: userId,
 				tags
-			})
-			.select()
-			.single();
-		if (insertError) {
-			error = insertError.message;
+			});
+			loadingMessage = 'Redirecting to editor...';
+			goto(`/create/edit/${story.id}`);
+		} catch (e) {
+			error = e instanceof Error ? e.message : String(e);
+		} finally {
 			loading = false;
-			return;
 		}
-		loadingMessage = 'Redirecting to editor...';
-		goto(`/create/edit/${data.id}`);
-		loading = false;
 	}
 
 	function addTag() {

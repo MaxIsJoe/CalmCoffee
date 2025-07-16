@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { supabase } from '$lib/supabaseClient';
 	import { coffeeMarkdown, type CoffeeMarkdownStyles } from '$lib/md/coffeeMarkdown';
 	import type { AgeRating } from '$lib/types/story';
 	import type { BlogType } from '$lib/types/blog';
 	import MicroBlogItem from '$lib/comp/microblog/MicroBlogItem.svelte';
 	import { user } from '$lib/stores/user';
+	import { fetchMicroblogs } from '$lib/db/blog';
 
 	let blogs: BlogType[] = $state([]);
 	let loading = $state(true);
@@ -17,41 +17,37 @@
 
 	async function fetchBlogs() {
 		loading = true;
-		let query = supabase
-			.from('microblogs')
-			.select('*, profiles:writer(username, avatar_url)')
-			.order('created_at', { ascending: false })
-			.limit(20);
-
-		if (ageFilter !== 'all') {
-			query = query.eq('age_rating', ageFilter);
-		}
-
+		let userInterests: string[] = [];
 		if (currentTab === 'interests' && $user?.profile?.interests && $user.profile.interests.length > 0) {
-			query = query.overlaps('tags', $user.profile.interests);
+			userInterests = $user.profile.interests;
 		}
-
-		const { data, error: fetchError } = await query;
-
+		const { blogs: fetchedBlogs, error: fetchError } = await fetchMicroblogs({
+			ageFilter,
+			currentTab,
+			userInterests,
+			limit: 20
+		});
 		if (fetchError) {
-			error = fetchError.message;
+			error = fetchError;
 			blogs = [];
 		} else {
-			blogs = data || [];
+			blogs = fetchedBlogs;
 			error = '';
 		}
 		loading = false;
 	}
 
 	onMount(async () => {
-		const { data: userData, error: userError } = await supabase.auth.getUser();
-		if (userData?.user) {
-			const { data: profileData, error: profileError } = await supabase
+		let userId: string | undefined;
+		const { data: userData, error: userError } = await import('$lib/supabaseClient').then(m => m.supabase.auth.getUser());
+		userId = userData.user?.id;
+		if (userId) {
+			const { data: profileData, error: profileError } = await import('$lib/supabaseClient').then(m => m.supabase
 				.from('profiles')
 				.select('*')
-				.eq('account_id', userData.user.id)
-				.single();
-
+				.eq('account_id', userId)
+				.single()
+			);
 			if (profileData) {
 				currentTab = 'interests';
 				user.set({ usr: userData.user, profile: profileData });
@@ -61,9 +57,6 @@
 		} else {
 			if (userError) console.error('Error fetching user:', userError);
 		}
-
-		console.log($user);
-
 		await fetchBlogs();
 		loading = false;
 	});
