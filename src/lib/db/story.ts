@@ -22,18 +22,21 @@ type StoryWithReactions = {
   stories_reactions?: { reaction: Database['public']['Enums']['Reactions'] }[];
 };
 
-export async function fetchStories({ ageRating = '', sort = 'newest', currentPage = 1, itemsPerPage = 10 }: {
+export async function fetchStories({ ageRating = '', sort = 'newest', currentPage = 1, itemsPerPage = 10, is_published = true, creator = '' }: {
   ageRating?: string;
   sort?: string;
   currentPage?: number;
   itemsPerPage?: number;
+  is_published?: boolean;
+  creator?: string
 }) {
   // Get total count
   let countQuery = supabase
     .from('stories')
     .select('id', { count: 'exact', head: true })
-    .eq('is_published', true);
   if (ageRating) countQuery = countQuery.eq('age_rating', ageRating);
+  if (is_published) countQuery = countQuery.eq('is_published', is_published);
+  if (creator) countQuery = countQuery.eq('user_id', creator);
   const { count, error: countError } = await countQuery;
   if (countError) throw new Error(countError.message);
   const totalItems = count || 0;
@@ -46,9 +49,11 @@ export async function fetchStories({ ageRating = '', sort = 'newest', currentPag
       id, title, short_description, age_rating, created_at, user_id, tags, updated_at,
       stories_reactions (reaction)
     `)
-    .eq('is_published', true)
     .range((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage - 1);
+  
+  if (is_published) query = query.eq('is_published', is_published)
   if (ageRating) query = query.eq('age_rating', ageRating);
+  if (creator) query = query.eq('user_id', creator);
   if (sort === 'newest') query = query.order('created_at', { ascending: false });
   else if (sort === 'oldest') query = query.order('created_at', { ascending: true });
   else if (sort === 'recently-updated') query = query.order('updated_at', { ascending: false });

@@ -23,8 +23,8 @@
 			return;
 		}
 		try {
-			const { stories } = await fetchStories({ currentPage: 1, itemsPerPage: 1000 });
-			projects = stories.filter(s => s.user_id === userId);
+			const { stories } = await fetchStories({ currentPage: 1, itemsPerPage: 1000, is_published: false, creator: userId });
+			projects = stories;
 		} catch (e) {
 			error = e instanceof Error ? e.message : String(e);
 			projects = [];
