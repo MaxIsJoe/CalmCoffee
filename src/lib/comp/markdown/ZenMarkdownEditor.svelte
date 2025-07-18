@@ -93,7 +93,10 @@
 
 	<div class="editor-main">
 		<div class="editor-column">
-			<MarkdownToolbar useMarkdown={true} on:insert={e => insertAtCursor(e.detail.before, e.detail.after, e.detail.placeholder)} />
+			<MarkdownToolbar
+				useMarkdown={true}
+				on:insert={(e) => insertAtCursor(e.detail.before, e.detail.after, e.detail.placeholder)}
+			/>
 			<textarea
 				bind:this={textareaEl}
 				bind:value
@@ -217,6 +220,9 @@
 		background: var(--color-editor-bg);
 		transition: border-color 0.2s ease;
 		color: var(--color-editor-text);
+		word-break: normal;
+		overflow-wrap: break-word;
+		white-space: pre-wrap;
 	}
 
 	.editor-textarea:focus {
@@ -248,7 +254,7 @@
 		font-size: 1rem;
 		line-height: 1.6;
 		color: var(--color-editor-text);
-        word-wrap: break-word;
+		word-wrap: break-word;
 	}
 
 	.empty-preview {
@@ -297,4 +303,4 @@
 			height: 100dvh;
 		}
 	}
-</style> 
+</style>
