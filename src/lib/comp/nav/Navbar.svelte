@@ -19,13 +19,44 @@
 
 	// Theme logic (sync with PreferencesSettings)
 	const THEME_VARIABLES = [
-		'--color-bg','--color-bg-alt','--color-text','--color-primary','--color-primary-alt','--color-secondary','--color-accent','--color-link','--color-link-hover','--color-footer-bg','--color-footer-alt','--color-footer-text','--color-footer-link','--color-footer-link-hover','--color-banner-bg','--color-banner-text','--color-banner-hover','--color-border','--color-card-bg','--color-card-shadow','--color-danger','--color-danger-hover','--color-success','--color-bg-hover','--color-navbar-bg','--color-navbar-border','--color-navbar-link','--color-navbar-link-hover','--color-navbar-shadow','--color-section-bg','--color-section-border',
+		'--color-bg',
+		'--color-bg-alt',
+		'--color-text',
+		'--color-primary',
+		'--color-primary-alt',
+		'--color-secondary',
+		'--color-accent',
+		'--color-link',
+		'--color-link-hover',
+		'--color-footer-bg',
+		'--color-footer-alt',
+		'--color-footer-text',
+		'--color-footer-link',
+		'--color-footer-link-hover',
+		'--color-banner-bg',
+		'--color-banner-text',
+		'--color-banner-hover',
+		'--color-border',
+		'--color-card-bg',
+		'--color-card-shadow',
+		'--color-danger',
+		'--color-danger-hover',
+		'--color-success',
+		'--color-bg-hover',
+		'--color-navbar-bg',
+		'--color-navbar-border',
+		'--color-navbar-link',
+		'--color-navbar-link-hover',
+		'--color-navbar-shadow',
+		'--color-section-bg',
+		'--color-section-border'
 	];
 	type Theme = { name: string; variables: Record<string, string>; isCustom?: boolean };
 	const BUILTIN_THEMES: Theme[] = [
 		{ name: 'Morning Coffee', variables: {} },
 		{ name: 'Dark Chocolate', variables: {} },
 		{ name: 'Blueberry Frost', variables: {} },
+		{ name: 'Strawberry Frab', variables: {} }
 	];
 	let customThemes: Theme[] = [];
 	let selectedTheme: string = 'Morning Coffee';
@@ -138,6 +169,10 @@
 			document.documentElement.setAttribute('data-theme', 'caramel');
 			removeCustomThemeStyle();
 			localStorage.setItem('theme', 'Blueberry Frost');
+		} else if (theme.name === 'Strawberry Frab') {
+			document.documentElement.setAttribute('data-theme', 'strawberry-frap');
+			removeCustomThemeStyle();
+			localStorage.setItem('theme', 'Strawberry Frab');
 		} else {
 			document.documentElement.setAttribute('data-theme', 'custom');
 			injectCustomThemeStyle(theme.variables);
@@ -168,15 +203,19 @@
 			let themeName = saved;
 			if (saved === 'light') themeName = 'Morning Coffee';
 			if (saved === 'dark') themeName = 'Dark Chocolate';
-			const found = [...BUILTIN_THEMES, ...customThemes].find(t => t.name === themeName);
+			const found = [...BUILTIN_THEMES, ...customThemes].find((t) => t.name === themeName);
 			if (found) applyTheme(found);
 		}
 	});
-	function openThemeModal() { showThemeModal = true; }
-	function closeThemeModal() { showThemeModal = false; }
+	function openThemeModal() {
+		showThemeModal = true;
+	}
+	function closeThemeModal() {
+		showThemeModal = false;
+	}
 	function selectTheme(name: string) {
 		selectedTheme = name;
-		const found = [...BUILTIN_THEMES, ...customThemes].find(t => t.name === name);
+		const found = [...BUILTIN_THEMES, ...customThemes].find((t) => t.name === name);
 		if (found) applyTheme(found);
 		closeThemeModal();
 	}
@@ -186,9 +225,24 @@
 	<div class="nav-left">
 		<button class="mobile-menu-btn" on:click={toggleMobileMenu} aria-label="Toggle menu">
 			<svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-				<path d="M3 12H21" stroke="var(--color-navbar-icon)" stroke-width="2" stroke-linecap="round"/>
-				<path d="M3 6H21" stroke="var(--color-navbar-icon)" stroke-width="2" stroke-linecap="round"/>
-				<path d="M3 18H21" stroke="var(--color-navbar-icon)" stroke-width="2" stroke-linecap="round"/>
+				<path
+					d="M3 12H21"
+					stroke="var(--color-navbar-icon)"
+					stroke-width="2"
+					stroke-linecap="round"
+				/>
+				<path
+					d="M3 6H21"
+					stroke="var(--color-navbar-icon)"
+					stroke-width="2"
+					stroke-linecap="round"
+				/>
+				<path
+					d="M3 18H21"
+					stroke="var(--color-navbar-icon)"
+					stroke-width="2"
+					stroke-linecap="round"
+				/>
 			</svg>
 		</button>
 		<a href="/" class="logo desktop-logo" data-sveltekit-reload>CalmCoffee</a>
@@ -211,7 +265,12 @@
 			<button on:click={navSearch} aria-label="Search">
 				<svg width="18" height="18" viewBox="0 0 20 20" fill="none">
 					<circle cx="9" cy="9" r="7" stroke="var(--color-navbar-search-icon)" stroke-width="2" />
-					<path d="M15 15L18 18" stroke="var(--color-navbar-search-icon)" stroke-width="2" stroke-linecap="round" />
+					<path
+						d="M15 15L18 18"
+						stroke="var(--color-navbar-search-icon)"
+						stroke-width="2"
+						stroke-linecap="round"
+					/>
 				</svg>
 			</button>
 		</div>
@@ -219,61 +278,65 @@
 			<div class="nav-loading-spinner" aria-label="Loading user info">
 				<div class="spinner"></div>
 			</div>
-		{:else}
-			{#if $userStore}
-				<NotificationButton userId={$userStore.usr?.id} />
-				<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-				<div class="user-dropdown" tabindex="0" on:blur={closeDropdown}>
-					<button class="user-btn" on:click={toggleDropdown} aria-label="User menu">
-						{#if avatarUrl}
-							<img class="avatar" src={avatarUrl} alt="avatar" />
-						{:else}
-							<div class="avatar avatar-fallback">
-								{username ? username.charAt(0).toUpperCase() : '?'}
-							</div>
-						{/if}
-						<span class="username">{username}</span>
-						<svg class="chevron" width="18" height="18" viewBox="0 0 20 20" fill="none">
-							<path
-								d="M6 8l4 4 4-4"
-								stroke="var(--color-navbar-icon)"
-								stroke-width="2"
-								stroke-linecap="round"
-								stroke-linejoin="round"
-							/>
-						</svg>
-					</button>
-					{#if dropdownOpen}
-						<!-- svelte-ignore a11y_no_static_element_interactions -->
-						<div class="dropdown-menu" on:mousedown|preventDefault>
-							<div class="dropdown-header">
-								{#if avatarUrl}
-									<img class="avatar" src={avatarUrl} alt="avatar" />
-								{:else}
-									<div class="avatar avatar-fallback">
-										{username ? username.charAt(0).toUpperCase() : '?'}
-									</div>
-								{/if}
-								<div>
-									<div class="dropdown-username">{username}</div>
-									<div class="dropdown-email">{$userStore.usr?.email}</div>
-								</div>
-							</div>
-							<a href={`/profile/${username}`} class="dropdown-link" on:click={closeDropdown}
-								>Profile</a
-							>
-							<a href="/settings" class="dropdown-link" on:click={closeDropdown}>Settings</a>
-							<button class="dropdown-link logout" on:click={logout}>Logout</button>
+		{:else if $userStore}
+			<NotificationButton userId={$userStore.usr?.id} />
+			<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+			<div class="user-dropdown" tabindex="0" on:blur={closeDropdown}>
+				<button class="user-btn" on:click={toggleDropdown} aria-label="User menu">
+					{#if avatarUrl}
+						<img class="avatar" src={avatarUrl} alt="avatar" />
+					{:else}
+						<div class="avatar avatar-fallback">
+							{username ? username.charAt(0).toUpperCase() : '?'}
 						</div>
 					{/if}
-				</div>
-			{:else}
-				<a href="/account/login" class="login-btn" data-sveltekit-reload>Login</a>
-			{/if}
+					<span class="username">{username}</span>
+					<svg class="chevron" width="18" height="18" viewBox="0 0 20 20" fill="none">
+						<path
+							d="M6 8l4 4 4-4"
+							stroke="var(--color-navbar-icon)"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+						/>
+					</svg>
+				</button>
+				{#if dropdownOpen}
+					<!-- svelte-ignore a11y_no_static_element_interactions -->
+					<div class="dropdown-menu" on:mousedown|preventDefault>
+						<div class="dropdown-header">
+							{#if avatarUrl}
+								<img class="avatar" src={avatarUrl} alt="avatar" />
+							{:else}
+								<div class="avatar avatar-fallback">
+									{username ? username.charAt(0).toUpperCase() : '?'}
+								</div>
+							{/if}
+							<div>
+								<div class="dropdown-username">{username}</div>
+								<div class="dropdown-email">{$userStore.usr?.email}</div>
+							</div>
+						</div>
+						<a href={`/profile/${username}`} class="dropdown-link" on:click={closeDropdown}
+							>Profile</a
+						>
+						<a href="/settings" class="dropdown-link" on:click={closeDropdown}>Settings</a>
+						<button class="dropdown-link logout" on:click={logout}>Logout</button>
+					</div>
+				{/if}
+			</div>
+		{:else}
+			<a href="/account/login" class="login-btn" data-sveltekit-reload>Login</a>
 		{/if}
 		<div class="theme-quick-switch desktop-theme-switch">
 			<button class="theme-btn" aria-label="Theme" on:click={openThemeModal}>
-				{selectedTheme === 'Morning Coffee' ? '🌙' : selectedTheme === 'Dark Chocolate' ? '☀️' : selectedTheme === 'Blueberry Frost' ? '🫐' : '🎨'}
+				{selectedTheme === 'Morning Coffee'
+					? '🌙'
+					: selectedTheme === 'Dark Chocolate'
+						? '☀️'
+						: selectedTheme === 'Blueberry Frost'
+							? '🫐'
+							: '🎨'}
 			</button>
 		</div>
 	</div>
@@ -296,13 +359,25 @@
 						>Profile</a
 					>
 					<a href="/settings" class="mobile-menu-link" on:click={closeMobileMenu}>Settings</a>
-					<button class="mobile-logout" on:click={() => { closeMobileMenu(); logout(); }}>Logout</button>
+					<button
+						class="mobile-logout"
+						on:click={() => {
+							closeMobileMenu();
+							logout();
+						}}>Logout</button
+					>
 				{:else}
 					<a href="/account/login" on:click={closeMobileMenu} data-sveltekit-reload>Login</a>
 				{/if}
 				<div class="theme-quick-switch mobile-theme-switch">
 					<button class="theme-btn" aria-label="Theme" on:click={openThemeModal}>
-						{selectedTheme === 'Morning Coffee' ? '🌙' : selectedTheme === 'Dark Chocolate' ? '☀️' : selectedTheme === 'Blueberry Frost' ? '🫐' : '🎨'}
+						{selectedTheme === 'Morning Coffee'
+							? '🌙'
+							: selectedTheme === 'Dark Chocolate'
+								? '☀️'
+								: selectedTheme === 'Blueberry Frost'
+									? '🫐'
+									: '🎨'}
 					</button>
 				</div>
 			</div>
@@ -322,13 +397,34 @@
 			<div class="theme-list">
 				{#each [...BUILTIN_THEMES, ...customThemes] as theme}
 					<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-					<div class="theme-list-item {selectedTheme === theme.name ? 'selected' : ''}" on:click={() => selectTheme(theme.name)} tabindex="0" aria-current={selectedTheme === theme.name}>
+					<div
+						class="theme-list-item {selectedTheme === theme.name ? 'selected' : ''}"
+						on:click={() => selectTheme(theme.name)}
+						tabindex="0"
+						aria-current={selectedTheme === theme.name}
+					>
 						<div class="theme-list-name">{theme.name}{theme.isCustom ? ' (Custom)' : ''}</div>
 						<div class="theme-list-swatches">
-							<span class="swatch" style="background:{theme.variables['--color-bg'] || (theme.name === 'Morning Coffee' ? '#fffdd0' : '#3d2c21')}"></span>
-							<span class="swatch" style="background:{theme.variables['--color-primary'] || (theme.name === 'Morning Coffee' ? '#4b2e19' : '#a67c52')}"></span>
-							<span class="swatch" style="background:{theme.variables['--color-accent'] || (theme.name === 'Morning Coffee' ? '#a67c52' : '#d4c2b8')}"></span>
-							<span class="swatch" style="background:{theme.variables['--color-link'] || (theme.name === 'Morning Coffee' ? '#4f46e5' : '#bfa07a')}"></span>
+							<span
+								class="swatch"
+								style="background:{theme.variables['--color-bg'] ||
+									(theme.name === 'Morning Coffee' ? '#fffdd0' : '#3d2c21')}"
+							></span>
+							<span
+								class="swatch"
+								style="background:{theme.variables['--color-primary'] ||
+									(theme.name === 'Morning Coffee' ? '#4b2e19' : '#a67c52')}"
+							></span>
+							<span
+								class="swatch"
+								style="background:{theme.variables['--color-accent'] ||
+									(theme.name === 'Morning Coffee' ? '#a67c52' : '#d4c2b8')}"
+							></span>
+							<span
+								class="swatch"
+								style="background:{theme.variables['--color-link'] ||
+									(theme.name === 'Morning Coffee' ? '#4f46e5' : '#bfa07a')}"
+							></span>
 						</div>
 						{#if selectedTheme === theme.name}
 							<span class="theme-selected-indicator">✓</span>
@@ -564,7 +660,9 @@
 		padding: 0.5rem 1rem;
 		border-radius: 4px;
 		cursor: pointer;
-		transition: background 0.15s, color 0.15s;
+		transition:
+			background 0.15s,
+			color 0.15s;
 	}
 	.nav-right button:hover,
 	.login-btn:hover {
@@ -651,7 +749,9 @@
 		font-size: 1.2em;
 		cursor: pointer;
 		box-shadow: 0 2px 8px var(--color-card-shadow);
-		transition: background 0.2s, color 0.2s;
+		transition:
+			background 0.2s,
+			color 0.2s;
 	}
 	.theme-btn:hover {
 		background: var(--color-navbar-btn-hover);
@@ -673,8 +773,11 @@
 	}
 	.theme-modal-backdrop {
 		position: fixed;
-		top: 0; left: 0; right: 0; bottom: 0;
-		background: rgba(0,0,0,0.25);
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: rgba(0, 0, 0, 0.25);
 		z-index: 2000;
 		display: flex;
 		align-items: center;
@@ -722,10 +825,13 @@
 		cursor: pointer;
 		background: var(--color-bg-alt);
 		border: 2px solid transparent;
-		transition: border 0.15s, background 0.15s;
+		transition:
+			border 0.15s,
+			background 0.15s;
 		outline: none;
 	}
-	.theme-list-item.selected, .theme-list-item:focus {
+	.theme-list-item.selected,
+	.theme-list-item:focus {
 		border: 2px solid var(--color-accent);
 		background: var(--color-section-bg);
 	}
@@ -773,7 +879,11 @@
 		animation: spin 1s linear infinite;
 	}
 	@keyframes spin {
-		0% { transform: rotate(0deg); }
-		100% { transform: rotate(360deg); }
+		0% {
+			transform: rotate(0deg);
+		}
+		100% {
+			transform: rotate(360deg);
+		}
 	}
 </style>

@@ -36,6 +36,16 @@
 				secondary: '#81d4fa',
 				accent: '#00bcd4'
 			}
+		},
+		{
+			name: 'Strawberry Frab',
+			description: 'Fruity pink theme inspired by strawberry frappuccino',
+			preview: {
+				bg: 'hsl(11, 43%, 76%)',
+				primary: 'hsl(11, 43%, 36%)',
+				secondary: 'hsl(41, 43%, 36%)',
+				accent: 'hsl(191, 43%, 36%)'
+			}
 		}
 	];
 
@@ -49,7 +59,7 @@
 
 	function applyTheme(themeName: string): void {
 		selectedTheme = themeName;
-		
+
 		// Only apply theme if it's different from what's currently set
 		const currentTheme = localStorage.getItem('theme');
 		if (currentTheme !== themeName) {
@@ -62,6 +72,9 @@
 			} else if (themeName === 'Blueberry Frost') {
 				document.documentElement.setAttribute('data-theme', 'caramel');
 				localStorage.setItem('theme', 'Blueberry Frost');
+			} else if (themeName === 'Strawberry Frab') {
+				document.documentElement.setAttribute('data-theme', 'strawberry-frap');
+				localStorage.setItem('theme', 'Strawberry Frab');
 			}
 		}
 	}
@@ -90,7 +103,7 @@
 		if (savedTheme) {
 			selectedTheme = savedTheme;
 		}
-		
+
 		if (checkFirstTimeVisitor()) {
 			showPopup = true;
 		}
@@ -114,11 +127,23 @@
 								on:click={() => applyTheme(theme.name)}
 							>
 								<div class="theme-preview" style="background-color: {theme.preview.bg}">
-									<div class="preview-header" style="background-color: {theme.preview.primary}"></div>
+									<div
+										class="preview-header"
+										style="background-color: {theme.preview.primary}"
+									></div>
 									<div class="preview-content">
-										<div class="preview-text" style="background-color: {theme.preview.secondary}"></div>
-										<div class="preview-text" style="background-color: {theme.preview.secondary}; width: 70%"></div>
-										<div class="preview-accent" style="background-color: {theme.preview.accent}"></div>
+										<div
+											class="preview-text"
+											style="background-color: {theme.preview.secondary}"
+										></div>
+										<div
+											class="preview-text"
+											style="background-color: {theme.preview.secondary}; width: 70%"
+										></div>
+										<div
+											class="preview-accent"
+											style="background-color: {theme.preview.accent}"
+										></div>
 									</div>
 								</div>
 								<div class="theme-info">
@@ -130,12 +155,8 @@
 					</div>
 
 					<div class="actions">
-						<button class="btn-secondary" on:click={skipOnboarding}>
-							Skip for now
-						</button>
-						<button class="btn-primary" on:click={nextStep}>
-							Continue
-						</button>
+						<button class="btn-secondary" on:click={skipOnboarding}> Skip for now </button>
+						<button class="btn-primary" on:click={nextStep}> Continue </button>
 					</div>
 				</div>
 			{:else}
@@ -149,16 +170,17 @@
 						<div class="notice-icon">⚠️</div>
 						<div class="notice-text">
 							<h3>Calm Coffee is in Pre-Alpha</h3>
-							<p>
-								We're still in the early stages of development. This means:
-							</p>
+							<p>We're still in the early stages of development. This means:</p>
 							<ul>
 								<li>Features may change or be removed</li>
 								<li>Your data might be lost during updates</li>
 								<li>Some functionality may not work as expected</li>
 							</ul>
 							<p>
-								<strong>We're working hard on making this platform the best it can be. Thank you for your patience!</strong>
+								<strong
+									>We're working hard on making this platform the best it can be. Thank you for your
+									patience!</strong
+								>
 							</p>
 						</div>
 					</div>
@@ -192,7 +214,9 @@
 	.popup {
 		background: var(--color-card-bg);
 		border-radius: 12px;
-		box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+		box-shadow:
+			0 20px 25px -5px rgba(0, 0, 0, 0.1),
+			0 10px 10px -5px rgba(0, 0, 0, 0.04);
 		max-width: 600px;
 		width: 100%;
 		max-height: 90vh;
@@ -348,7 +372,8 @@
 		flex-wrap: wrap;
 	}
 
-	.btn-primary, .btn-secondary {
+	.btn-primary,
+	.btn-secondary {
 		padding: 0.75rem 1.5rem;
 		border-radius: 6px;
 		font-size: 1rem;
@@ -409,8 +434,9 @@
 			flex-direction: column;
 		}
 
-		.btn-primary, .btn-secondary {
+		.btn-primary,
+		.btn-secondary {
 			width: 100%;
 		}
 	}
-</style> 
+</style>
