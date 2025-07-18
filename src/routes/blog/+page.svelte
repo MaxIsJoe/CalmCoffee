@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { coffeeMarkdown, type CoffeeMarkdownStyles } from '$lib/md/coffeeMarkdown';
 	import type { AgeRating } from '$lib/types/story';
 	import type { BlogType } from '$lib/types/blog';
 	import MicroBlogItem from '$lib/comp/microblog/MicroBlogItem.svelte';
@@ -18,7 +17,11 @@
 	async function fetchBlogs() {
 		loading = true;
 		let userInterests: string[] = [];
-		if (currentTab === 'interests' && $user?.profile?.interests && $user.profile.interests.length > 0) {
+		if (
+			currentTab === 'interests' &&
+			$user?.profile?.interests &&
+			$user.profile.interests.length > 0
+		) {
 			userInterests = $user.profile.interests;
 		}
 		const { blogs: fetchedBlogs, error: fetchError } = await fetchMicroblogs({
@@ -37,28 +40,20 @@
 		loading = false;
 	}
 
-	onMount(async () => {
-		let userId: string | undefined;
-		const { data: userData, error: userError } = await import('$lib/supabaseClient').then(m => m.supabase.auth.getUser());
-		userId = userData.user?.id;
-		if (userId) {
-			const { data: profileData, error: profileError } = await import('$lib/supabaseClient').then(m => m.supabase
-				.from('profiles')
-				.select('*')
-				.eq('account_id', userId)
-				.single()
-			);
-			if (profileData) {
-				currentTab = 'interests';
-				user.set({ usr: userData.user, profile: profileData });
-			} else {
-				if (profileError) console.error('Error fetching profile:', profileError);
+	onMount(() => {
+		fetchBlogs();
+		const unsubscribe = user.subscribe(async (u) => {
+			if (u && u.profile) {
+				if (currentTab !== 'interests') {
+					currentTab = 'interests';
+					await fetchBlogs();
+				}
+			} else if (!u && currentTab !== 'latest') {
+				currentTab = 'latest';
+				await fetchBlogs();
 			}
-		} else {
-			if (userError) console.error('Error fetching user:', userError);
-		}
-		await fetchBlogs();
-		loading = false;
+			loading = false;
+		});
 	});
 </script>
 
@@ -106,7 +101,11 @@
 	{:else if error}
 		<p class="blog-error">{error}</p>
 	{:else if currentTab === 'interests' && blogs.length === 0}
-		<p>You don't have any interests set in your profile. Go to your <a href="/profile/{$user?.profile?.username}">profile</a> to add some!</p>
+		<p>
+			You don't have any interests set in your profile. Go to your <a
+				href="/profile/{$user?.profile?.username}">profile</a
+			> to add some!
+		</p>
 	{:else if blogs.length === 0}
 		<p>No blogs found.</p>
 	{:else}
@@ -142,7 +141,7 @@
 		align-items: center;
 		gap: 0.7rem;
 	}
-	label[for="age-filter"] {
+	label[for='age-filter'] {
 		font-size: 1.06rem;
 		font-weight: 500;
 		color: var(--color-blog-label, var(--color-secondary));
@@ -207,7 +206,9 @@
 		cursor: pointer;
 		font-size: 1rem;
 		color: var(--color-blog-tabs-btn, #6b7280);
-		transition: color 0.2s, border-bottom 0.2s;
+		transition:
+			color 0.2s,
+			border-bottom 0.2s;
 	}
 
 	.tabs button.active {
