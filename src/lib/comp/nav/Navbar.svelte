@@ -245,7 +245,9 @@
 				/>
 			</svg>
 		</button>
-		<a href="/" class="logo desktop-logo" data-sveltekit-reload>CalmCoffee</a>
+		<a href="/" class="logo desktop-logo" data-sveltekit-reload
+			><img src="favicon.png" width="78" alt="logo" /></a
+		>
 		<div class="desktop-nav">
 			<a href="/read" data-sveltekit-reload>Stories</a>
 			<a href="/blog" data-sveltekit-reload>Microblogs</a>
@@ -765,11 +767,13 @@
 		margin: 1.2rem 0 0 0;
 		justify-content: flex-start;
 	}
-	@media (max-width: 768px) {
-		.desktop-theme-switch {
+	@media (max-width: 968px) {
+		.desktop-nav {
 			display: none;
 		}
-		/* .mobile-theme-switch is now only in the mobile menu */
+		.mobile-menu-btn {
+			display: block;
+		}
 	}
 	.theme-modal-backdrop {
 		position: fixed;
