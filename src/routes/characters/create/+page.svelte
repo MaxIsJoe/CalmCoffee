@@ -8,6 +8,7 @@
 	import { onMount } from 'svelte';
 	import { createCharacter } from '$lib/db/characters';
 	import { fetchStoreContent, StoreContentType, type StoreContent } from '$lib/db/content-shop';
+	import DatePicker from '$lib/comp/common/DatePicker.svelte';
 
 	type CharacterInsert = Database['public']['Tables']['characters']['Insert'];
 
@@ -161,10 +162,11 @@
 		templateError = null;
 		try {
 			const { data } = await fetchStoreContent({ limit: 50, offset: 0 });
-			templateResults = (data || []).filter(t => t.type === StoreContentType.TEMPLATE &&
-				(t.name.toLowerCase().includes(templateSearch.toLowerCase()) ||
-				 t.description.toLowerCase().includes(templateSearch.toLowerCase())
-				)
+			templateResults = (data || []).filter(
+				(t) =>
+					t.type === StoreContentType.TEMPLATE &&
+					(t.name.toLowerCase().includes(templateSearch.toLowerCase()) ||
+						t.description.toLowerCase().includes(templateSearch.toLowerCase()))
 			);
 		} catch (e) {
 			templateError = e instanceof Error ? e.message : 'Failed to load templates.';
@@ -195,17 +197,27 @@
 					on:insert={(e) =>
 						insertDescAtCursor(e.detail.before, e.detail.after, e.detail.placeholder)}
 				/>
-				<button type="button" class="browse-templates-btn" on:click={openTemplateModal}>Browse Templates</button>
+				<button type="button" class="browse-templates-btn" on:click={openTemplateModal}
+					>Browse Templates</button
+				>
 				<textarea bind:this={descTextarea} bind:value={character_desc} required></textarea>
 			</label>
 			{#if showTemplateModal}
-				<div class="template-modal-backdrop" on:click={() => showTemplateModal = false}></div>
+				<div class="template-modal-backdrop" on:click={() => (showTemplateModal = false)}></div>
 				<div class="template-modal">
 					<div class="template-modal-header">
 						<span>Browse Templates</span>
-						<button class="close-modal-btn" on:click={() => showTemplateModal = false}>&times;</button>
+						<button class="close-modal-btn" on:click={() => (showTemplateModal = false)}
+							>&times;</button
+						>
 					</div>
-					<input class="template-search-input" type="text" placeholder="Search templates..." bind:value={templateSearch} on:input={searchTemplates} />
+					<input
+						class="template-search-input"
+						type="text"
+						placeholder="Search templates..."
+						bind:value={templateSearch}
+						on:input={searchTemplates}
+					/>
 					{#if templateLoading}
 						<div class="template-modal-status">Loading...</div>
 					{:else if templateError}
@@ -218,10 +230,21 @@
 								<li class="template-modal-item">
 									<div class="template-modal-name">{t.name}</div>
 									<div class="template-modal-desc">{t.description}</div>
-									<pre class="template-modal-preview">{t.content.slice(0, 200)}{t.content.length > 200 ? '...' : ''}</pre>
+									<pre class="template-modal-preview">{t.content.slice(0, 200)}{t.content.length >
+										200
+											? '...'
+											: ''}</pre>
 									<div class="template-modal-actions">
-										<button class="insert-template-btn" on:click={() => insertTemplateContent(t.content)}>Insert</button>
-										<a class="goto-templates-btn" href="/templates" target="_blank" title="Go to templates page">See all</a>
+										<button
+											class="insert-template-btn"
+											on:click={() => insertTemplateContent(t.content)}>Insert</button
+										>
+										<a
+											class="goto-templates-btn"
+											href="/templates"
+											target="_blank"
+											title="Go to templates page">See all</a
+										>
 									</div>
 								</li>
 							{/each}
@@ -239,7 +262,7 @@
 			</label>
 			<label>
 				<div>Date of Birth: <span class="required-indicator">*</span></div>
-				<input type="date" bind:value={date_of_birth} required />
+				<DatePicker bind:value={date_of_birth}></DatePicker>
 			</label>
 			<label>
 				Avatar URL:
@@ -321,7 +344,14 @@
 						<div><strong>Name:</strong> {character_name}</div>
 						<div><strong>Type:</strong> {character_type}</div>
 						{#if date_of_birth}
-							<div><strong>Date of Birth:</strong> {date_of_birth}</div>
+							<div>
+								<strong>Date of Birth:</strong>
+								<DatePicker
+									bind:value={date_of_birth}
+									previewMode={true}
+									previewColor={'var(--color-primary)'}
+								></DatePicker>
+							</div>
 						{/if}
 						{#if gender}
 							<div><strong>Gender:</strong> {gender}</div>
@@ -762,9 +792,6 @@
 		}
 	}
 
-	.muted {
-		color: var(--color-muted);
-	}
 	.error {
 		color: var(--color-error);
 	}
@@ -854,17 +881,21 @@
 	}
 	.template-modal-backdrop {
 		position: fixed;
-		top: 0; left: 0; right: 0; bottom: 0;
-		background: rgba(0,0,0,0.3);
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: rgba(0, 0, 0, 0.3);
 		z-index: 1000;
 	}
 	.template-modal {
 		position: fixed;
-		top: 50%; left: 50%;
+		top: 50%;
+		left: 50%;
 		transform: translate(-50%, -50%);
 		background: var(--color-block-bg, #fff);
 		border-radius: 10px;
-		box-shadow: 0 2px 16px var(--color-card-shadow, rgba(0,0,0,0.18));
+		box-shadow: 0 2px 16px var(--color-card-shadow, rgba(0, 0, 0, 0.18));
 		padding: 2em 2em 1.5em 2em;
 		z-index: 1001;
 		min-width: 340px;
@@ -930,7 +961,7 @@
 		font-size: 0.95em;
 		overflow-x: auto;
 		margin-bottom: 0.5em;
-		box-shadow: 0 1px 2px var(--color-block-shadow, rgba(0,0,0,0.03));
+		box-shadow: 0 1px 2px var(--color-block-shadow, rgba(0, 0, 0, 0.03));
 		max-height: 7em;
 	}
 	.insert-template-btn {
@@ -961,7 +992,10 @@
 		text-decoration: none;
 		border: none;
 		opacity: 0.7;
-		transition: background 0.2s, color 0.2s, opacity 0.2s;
+		transition:
+			background 0.2s,
+			color 0.2s,
+			opacity 0.2s;
 		margin-left: 0.2em;
 	}
 	.goto-templates-btn:hover {

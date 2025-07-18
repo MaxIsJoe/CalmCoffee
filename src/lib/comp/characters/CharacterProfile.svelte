@@ -6,6 +6,7 @@
 	import CharacterReactions from '$lib/comp/characters/CharacterReactions.svelte';
 	import { sendLikeStoryNotification } from '$lib/notifications';
 	import { supabase } from '$lib/supabaseClient';
+	import DatePicker from '../common/DatePicker.svelte';
 
 	export let character: Database['public']['Tables']['characters']['Row'];
 	export let previewMode = false;
@@ -39,13 +40,17 @@
 
 	async function handleCharacterReaction(event: CustomEvent<{ reaction: string }>) {
 		if (!character?.creator || !character.id) {
-			console.error(`STOP RIGHT HERE CRIMINAL SCUM. creator: ${character?.creator}, character: ${character}`);
+			console.error(
+				`STOP RIGHT HERE CRIMINAL SCUM. creator: ${character?.creator}, character: ${character}`
+			);
 			return;
 		}
-		
-		const { data: { user } } = await supabase.auth.getUser();
+
+		const {
+			data: { user }
+		} = await supabase.auth.getUser();
 		if (!user) {
-			console.error("tried doing stuff without being logged in");
+			console.error('tried doing stuff without being logged in');
 			return;
 		}
 
@@ -60,7 +65,7 @@
 		}
 
 		if (reactorProfile?.username) {
-			if (event.detail.reaction === "0") {
+			if (event.detail.reaction === '0') {
 				await sendLikeStoryNotification({
 					userId: character.creator,
 					reactorId: user.id,
@@ -79,7 +84,7 @@
 
 	// Load creator username if not in preview mode
 	$: if (!previewMode && character?.creator) {
-		usernameCache.getUsername(character.creator).then(username => {
+		usernameCache.getUsername(character.creator).then((username) => {
 			creatorUsername = username;
 			if (username) {
 				creatorProfileUrl = `/profile/${username}`;
@@ -99,7 +104,10 @@
 				<div><strong>Name:</strong> {character.character_name}</div>
 				<div><strong>Type:</strong> {character.character_type}</div>
 				{#if character.date_of_birth}
-					<div><strong>Date of Birth:</strong> {character.date_of_birth}</div>
+					<div>
+						<strong>Date of Birth:</strong>
+						<DatePicker bind:value={character.date_of_birth} previewMode={true}></DatePicker>
+					</div>
 				{/if}
 				{#if character.gender}
 					<div><strong>Gender:</strong> {GetGenderFlagAndText()}</div>
@@ -573,4 +581,4 @@
 			height: 90px;
 		}
 	}
-</style> 
+</style>

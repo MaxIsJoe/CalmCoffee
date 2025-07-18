@@ -2,6 +2,8 @@
 	import { onMount, createEventDispatcher } from 'svelte';
 	import { supabase } from '$lib/supabaseClient';
 	import type { Database } from '../../../../database.types';
+	import { fetchCharacters } from '$lib/db/characters';
+	import AvatarPlaceholder from '$lib/comp/common/AvatarPlaceholder.svelte';
 
 	// Import itself for recursive use
 	import RelationshipGraphEditor from './RelationshipGraphEditor.svelte';
@@ -42,6 +44,8 @@
 
 	let graphViewVersion = 0;
 
+	let searchLoading = false;
+
 	function zoomIn() {
 		zoom = Math.min(maxZoom, zoom * 1.2);
 		graphViewVersion++;
@@ -57,19 +61,8 @@
 		graphViewVersion++;
 	}
 
-	// Fetch all characters and set main character info
-	onMount(async () => {
-		const { data } = await supabase
-			.from('characters')
-			.select('id,character_name,character_avatar')
-			.limit(100);
-		allCharacters = (data ?? []).map((c: any) => ({
-			id: c.id,
-			name: c.character_name,
-			avatar: c.character_avatar
-		}));
-
-		// Load graph state from character.relations if available
+	// Only load graph state from character.relations if available
+	onMount(() => {
 		if (character?.relations) {
 			try {
 				const parsed =
@@ -84,7 +77,6 @@
 				console.warn('Failed to parse character.relations JSON', e);
 			}
 		}
-
 		console.log('mainCharacter:', character);
 	});
 
@@ -122,9 +114,19 @@
 	async function handleSearchInput(e: Event) {
 		search = (e.target as HTMLInputElement).value;
 		if (search.length > 1) {
-			searchResults = allCharacters.filter((c) =>
-				c.name.toLowerCase().includes(search.toLowerCase())
-			);
+			searchLoading = true;
+			try {
+				const { characters } = await fetchCharacters({ search, itemsPerPage: 20 });
+				console.log(characters);
+				searchResults = (characters ?? []).map((c: any) => ({
+					id: c.id,
+					name: c.character_name,
+					avatar: c.character_avatar
+				}));
+			} catch (error) {
+				searchResults = [];
+			}
+			searchLoading = false;
 		} else {
 			searchResults = [];
 		}
@@ -305,7 +307,13 @@
 								{@const rel = graph.nodes.find((n) => n.id === edge.to)}
 								<li class="type-character">
 									<!-- svelte-ignore a11y_missing_attribute -->
-									<img src={rel.avatar} class="type-avatar" />
+									{#if rel.avatar}
+										<img src={rel.avatar} class="type-avatar" />
+									{:else}
+										<div class="type-avatar">
+											<AvatarPlaceholder minSize="4px" />
+										</div>
+									{/if}
 									<span>{rel.label}</span>
 								</li>
 							{/if}
@@ -409,11 +417,15 @@
 											class="node-avatar"
 										/>
 									{:else}
-										<div class="node-avatar node-avatar-placeholder"></div>
+										<AvatarPlaceholder class="node-avatar" />
 									{/if}
 									<div class="node-label main-label">{character?.character_name}</div>
 								{:else}
-									<img src={node.avatar} alt={node.label} class="node-avatar" />
+									{#if node.avatar}
+										<img src={node.avatar} alt={node.label} class="node-avatar" />
+									{:else}
+										<AvatarPlaceholder class="node-avatar" />
+									{/if}
 									<div class="node-label">{node.label}</div>
 								{/if}
 								{#if owner && node.id !== character?.id}
@@ -464,13 +476,31 @@
 							placeholder="Search character..."
 							autocomplete="off"
 						/>
-						<ul>
-							{#each searchResults as char}
-								<li>
-									<button on:click={() => selectCharacter(char)}>{char.name}</button>
-								</li>
-							{/each}
-						</ul>
+						{#if searchLoading}
+							<div class="search-loading">Searching...</div>
+						{:else}
+							<ul>
+								{#each searchResults as char}
+									<li>
+										<button on:click={() => selectCharacter(char)}>
+											{#if char.avatar}
+												<img
+													src={char.avatar}
+													class="type-avatar"
+													style="margin-right:0.5em;vertical-align:middle;"
+												/>
+											{:else}
+												<AvatarPlaceholder
+													class="type-avatar"
+													style="margin-right:0.5em;vertical-align:middle;"
+												/>
+											{/if}
+											{char.name}
+										</button>
+									</li>
+								{/each}
+							</ul>
+						{/if}
 						<button type="button" on:click={() => (showSearch = false)}>Cancel</button>
 					</div>
 				{/if}
@@ -490,7 +520,11 @@
 										{@const rel = graph.nodes.find((n) => n.id === edge.to)}
 										<li class="type-character">
 											<!-- svelte-ignore a11y_missing_attribute -->
-											<img src={rel.avatar} class="type-avatar" />
+											{#if rel.avatar}
+												<img src={rel.avatar} class="type-avatar" />
+											{:else}
+												<AvatarPlaceholder class="type-avatar" />
+											{/if}
 											<span>{rel.label}</span>
 											{#if owner}
 												<button
@@ -859,5 +893,11 @@
 	}
 	.close-modal-btn:hover {
 		background: var(--color-danger-hover);
+	}
+	.search-loading {
+		color: var(--color-secondary);
+		font-size: 1rem;
+		margin-bottom: 0.5rem;
+		text-align: center;
 	}
 </style>

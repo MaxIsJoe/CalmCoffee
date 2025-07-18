@@ -1,3 +1,6 @@
+// most of this script has been fed through AI because I have no clue how to handle Regex and I hate Regex
+// if you find any problems here, blame the machine.
+
 export type CoffeeMarkdownStyles = {
 	h1?: string;
 	h2?: string;

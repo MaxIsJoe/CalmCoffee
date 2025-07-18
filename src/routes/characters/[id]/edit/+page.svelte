@@ -14,6 +14,8 @@
 	import { fetchCharacterById, updateCharacter, deleteCharacter } from '$lib/db/characters';
 	import type { Character } from '$lib/db/characters';
 	import type { Database } from '../../../../../database.types';
+	import DatePicker from '$lib/comp/common/DatePicker.svelte';
+	import { supabase } from '$lib/supabaseClient';
 
 	let id: string = '';
 	let character: Character | null = null;
@@ -47,6 +49,10 @@
 	let tagWarning = '';
 	const maxTags = 6;
 
+	let avatarUploadError: string | null = null;
+	let avatarUploading = false;
+	let avatarFileInput: HTMLInputElement | null = null;
+
 	onMount(async () => {
 		id = $page.params.id;
 		try {
@@ -58,7 +64,8 @@
 			}
 			character_name = character.character_name ?? '';
 			character_avatar = character.character_avatar ?? '';
-			character_type = (character.character_type as 'OC' | 'SONA' | 'FROM-MEDIA' | undefined) ?? 'OC';
+			character_type =
+				(character.character_type as 'OC' | 'SONA' | 'FROM-MEDIA' | undefined) ?? 'OC';
 			character_desc = character.character_desc ?? '';
 			date_of_birth = character.date_of_birth ?? '';
 			art_links = (character.art_links ?? []).join('\n');
@@ -110,9 +117,39 @@
 		}
 	}
 
-	function handleArtInsert(event: CustomEvent<{ before: string; after: string; placeholder: string }>) {
+	function handleArtInsert(
+		event: CustomEvent<{ before: string; after: string; placeholder: string }>
+	) {
 		const { placeholder } = event.detail;
 		art_links = art_links ? `${art_links}\n${placeholder}` : placeholder;
+	}
+
+	async function handleAvatarUpload(event: Event) {
+		const files = (event.target as HTMLInputElement).files;
+		if (!files || files.length === 0) return;
+		const file = files[0];
+		avatarUploadError = null;
+		avatarUploading = true;
+		try {
+			const fileExt = file.name.split('.').pop();
+			const fileName = `${id}-avatar-${Date.now()}.${fileExt}`;
+			const { data, error } = await supabase.storage.from('avatars').upload(fileName, file, {
+				cacheControl: '3600',
+				upsert: true
+			});
+			if (error) throw error;
+			// Get public URL
+			const { data: publicUrlData } = supabase.storage.from('avatars').getPublicUrl(fileName);
+			if (publicUrlData?.publicUrl) {
+				character_avatar = publicUrlData.publicUrl;
+			} else {
+				avatarUploadError = 'Failed to get public URL.';
+			}
+		} catch (err) {
+			avatarUploadError = (err as Error).message;
+		}
+		avatarUploading = false;
+		if (avatarFileInput) avatarFileInput.value = '';
 	}
 
 	async function save() {
@@ -131,7 +168,7 @@
 				character_type,
 				character_desc,
 				date_of_birth,
-				gender: gender || null,
+				gender: gender || undefined,
 				pronouns,
 				art_links: art_links
 					.split('\n')
@@ -181,8 +218,24 @@
 					<input type="text" bind:value={character_name} maxlength="100" required />
 				</label>
 				<label>
-					Avatar URL:
-					<input type="url" bind:value={character_avatar} maxlength="400" />
+					Avatar:
+					<div style="display: flex; align-items: center; gap: 1rem;">
+						<input
+							type="url"
+							bind:value={character_avatar}
+							maxlength="400"
+							placeholder="Paste image URL..."
+							style="flex:1 1 0;"
+						/>
+						<ArtUploadButton on:insert={(e) => (character_avatar = e.detail.placeholder)} />
+					</div>
+					{#if character_avatar}
+						<img
+							src={character_avatar}
+							alt="Avatar preview"
+							style="margin-top:0.5rem;max-width:96px;max-height:96px;border-radius:8px;border:1px solid var(--color-border);"
+						/>
+					{/if}
 				</label>
 				<label>
 					Type:
@@ -195,20 +248,31 @@
 				</label>
 				<label>
 					Date of Birth:
-					<input type="date" bind:value={date_of_birth} />
+					<DatePicker bind:value={date_of_birth} />
 				</label>
 				<label>
 					Description:
-					<ZenMarkdownEditor maxLength={12480} showPreview={false} bind:value={character_desc} placeholder="Write your character's description here..." />
+					<ZenMarkdownEditor
+						maxLength={12480}
+						showPreview={false}
+						bind:value={character_desc}
+						placeholder="Write your character's description here..."
+					/>
 				</label>
 				<label>
 					Art Links (one per line):
 					<div class="art-upload-section">
 						<div class="art-upload-header">
 							<ArtUploadButton on:insert={handleArtInsert} />
-							<span class="art-upload-hint">- Upload or select already uploaded images on this account</span>
+							<span class="art-upload-hint"
+								>- Upload or select already uploaded images on this account</span
+							>
 						</div>
-						<textarea bind:value={art_links} rows="3" placeholder="Or paste image URLs here, one per line"></textarea>
+						<textarea
+							bind:value={art_links}
+							rows="3"
+							placeholder="Or paste image URLs here, one per line"
+						></textarea>
 					</div>
 				</label>
 				<label>
@@ -295,17 +359,20 @@
 	<div class="preview-section">
 		<h2>Preview</h2>
 		{#if character}
-			<CharacterProfile 
+			<CharacterProfile
 				character={{
 					...character,
 					character_name,
 					character_avatar,
-					character_type: character_type as "OC" | "SONA" | "FROM-MEDIA",
+					character_type: character_type as 'OC' | 'SONA' | 'FROM-MEDIA',
 					character_desc,
 					date_of_birth,
-					gender: gender || "NB",
+					gender: gender || 'NB',
 					pronouns,
-					art_links: art_links.split('\n').map(s => s.trim()).filter(Boolean),
+					art_links: art_links
+						.split('\n')
+						.map((s) => s.trim())
+						.filter(Boolean),
 					tags,
 					created_at: character.created_at,
 					creator: character.creator,
