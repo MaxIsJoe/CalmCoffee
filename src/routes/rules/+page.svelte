@@ -19,9 +19,9 @@
 
 <div class="rules-container">
 	{#if rules !== ''}
-	<div class="rules-content">
-		{@html coffeeMarkdown(rules)}
-	</div>
+		<div class="rules-content">
+			{@html coffeeMarkdown(rules)}
+		</div>
 	{/if}
 </div>
 
@@ -33,10 +33,11 @@
 	}
 
 	.rules-content {
-		background-color: #fff;
+		background-color: var(--color-bg-alt);
 		padding: 2rem;
 		border-radius: 12px;
-		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+		box-shadow: 0 4px 20px var(--color-card-shadow);
+		color: var(--color-text);
 	}
 
 	@media (max-width: 768px) {
@@ -50,14 +51,17 @@
 
 		:global(.rules-content h1) {
 			font-size: 2rem;
+			color: var(--color-primary);
 		}
 
 		:global(.rules-content h2) {
 			font-size: 1.5rem;
+			color: var(--color-primary);
 		}
 
 		:global(.rules-content h3) {
 			font-size: 1.2rem;
+			color: var(--color-primary);
 		}
 	}
 </style>
