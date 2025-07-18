@@ -72,7 +72,7 @@ export function coffeeMarkdown(md: string, styles: CoffeeMarkdownStyles = {}): s
 
 	let html = escapeHtml(md);
 
-		// 1. Custom block containers
+	// 1. Custom block containers
 	html = handleColumns(html, mergedStyles);
 	html = handleBgc(html, mergedStyles);
 	html = handleBackground(html, mergedStyles);
@@ -113,7 +113,7 @@ function escapeHtml(md: string): string {
 		if (tagNameMatch) {
 			const tagName = tagNameMatch[1].toLowerCase();
 			if (allowedTags.includes(tagName)) {
-    			return `<${tagContent}>`;
+				return `<${tagContent}>`;
 			}
 		}
 		// Escape the entire tag
@@ -159,8 +159,8 @@ function handleAlignment(html: string, mergedStyles: Required<CoffeeMarkdownStyl
 		(_, alignment, content) => {
 			const alignValue = alignment.trim().toLowerCase();
 			let style = '';
-			
-			switch(alignValue) {
+
+			switch (alignValue) {
 				case 'left':
 					style = 'text-align:left;';
 					break;
@@ -176,7 +176,7 @@ function handleAlignment(html: string, mergedStyles: Required<CoffeeMarkdownStyl
 				default:
 					style = mergedStyles.align;
 			}
-			
+
 			return `<div style="${style}">${content}</div>`;
 		}
 	);
@@ -239,13 +239,13 @@ function handleBold(html: string, mergedStyles: Required<CoffeeMarkdownStyles>):
 }
 
 function handleUnderline(html: string): string {
-  // Replace Markdown-style __text__ with styled <u>
-  html = html.replace(/__([\s\S]+?)__/g, `<u style="text-decoration:underline;">$1</u>`);
+	// Replace Markdown-style __text__ with styled <u>
+	html = html.replace(/__([\s\S]+?)__/g, `<u style="text-decoration:underline;">$1</u>`);
 
-  // Replace <u> tags even with whitespace or attributes
-  html = html.replace(/<u(?:\s[^>]*)?>([\s\S]*?)<\/u>/gi, `<u style="text-decoration:underline;">$1</u>`);
+	// Replace <u> tags even with whitespace or attributes
+	html = html.replace(/<u(?:\s[^>]*)?>([\s\S]*?)<\/u>/gi, `<u style="text-decoration:underline;">$1</u>`);
 
-  return html;
+	return html;
 }
 
 function handleItalic(html: string, mergedStyles: Required<CoffeeMarkdownStyles>): string {
@@ -261,22 +261,16 @@ function handleEscapedNewlines(html: string): string {
 }
 
 function handleParagraphs(html: string, mergedStyles: Required<CoffeeMarkdownStyles>): string {
+	// This function ensures that every single newline inside a paragraph is replaced with <br>,
+	// and paragraphs are created for blocks separated by two or more newlines.
+
 	// Normalize blank lines first
 	html = html.replace(/(?:\r?\n){2,}/g, '\n\n');
 
 	// Process paragraphs: look for blocks of text separated by two or more newlines, or at the start of the string.
-	// This regex captures the separator (if any) and the content of the "paragraph".
-	// The content ([^\n]*) can contain single newlines.
-	return html.replace(/(^|(?:\n{2,}))([^\n]*)/g, (m, sep, lineContent) => {
-		// If the "lineContent" starts with an already-processed HTML block tag,
-		// we don't want to wrap it in a <p> or process its newlines.
-
-		// Within the lineContent (which is effectively a paragraph),
-		// replace single newlines with <br>.
-		// NOTE: This now handles PHYSICAL newlines. Literal \n was handled by handleEscapedNewlines.
+	return html.replace(/(^|(?:\n{2,}))([^\n][^\n]*([\n][^\n]+)*)/g, (m, sep, lineContent) => {
+		// Replace single newlines with <br> within the paragraph
 		const processedLineContent = lineContent.trim().replace(/\n/g, '<br>');
-
-		// Wrap the processed content in a paragraph tag.
 		return `${sep}<p style="${mergedStyles.p}">${processedLineContent}</p>`;
 	});
 }
@@ -342,56 +336,56 @@ function handleCheckboxes(html: string, mergedStyles: Required<CoffeeMarkdownSty
 // This function applies all parsing steps except `escapeHtml` and `handleColumns`
 // to avoid double-escaping and infinite recursion.
 function processMarkdownBlock(mdBlock: string, mergedStyles: Required<CoffeeMarkdownStyles>): string {
-    let htmlBlock = mdBlock; // Assume already escaped by the main escapeHtml call
+	let htmlBlock = mdBlock; // Assume already escaped by the main escapeHtml call
 
-    htmlBlock = handleCodeBlocks(htmlBlock, mergedStyles);
-    htmlBlock = handleInlineCode(htmlBlock, mergedStyles);
-    htmlBlock = handleImages(htmlBlock, mergedStyles);
-    htmlBlock = handleHeadings(htmlBlock, mergedStyles);
-    htmlBlock = handleBlockquotes(htmlBlock, mergedStyles);
-    htmlBlock = handleUnorderedLists(htmlBlock, mergedStyles);
-    htmlBlock = handleOrderedLists(htmlBlock, mergedStyles);
-    htmlBlock = handleLinks(htmlBlock, mergedStyles);
-    htmlBlock = handleBold(htmlBlock, mergedStyles);
-    htmlBlock = handleUnderline(htmlBlock);
-    htmlBlock = handleItalic(htmlBlock, mergedStyles);
-    htmlBlock = handleEscapedNewlines(htmlBlock);
-    htmlBlock = handleParagraphs(htmlBlock, mergedStyles);
-    htmlBlock = handleBgc(htmlBlock, mergedStyles);
-    htmlBlock = handleCustom(htmlBlock, mergedStyles);
-    htmlBlock = handleAlignment(htmlBlock, mergedStyles);
+	htmlBlock = handleCodeBlocks(htmlBlock, mergedStyles);
+	htmlBlock = handleInlineCode(htmlBlock, mergedStyles);
+	htmlBlock = handleImages(htmlBlock, mergedStyles);
+	htmlBlock = handleHeadings(htmlBlock, mergedStyles);
+	htmlBlock = handleBlockquotes(htmlBlock, mergedStyles);
+	htmlBlock = handleUnorderedLists(htmlBlock, mergedStyles);
+	htmlBlock = handleOrderedLists(htmlBlock, mergedStyles);
+	htmlBlock = handleLinks(htmlBlock, mergedStyles);
+	htmlBlock = handleBold(htmlBlock, mergedStyles);
+	htmlBlock = handleUnderline(htmlBlock);
+	htmlBlock = handleItalic(htmlBlock, mergedStyles);
+	htmlBlock = handleEscapedNewlines(htmlBlock);
+	htmlBlock = handleParagraphs(htmlBlock, mergedStyles);
+	htmlBlock = handleBgc(htmlBlock, mergedStyles);
+	htmlBlock = handleCustom(htmlBlock, mergedStyles);
+	htmlBlock = handleAlignment(htmlBlock, mergedStyles);
 
-    return htmlBlock;
+	return htmlBlock;
 }
 
 function handleColumns(html: string, mergedStyles: Required<CoffeeMarkdownStyles>): string {
-    // Regex for <columns float="left|right" width="X%">...</columns>
-    // Group 2: float direction (left|right)
-    // Group 3: width (optional)
-    // Group 4: entire content within <columns> tags
+	// Regex for <columns float="left|right" width="X%">...</columns>
+	// Group 2: float direction (left|right)
+	// Group 3: width (optional)
+	// Group 4: entire content within <columns> tags
 	return html.replace(
 		/<columns\s+float=(["'])(left|right)\1(?:\s+width=(["'])(\d{1,2}(?:\.\d+)?%)\3)?>([\s\S]*?)<\/columns>/gi,
 		(_, _quote1, floatDirection, _quote2, floatWidth = '40%', innerContent) => {
-            const parts = innerContent.split(/(\n\s*---\s*\n)/); // Split by separator '---' on its own line
+			const parts = innerContent.split(/(\n\s*---\s*\n)/); // Split by separator '---' on its own line
 
-            let floatBlockMarkdown = '';
-            let mainBlockMarkdown = '';
+			let floatBlockMarkdown = '';
+			let mainBlockMarkdown = '';
 
-            if (parts.length >= 3) {
-                // If separator found, first part is float content, rest is main content
-                floatBlockMarkdown = parts[0].trim();
-                mainBlockMarkdown = parts.slice(2).join('').trim();
-            } else {
-                // If no separator, treat entire content as mainBlock
-                mainBlockMarkdown = innerContent.trim();
-            }
+			if (parts.length >= 3) {
+				// If separator found, first part is float content, rest is main content
+				floatBlockMarkdown = parts[0].trim();
+				mainBlockMarkdown = parts.slice(2).join('').trim();
+			} else {
+				// If no separator, treat entire content as mainBlock
+				mainBlockMarkdown = innerContent.trim();
+			}
 
-            // Recursively process markdown within each block
-            const processedFloatBlock = processMarkdownBlock(floatBlockMarkdown, mergedStyles);
-            const processedMainBlock = processMarkdownBlock(mainBlockMarkdown, mergedStyles);
+			// Recursively process markdown within each block
+			const processedFloatBlock = processMarkdownBlock(floatBlockMarkdown, mergedStyles);
+			const processedMainBlock = processMarkdownBlock(mainBlockMarkdown, mergedStyles);
 
-            const floatStyle = floatDirection === 'left' ? 'float:left; margin-right:1.5em;' : 'float:right; margin-left:1.5em;';
-            const floatContainerStyle = `width:${floatWidth}; ${floatStyle} margin-bottom:0.7em;`;
+			const floatStyle = floatDirection === 'left' ? 'float:left; margin-right:1.5em;' : 'float:right; margin-left:1.5em;';
+			const floatContainerStyle = `width:${floatWidth}; ${floatStyle} margin-bottom:0.7em;`;
 
 			return `
 <div style="${mergedStyles.section}">

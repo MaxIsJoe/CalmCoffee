@@ -50,7 +50,7 @@ export async function fetchStories({ ageRating = '', sort = 'newest', currentPag
       stories_reactions (reaction)
     `)
     .range((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage - 1);
-  
+
   if (is_published) query = query.eq('is_published', is_published)
   if (ageRating) query = query.eq('age_rating', ageRating);
   if (creator) query = query.eq('user_id', creator);
