@@ -113,6 +113,7 @@
 		if (toDelete) {
 			const filtered = $customThemes.filter((t) => t.name !== toDelete);
 			customThemes.set(filtered);
+			saveCustomThemes();
 			if ($selectedTheme === toDelete) {
 				selectedTheme.set('Morning Coffee');
 			}
