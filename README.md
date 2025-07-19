@@ -42,7 +42,7 @@ A platform for writers who easily get burnt-out while writing fiction, and rolep
 We welcome contributions! To get started:
 
 - Fork this repository and create a new branch for your feature or bugfix.
-- Follow the [Community Rules](https://github.com/maxisjoe/calm-coffee/blob/main/static/text/rules.md) and code of conduct.
+- Follow the [Community Rules](https://github.com/maxisjoe/CalmCoffee/blob/main/static/text/rules.md) and code of conduct.
 - Submit a pull request with a clear description of your changes.
 
 ---
