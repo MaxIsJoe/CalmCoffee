@@ -1,4 +1,10 @@
 <script lang="ts">
+	// hey, so quick note
+	// this is one of those "fuck this, I'm shoving you into chatgpt" components
+	// this sucks ass
+	// you have every right to crucify me for tainting this component with AI slop
+	// I ask for no forgiveness, only for you to understand that coding in 40+ celsius weather in a room that traps heat
+	// sucks major balls
 	import { onMount, createEventDispatcher } from 'svelte';
 	import { supabase } from '$lib/supabaseClient';
 	import type { Database } from '../../../../database.types';

@@ -16,7 +16,6 @@
 	const maxTags = 6;
 	let tagWarning = '';
 
-	// Onboarding state
 	let currentStep = 1;
 	const totalSteps = 3;
 	let stepTransitioning = false;
@@ -49,7 +48,9 @@
 		if ($user?.usr?.id) {
 			userId = $user.usr.id;
 		} else {
-			const { data: userData } = await import('$lib/supabaseClient').then(m => m.supabase.auth.getUser());
+			const { data: userData } = await import('$lib/supabaseClient').then((m) =>
+				m.supabase.auth.getUser()
+			);
 			userId = userData.user?.id;
 		}
 		if (!userId) {
@@ -124,12 +125,21 @@
 			{#if currentStep === 1}
 				<div class="step-content">
 					<h3>Let's start with the basics</h3>
-					<p class="step-description">Give your story a title and choose an appropriate age rating. This helps readers find your work.</p>
-					
+					<p class="step-description">
+						Give your story a title and choose an appropriate age rating. This helps readers find
+						your work.
+					</p>
+
 					<!-- svelte-ignore a11y_label_has_associated_control -->
 					<label>Title</label>
-					<input type="text" bind:value={title} required maxlength="100" placeholder="Enter your story's title" />
-					
+					<input
+						type="text"
+						bind:value={title}
+						required
+						maxlength="100"
+						placeholder="Enter your story's title"
+					/>
+
 					<!-- svelte-ignore a11y_label_has_associated_control -->
 					<label>Age Rating</label>
 					<select bind:value={age_rating}>
@@ -138,12 +148,19 @@
 						<option value="Mature">Mature</option>
 						<option value="Adult">Adult</option>
 					</select>
-					
+
 					<div class="step-actions">
 						<button type="button" class="next-btn" on:click={nextStep} disabled={!title.trim()}>
 							Next Step
-							<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-								<path d="M5 12h14M12 5l7 7-7 7"/>
+							<svg
+								width="20"
+								height="20"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+							>
+								<path d="M5 12h14M12 5l7 7-7 7" />
 							</svg>
 						</button>
 					</div>
@@ -151,34 +168,56 @@
 			{:else if currentStep === 2}
 				<div class="step-content">
 					<h3>Tell us about your story</h3>
-					<p class="step-description">Write a brief summary and a more detailed description to help readers understand what your story is about.</p>
-					
+					<p class="step-description">
+						Write a brief summary and a more detailed description to help readers understand what
+						your story is about.
+					</p>
+
 					<label>Short Description</label>
-					<textarea 
-						bind:value={short_description} 
-						maxlength="300" 
+					<textarea
+						bind:value={short_description}
+						maxlength="300"
 						placeholder="A brief summary of your story that will appear on story listings (max 300 characters)"
 						rows="2"
 					></textarea>
-					
+
 					<label>Full Description</label>
-					<textarea 
-						bind:value={description} 
+					<textarea
+						bind:value={description}
 						maxlength="2500"
 						placeholder="A more detailed description/synopsis of your story (markdown supported)"
 					></textarea>
-					
+
 					<div class="step-actions">
 						<button type="button" class="back-btn" on:click={prevStep}>
-							<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-								<path d="M19 12H5M12 19l-7-7 7-7"/>
+							<svg
+								width="20"
+								height="20"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+							>
+								<path d="M19 12H5M12 19l-7-7 7-7" />
 							</svg>
 							Previous
 						</button>
-						<button type="button" class="next-btn" on:click={nextStep} disabled={!short_description.trim()}>
+						<button
+							type="button"
+							class="next-btn"
+							on:click={nextStep}
+							disabled={!short_description.trim()}
+						>
 							Next Step
-							<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-								<path d="M5 12h14M12 5l7 7-7 7"/>
+							<svg
+								width="20"
+								height="20"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+							>
+								<path d="M5 12h14M12 5l7 7-7 7" />
 							</svg>
 						</button>
 					</div>
@@ -186,8 +225,11 @@
 			{:else if currentStep === 3}
 				<div class="step-content">
 					<h3>Add some tags</h3>
-					<p class="step-description">Tags help readers discover your story. Add up to 6 tags that best describe your story's themes, genres, or content.</p>
-					
+					<p class="step-description">
+						Tags help readers discover your story. Add up to 6 tags that best describe your story's
+						themes, genres, or content.
+					</p>
+
 					<div class="tags-input">
 						<input
 							type="text"
@@ -197,12 +239,18 @@
 							on:keydown={handleTagInputKeydown}
 							disabled={tags.length >= maxTags}
 						/>
-						<button type="button" on:click={addTag} disabled={tags.length >= maxTags || !tagInput.trim()}>Add</button>
+						<button
+							type="button"
+							on:click={addTag}
+							disabled={tags.length >= maxTags || !tagInput.trim()}>Add</button
+						>
 						<div class="tag-list">
 							{#each tags as tag, i}
 								<span class="tag">
 									{tag}
-									<button type="button" on:click={() => removeTag(i)} aria-label="Remove tag">&times;</button>
+									<button type="button" on:click={() => removeTag(i)} aria-label="Remove tag"
+										>&times;</button
+									>
 								</span>
 							{/each}
 						</div>
@@ -210,11 +258,18 @@
 							<p class="tag-warning">{tagWarning}</p>
 						{/if}
 					</div>
-					
+
 					<div class="step-actions">
 						<button type="button" class="back-btn" on:click={prevStep}>
-							<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-								<path d="M19 12H5M12 19l-7-7 7-7"/>
+							<svg
+								width="20"
+								height="20"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+							>
+								<path d="M19 12H5M12 19l-7-7 7-7" />
 							</svg>
 							Previous
 						</button>
@@ -265,7 +320,9 @@
 		border-radius: 16px;
 		box-shadow: 0 4px 24px var(--color-card-shadow);
 		padding: 2.5rem;
-		transition: opacity 0.3s, transform 0.3s;
+		transition:
+			opacity 0.3s,
+			transform 0.3s;
 	}
 
 	form.transitioning {

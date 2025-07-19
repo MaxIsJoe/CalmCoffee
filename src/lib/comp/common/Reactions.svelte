@@ -8,13 +8,11 @@
 		{ emoji: '🗑️', value: '3', label: 'Trash' }
 	];
 
-	// Props
 	export let userReaction: string | null = null;
 	export let reactionCounts: Record<string, number> = {};
 	export let loading = false;
 	export let errorMsg: string | null = null;
 
-	// Events
 	const dispatch = createEventDispatcher<{
 		react: { reaction: string };
 	}>();
@@ -85,4 +83,4 @@
 		margin-bottom: 0.5em;
 		font-size: 0.97em;
 	}
-</style> 
+</style>

@@ -32,14 +32,26 @@
 
 <svelte:head>
 	<title>Calm Coffee - A Cozy Writing Platform</title>
-	<meta name="description" content="Write, share, and discover stories one block at a time. A cozy platform for writers to express their creativity in manageable pieces." />
-	<meta name="keywords" content="writing platform, creative writing, stories, blogging, character creation" />
+	<meta
+		name="description"
+		content="Write, share, and discover stories one block at a time. A cozy platform for writers to express their creativity in manageable pieces."
+	/>
+	<meta
+		name="keywords"
+		content="writing platform, creative writing, stories, blogging, character creation"
+	/>
 	<meta property="og:title" content="Calm Coffee - A Cozy Writing Platform" />
-	<meta property="og:description" content="Write, share, and discover stories one block at a time. A cozy platform for writers to express their creativity in manageable pieces." />
+	<meta
+		property="og:description"
+		content="Write, share, and discover stories one block at a time. A cozy platform for writers to express their creativity in manageable pieces."
+	/>
 	<meta property="og:type" content="website" />
 	<meta name="twitter:card" content="summary_large_image" />
 	<meta name="twitter:title" content="Calm Coffee - A Cozy Writing Platform" />
-	<meta name="twitter:description" content="Write, share, and discover stories one block at a time. A cozy platform for writers to express their creativity in manageable pieces." />
+	<meta
+		name="twitter:description"
+		content="Write, share, and discover stories one block at a time. A cozy platform for writers to express their creativity in manageable pieces."
+	/>
 </svelte:head>
 
 <div class="hero-section">
@@ -53,7 +65,7 @@
 			<div class="floating-element" style="--delay: 5s">🌟</div>
 		</div>
 	</div>
-	
+
 	<div class="hero-content">
 		<div class="brand-header">
 			<h1 class="main-title">
@@ -63,10 +75,10 @@
 		</div>
 
 		<p class="hero-description">
-			Discover a cozy writing platform where stories come to life one block at a time. 
-			No pressure to write a whole book. Just share your creativity in small, manageable pieces. 
-			Whether you're a seasoned author or just starting your journey, Calm Coffee is your perfect 
-			companion for brewing beautiful stories.
+			Discover a cozy writing platform where stories come to life one block at a time. No pressure
+			to write a whole book. Just share your creativity in small, manageable pieces. Whether you're
+			a seasoned author or just starting your journey, Calm Coffee is your perfect companion for
+			brewing beautiful stories.
 		</p>
 
 		<div class="feature-grid">
@@ -168,10 +180,12 @@
 		left: 0;
 		right: 0;
 		bottom: 0;
-		background: linear-gradient(135deg, 
-			var(--color-bg) 0%, 
-			var(--color-bg-alt) 50%, 
-			var(--color-card-bg) 100%);
+		background: linear-gradient(
+			135deg,
+			var(--color-bg) 0%,
+			var(--color-bg-alt) 50%,
+			var(--color-card-bg) 100%
+		);
 		z-index: -2;
 	}
 
@@ -192,16 +206,39 @@
 		animation-delay: var(--delay);
 	}
 
-	.floating-element:nth-child(1) { top: 10%; left: 10%; }
-	.floating-element:nth-child(2) { top: 20%; right: 15%; }
-	.floating-element:nth-child(3) { top: 60%; left: 5%; }
-	.floating-element:nth-child(4) { top: 70%; right: 10%; }
-	.floating-element:nth-child(5) { top: 40%; left: 20%; }
-	.floating-element:nth-child(6) { top: 30%; right: 25%; }
+	.floating-element:nth-child(1) {
+		top: 10%;
+		left: 10%;
+	}
+	.floating-element:nth-child(2) {
+		top: 20%;
+		right: 15%;
+	}
+	.floating-element:nth-child(3) {
+		top: 60%;
+		left: 5%;
+	}
+	.floating-element:nth-child(4) {
+		top: 70%;
+		right: 10%;
+	}
+	.floating-element:nth-child(5) {
+		top: 40%;
+		left: 20%;
+	}
+	.floating-element:nth-child(6) {
+		top: 30%;
+		right: 25%;
+	}
 
 	@keyframes float {
-		0%, 100% { transform: translateY(0px) rotate(0deg); }
-		50% { transform: translateY(-20px) rotate(10deg); }
+		0%,
+		100% {
+			transform: translateY(0px) rotate(0deg);
+		}
+		50% {
+			transform: translateY(-20px) rotate(10deg);
+		}
 	}
 
 	.hero-content {
@@ -222,11 +259,6 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.5rem;
-	}
-
-	.title-line {
-		color: var(--color-text);
-		font-weight: 300;
 	}
 
 	.title-highlight {
@@ -326,7 +358,8 @@
 		margin-top: 3rem;
 	}
 
-	.cta-primary, .cta-secondary {
+	.cta-primary,
+	.cta-secondary {
 		display: inline-flex;
 		align-items: center;
 		gap: 0.75rem;
@@ -377,8 +410,13 @@
 	}
 
 	@keyframes sparkle {
-		0%, 100% { transform: scale(1) rotate(0deg); }
-		50% { transform: scale(1.2) rotate(180deg); }
+		0%,
+		100% {
+			transform: scale(1) rotate(0deg);
+		}
+		50% {
+			transform: scale(1.2) rotate(180deg);
+		}
 	}
 
 	/* Community Stats */
@@ -446,12 +484,22 @@
 		animation: loading 1.4s ease-in-out infinite both;
 	}
 
-	.loading-dots span:nth-child(1) { animation-delay: -0.32s; }
-	.loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+	.loading-dots span:nth-child(1) {
+		animation-delay: -0.32s;
+	}
+	.loading-dots span:nth-child(2) {
+		animation-delay: -0.16s;
+	}
 
 	@keyframes loading {
-		0%, 80%, 100% { transform: scale(0); }
-		40% { transform: scale(1); }
+		0%,
+		80%,
+		100% {
+			transform: scale(0);
+		}
+		40% {
+			transform: scale(1);
+		}
 	}
 
 	/* Responsive Design */
@@ -479,7 +527,8 @@
 			align-items: center;
 		}
 
-		.cta-primary, .cta-secondary {
+		.cta-primary,
+		.cta-secondary {
 			width: 100%;
 			max-width: 300px;
 			justify-content: center;

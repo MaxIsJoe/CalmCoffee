@@ -50,7 +50,6 @@
 
 	const DRAFT_KEY = 'calmcaf_character_create_draft';
 
-	// Load draft from localStorage if present (browser only)
 	onMount(() => {
 		if (typeof localStorage === 'undefined') return;
 		const draft = localStorage.getItem(DRAFT_KEY);
@@ -69,7 +68,6 @@
 		}
 	});
 
-	// Save draft to localStorage on change (browser only)
 	$: saveDraft();
 	function saveDraft() {
 		if (typeof localStorage === 'undefined') return;

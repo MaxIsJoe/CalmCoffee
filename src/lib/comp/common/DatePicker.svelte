@@ -28,7 +28,6 @@
 	let avatarPositions: { [id: number]: { left: number; top: number } } = {};
 	let dayEls: { [day: number]: HTMLDivElement } = {};
 
-	// Load format preference
 	onMount(() => {
 		const savedFormat = localStorage.getItem('preferredDateFormat');
 		if (savedFormat && formats.includes(savedFormat)) {
@@ -43,7 +42,7 @@
 
 	function selectDate(year: number, month: number, day: number) {
 		const date = new Date(year, month, day);
-		value = date.toISOString().split('T')[0]; // bindable ISO format
+		value = date.toISOString().split('T')[0];
 	}
 
 	function formatDate(dateStr: string): string {
@@ -183,7 +182,6 @@
 	}
 
 	$: if (inputRef && document.activeElement === inputRef) {
-		// Blur input when format changes to force update
 		inputRef.blur();
 	}
 
@@ -192,7 +190,6 @@
 		manualInput = formatDate(value);
 	}
 
-	// Fetch characters when calendar opens
 	$: if (showCalendar && !previewMode) {
 		fetchMyCharacters().then((chars) => {
 			myCharacters = chars.filter((c) => c.date_of_birth);
@@ -208,13 +205,11 @@
 		});
 	}
 
-	// Re-filter when month, characters, or value changes
 	$: if (showCalendar && !previewMode) filterMonthCharacters();
 
 	// Avatar hover logic
 	function handleAvatarRowMouseEnter() {
 		avatarsDistributed = true;
-		// Calculate positions for each avatar
 		avatarPositions = {};
 		for (const char of monthCharacters) {
 			const day = getBirthdayDay(char);
@@ -232,19 +227,16 @@
 		avatarsDistributed = false;
 	}
 
-	// Helper: get day of month from birthday
 	function getBirthdayDay(character: Character) {
 		if (!character.date_of_birth) return null;
 		return Number(character.date_of_birth.split('-')[2]);
 	}
 
-	// Helper for day cell refs
 	function setDayRef(day: number, el: HTMLDivElement | null) {
 		if (day && el) dayEls[day] = el;
 	}
 
 	$: {
-		// Sync dayEls with dayRefs
 		dayEls = { ...dayEls };
 	}
 </script>

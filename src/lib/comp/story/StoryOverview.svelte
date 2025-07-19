@@ -17,16 +17,13 @@
 		lastReadChapterId = getLastReadChapter(story.id);
 	}
 
-	// Calculate total word count
 	$: wordCount = blocks.reduce((count, block) => {
 		const content = block.content || '';
 		return count + content.split(/\s+/).length;
 	}, 0);
 
-	// Calculate reading time (assuming 200 words per minute)
 	$: readingTime = Math.ceil(wordCount / 200);
 
-	// Get first chapter ID
 	$: firstChapterId = chapters[0]?.id;
 
 	function handleChapterClick(chapterId: string) {
@@ -38,7 +35,9 @@
 	<div class="story-header">
 		<h1>{story.title}</h1>
 		{#if author}
-			<p class="story-author">By <a href="/profile/{author.username}" class="author-link">{author.username}</a></p>
+			<p class="story-author">
+				By <a href="/profile/{author.username}" class="author-link">{author.username}</a>
+			</p>
 		{/if}
 	</div>
 
@@ -93,12 +92,16 @@
 		<StoryReactions storyId={story.id} />
 		<div class="reading-buttons">
 			{#if lastReadChapterId}
-				<button 
-					class="continue-reading-btn" 
-					on:click={() => onStartReading(lastReadChapterId)}
-				>
-					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-						<path d="M5 12h14M12 5l7 7-7 7"/>
+				<button class="continue-reading-btn" on:click={() => onStartReading(lastReadChapterId)}>
+					<svg
+						width="20"
+						height="20"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+					>
+						<path d="M5 12h14M12 5l7 7-7 7" />
 					</svg>
 					Continue Reading
 				</button>
@@ -120,8 +123,16 @@
 							<p class="chapter-desc">{chapter.description}</p>
 						{/if}
 					</div>
-					<svg class="chapter-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-						<path d="M9 18l6-6-6-6"/>
+					<svg
+						class="chapter-arrow"
+						width="20"
+						height="20"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+					>
+						<path d="M9 18l6-6-6-6" />
 					</svg>
 				</li>
 			{/each}
@@ -392,4 +403,4 @@
 	.story-reactions {
 		margin-top: 0.8rem;
 	}
-</style> 
+</style>

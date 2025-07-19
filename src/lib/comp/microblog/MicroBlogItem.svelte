@@ -9,7 +9,7 @@
 	import { browser } from '$app/environment';
 
 	export let mb: BlogType;
-	export let profile: { username: string | null; avatar_url: string | null; } | null;
+	export let profile: { username: string | null; avatar_url: string | null } | null;
 
 	let shareUrl = '';
 	let showShareTooltip = false;
@@ -137,22 +137,21 @@
 				return;
 			}
 
-			// Send notification to the post author if it's not the current user
 			const { data: reactorProfile } = await supabase
-					.from('profiles')
-					.select('username')
-					.eq('account_id', userId)
-					.single();
+				.from('profiles')
+				.select('username')
+				.eq('account_id', userId)
+				.single();
 
-				if (reactorProfile?.username) {
-					await sendLikeStoryNotification({
-						userId: mb.writer,
-						reactorId: userId,
-						reactorUsername: reactorProfile.username,
-						storyTitle: mb.content.slice(0, 50) + (mb.content.length > 50 ? '...' : ''),
-						reaction: event.detail.reaction
-					});
-				}
+			if (reactorProfile?.username) {
+				await sendLikeStoryNotification({
+					userId: mb.writer,
+					reactorId: userId,
+					reactorUsername: reactorProfile.username,
+					storyTitle: mb.content.slice(0, 50) + (mb.content.length > 50 ? '...' : ''),
+					reaction: event.detail.reaction
+				});
+			}
 		}
 		userReaction = userReaction === event.detail.reaction ? null : event.detail.reaction;
 		await fetchReactions();
@@ -160,7 +159,7 @@
 	}
 
 	onMount(fetchReactions);
-	$: mb?.post_id, fetchReactions();
+	$: (mb?.post_id, fetchReactions());
 </script>
 
 {#if mb && mb.content !== undefined && mb.content !== null}
@@ -186,20 +185,24 @@
 		{/if}
 
 		{#if user}
-			<Reactions
-				{userReaction}
-				{reactionCounts}
-				{loading}
-				{errorMsg}
-				on:react={handleReaction}
-			/>
+			<Reactions {userReaction} {reactionCounts} {loading} {errorMsg} on:react={handleReaction} />
 		{/if}
 
 		<small class="microblog-date">
 			{new Date(mb.created_at).toLocaleString()}
 			<span class="microblog-age-rating">| {mb.age_rating}</span>
 			<button class="share-btn" on:click={handleShare} title="Share this post">
-				<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width="16"
+					height="16"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				>
 					<path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
 					<polyline points="16 6 12 2 8 6"></polyline>
 					<line x1="12" y1="2" x2="12" y2="15"></line>

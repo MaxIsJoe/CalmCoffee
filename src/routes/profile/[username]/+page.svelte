@@ -9,11 +9,17 @@
 	import ProfileBlog from './ProfileBlog.svelte';
 	import ProfileCharacters from './ProfileCharacters.svelte';
 	import ProfileLikes from './ProfileLikes.svelte';
-	import { fetchProfileByUsername, fetchProfileById, fetchStoriesByUserId, fetchRecentCommentsByAccountId, updateProfileByUsername, updateProfileInterests } from '$lib/db/profile';
+	import {
+		fetchProfileByUsername,
+		fetchProfileById,
+		fetchStoriesByUserId,
+		fetchRecentCommentsByAccountId,
+		updateProfileByUsername,
+		updateProfileInterests
+	} from '$lib/db/profile';
 	import type { Profile, Story, ProfileComment } from '$lib/db/profile';
 	import { user } from '$lib/stores/user';
 	import type { UserStoreType } from '$lib/stores/user';
-	import type { ProfileType } from '$lib/types/profile';
 
 	let userComments: ProfileComment[] = [];
 	let loadingComments: boolean = false;
@@ -136,7 +142,7 @@
 		}
 		return years;
 	}
-	// Add a helper function for user id equality
+
 	function isCurrentUserProfile(user: UserStoreType | null, profile: Profile | null): boolean {
 		return !!user?.usr?.id && !!profile?.account_id && user.usr.id === profile.account_id;
 	}
@@ -260,7 +266,10 @@
 											if (!profile?.account_id || !profile?.interests) return;
 											const updated = profile.interests.filter((_, idx) => idx !== i);
 											try {
-												profile.interests = await updateProfileInterests(profile.account_id, updated);
+												profile.interests = await updateProfileInterests(
+													profile.account_id,
+													updated
+												);
 											} catch (e) {
 												error = (e as Error).message;
 											}
@@ -512,7 +521,9 @@
 		padding: 0.7em 1.5em;
 		font-size: 1.05rem;
 		cursor: pointer;
-		transition: background 0.16s, color 0.16s;
+		transition:
+			background 0.16s,
+			color 0.16s;
 		font-weight: 500;
 		white-space: nowrap;
 		flex-shrink: 0;

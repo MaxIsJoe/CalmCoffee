@@ -11,12 +11,10 @@ type UsernameCache = Record<string, UsernameCacheEntry>;
 function createUsernameCache() {
 	const { subscribe, set, update } = writable<UsernameCache>({});
 
-	// Helper to check if entry is expired
 	function isExpired(entry: UsernameCacheEntry) {
 		return Date.now() > entry.expires;
 	}
 
-	// Fetch username from Supabase and update cache
 	async function fetchUsername(id: string): Promise<string | null> {
 		const { data, error } = await supabase
 			.from('profiles')
@@ -32,7 +30,6 @@ function createUsernameCache() {
 		return data.username;
 	}
 
-	// Get username, using cache if valid, otherwise fetch
 	async function getUsername(id: string): Promise<string | null> {
 		let cached: UsernameCacheEntry | undefined;
 		let username: string | null = null;
@@ -47,7 +44,6 @@ function createUsernameCache() {
 		return username;
 	}
 
-	// Optionally: expose a method to clear expired entries
 	function clearExpired() {
 		update(cache => {
 			const now = Date.now();
@@ -70,11 +66,11 @@ function createUsernameCache() {
 }
 
 function printAllCacheEntries(cache: UsernameCache): string {
-    let output = '';
-    for (const [id, entry] of Object.entries(cache)) {
-        output += `ID: ${id}, Username: ${entry.username}, Expires: ${new Date(entry.expires).toLocaleString()}\n`;
-    }
-    return output;
+	let output = '';
+	for (const [id, entry] of Object.entries(cache)) {
+		output += `ID: ${id}, Username: ${entry.username}, Expires: ${new Date(entry.expires).toLocaleString()}\n`;
+	}
+	return output;
 }
 
 /**

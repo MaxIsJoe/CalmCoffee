@@ -14,7 +14,7 @@
 
 	let textareaEl: HTMLTextAreaElement | null = null;
 	let previewHtml = '';
-	let previewWidth = 400; // Default preview width
+	let previewWidth = 400;
 	let isResizing = false;
 	let startX = 0;
 	let startWidth = 0;
@@ -32,7 +32,7 @@
 		if (!isResizing) return;
 		const dx = e.clientX - startX;
 		let newWidth = startWidth - dx; // Subtract because we're dragging left
-		newWidth = Math.max(300, Math.min(800, newWidth)); // Min 300px, max 800px
+		newWidth = Math.max(300, Math.min(800, newWidth));
 		previewWidth = newWidth;
 	}
 

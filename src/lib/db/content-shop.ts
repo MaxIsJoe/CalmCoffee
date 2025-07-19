@@ -16,7 +16,6 @@ export type StoreContent = {
     created_by: string
 }
 
-// Fetch store content with pagination
 export async function fetchStoreContent({ limit = 10, offset = 0 }: { limit?: number; offset?: number }) {
     const { data, error, count } = await supabase
         .from(STORE)
@@ -26,7 +25,6 @@ export async function fetchStoreContent({ limit = 10, offset = 0 }: { limit?: nu
     return { data, count };
 }
 
-// Create a new store content entry
 export async function createStoreContent(content: Omit<StoreContent, 'id'>) {
     if (content.content === null || content.content === undefined || content.content.length <= 5) {
         throw new Error("can't upload empty data");
@@ -40,7 +38,7 @@ export async function createStoreContent(content: Omit<StoreContent, 'id'>) {
     return data;
 }
 
-// Update an existing store content entry by id
+
 export async function updateStoreContent(id: number, updates: Partial<Omit<StoreContent, 'id'>>) {
     const { data, error } = await supabase
         .from(STORE)
@@ -52,7 +50,7 @@ export async function updateStoreContent(id: number, updates: Partial<Omit<Store
     return data;
 }
 
-// Delete a store content entry by id
+
 export async function deleteStoreContent(id: number) {
     const { error } = await supabase
         .from(STORE)

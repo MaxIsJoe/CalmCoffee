@@ -8,7 +8,6 @@
 	let error = '';
 	let loading = false;
 
-	// Get email from query param
 	let email = '';
 	$: email = $page.url.searchParams.get('email') ?? '';
 
@@ -22,7 +21,6 @@
 			return;
 		}
 
-		// Find the profile row by email
 		const { data: profile, error: fetchError } = await supabase
 			.from('profiles')
 			.select('id')
@@ -35,7 +33,6 @@
 			return;
 		}
 
-		// Update the profile by id
 		const { error: profileError } = await supabase
 			.from('profiles')
 			.update({

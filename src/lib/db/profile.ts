@@ -102,7 +102,6 @@ export async function fetchRecentCommentsByAccountId(accountId: string, limit = 
     .limit(limit);
   if (error) throw new Error(error.message);
   return (data || []).map((c: RawCommentRow): ProfileComment => {
-    // blocks may be an array or object
     const blocks = Array.isArray(c.blocks) ? c.blocks[0] : c.blocks;
     const chapters = blocks?.chapters;
     const stories = Array.isArray(chapters?.stories) ? chapters.stories[0] : chapters?.stories;

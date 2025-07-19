@@ -98,7 +98,6 @@
 	}
 
 	onMount(() => {
-		// Initialize selectedTheme based on what's already set
 		const savedTheme = localStorage.getItem('theme');
 		if (savedTheme) {
 			selectedTheme = savedTheme;

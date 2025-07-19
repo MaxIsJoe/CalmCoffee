@@ -13,7 +13,7 @@
 	let errorMsg: string | null = null;
 
 	const dispatch = createEventDispatcher<{
-		react: { reaction: string }
+		react: { reaction: string };
 	}>();
 
 	async function fetchReactions() {
@@ -26,11 +26,10 @@
 
 		if (fetchError) {
 			errorMsg = fetchError.message;
-            console.error(fetchError.message);
+			console.error(fetchError.message);
 			return;
 		}
 
-		// Count reactions
 		const counts: Record<string, number> = {};
 		reactions?.forEach((r) => {
 			if (r.reaction) {
@@ -39,7 +38,6 @@
 		});
 		reactionCounts = counts;
 
-		// Get user's reaction
 		const currentUser = $user;
 		if (currentUser) {
 			const foundReaction = reactions?.find((r) => r.user_id === currentUser.usr?.id);
@@ -74,7 +72,7 @@
 				loading = false;
 				return;
 			}
-			// Dispatch the reaction event
+
 			dispatch('react', { reaction: event.detail.reaction });
 		}
 		userReaction = userReaction === event.detail.reaction ? null : event.detail.reaction;
@@ -90,37 +88,5 @@
 </script>
 
 {#if $user}
-	<Reactions
-		{userReaction}
-		{reactionCounts}
-		{loading}
-		{errorMsg}
-		on:react={handleReaction}
-	/>
+	<Reactions {userReaction} {reactionCounts} {loading} {errorMsg} on:react={handleReaction} />
 {/if}
-
-<style>
-	.reactions-panel {
-		background: var(--color-bg-alt);
-		border: 1px solid var(--color-border);
-		border-radius: 8px;
-		box-shadow: 0 1px 4px var(--color-card-shadow);
-	}
-	.reaction-btn {
-		background: var(--color-bg-alt);
-		border: 1px solid var(--color-border);
-		color: var(--color-link);
-	}
-	.reaction-btn.active {
-		background: var(--color-secondary);
-		color: var(--color-accent);
-		border-color: var(--color-accent);
-	}
-	.reaction-btn:hover {
-		background: var(--color-link-hover);
-		color: var(--color-primary-alt);
-	}
-	.reaction-count {
-		color: var(--color-accent);
-	}
-</style> 

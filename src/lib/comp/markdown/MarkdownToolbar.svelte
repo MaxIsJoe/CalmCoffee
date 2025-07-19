@@ -15,45 +15,86 @@
 	<!-- Text Formatting -->
 	<div class="toolbar-group">
 		<button type="button" title="Bold" on:click={() => insert('**', '**', 'bold')}><b>B</b></button>
-		<button type="button" title="Italic" on:click={() => insert('*', '*', 'italic')}><i>I</i></button>
-		<button type="button" title="Underline" on:click={() => insert('<u>', '</u>', 'underline')}><u>U</u></button>
+		<button type="button" title="Italic" on:click={() => insert('*', '*', 'italic')}
+			><i>I</i></button
+		>
+		<button type="button" title="Underline" on:click={() => insert('<u>', '</u>', 'underline')}
+			><u>U</u></button
+		>
 		<button type="button" title="Code" on:click={() => insert('`', '`', 'code')}>` `</button>
 	</div>
 
 	<!-- Headings -->
 	<div class="toolbar-group">
-		<button type="button" title="Heading 1" on:click={() => insert('# ', '', 'Heading 1')}>H1</button>
-		<button type="button" title="Heading 2" on:click={() => insert('## ', '', 'Heading 2')}>H2</button>
-		<button type="button" title="Heading 3" on:click={() => insert('### ', '', 'Heading 3')}>H3</button>
+		<button type="button" title="Heading 1" on:click={() => insert('# ', '', 'Heading 1')}
+			>H1</button
+		>
+		<button type="button" title="Heading 2" on:click={() => insert('## ', '', 'Heading 2')}
+			>H2</button
+		>
+		<button type="button" title="Heading 3" on:click={() => insert('### ', '', 'Heading 3')}
+			>H3</button
+		>
 	</div>
 
 	<!-- Lists -->
 	<div class="toolbar-group">
-		<button type="button" title="Unordered List" on:click={() => insert('- ', '', 'list item')}>•</button>
-		<button type="button" title="Ordered List" on:click={() => insert('1. ', '', 'ordered item')}>1.</button>
+		<button type="button" title="Unordered List" on:click={() => insert('- ', '', 'list item')}
+			>•</button
+		>
+		<button type="button" title="Ordered List" on:click={() => insert('1. ', '', 'ordered item')}
+			>1.</button
+		>
 	</div>
 
 	<!-- Alignment -->
 	<div class="toolbar-group">
-		<button type="button" title="Align Left" on:click={() => insert('<align left>\n', '\n</align>', 'left-aligned text')}>⇤</button>
-		<button type="button" title="Align Center" on:click={() => insert('<align center>\n', '\n</align>', 'centered text')}>⇔</button>
-		<button type="button" title="Align Right" on:click={() => insert('<align right>\n', '\n</align>', 'right-aligned text')}>⇥</button>
-		<button type="button" title="Justify" on:click={() => insert('<align justify>\n', '\n</align>', 'justified text')}>⇿</button>
+		<button
+			type="button"
+			title="Align Left"
+			on:click={() => insert('<align left>\n', '\n</align>', 'left-aligned text')}>⇤</button
+		>
+		<button
+			type="button"
+			title="Align Center"
+			on:click={() => insert('<align center>\n', '\n</align>', 'centered text')}>⇔</button
+		>
+		<button
+			type="button"
+			title="Align Right"
+			on:click={() => insert('<align right>\n', '\n</align>', 'right-aligned text')}>⇥</button
+		>
+		<button
+			type="button"
+			title="Justify"
+			on:click={() => insert('<align justify>\n', '\n</align>', 'justified text')}>⇿</button
+		>
 	</div>
 
 	<!-- Media & Links -->
 	<div class="toolbar-group">
-		<button type="button" title="Link" on:click={() => insert('[', '](https://)', 'link text')}>🔗</button>
-		<ImageToolbar useMarkdown={useMarkdown} on:insert={(e: CustomEvent<{ before: string; after: string; placeholder: string }>) => 
-			insert(e.detail.before, e.detail.after, e.detail.placeholder)} 
+		<button type="button" title="Link" on:click={() => insert('[', '](https://)', 'link text')}
+			>🔗</button
+		>
+		<ImageToolbar
+			{useMarkdown}
+			on:insert={(e: CustomEvent<{ before: string; after: string; placeholder: string }>) =>
+				insert(e.detail.before, e.detail.after, e.detail.placeholder)}
 		/>
 	</div>
 
 	<!-- Blocks -->
 	<div class="toolbar-group">
-		<button type="button" title="Blockquote" on:click={() => insert('> ', '', 'quote')}>&gt;</button>
-		<button type="button" title="Code Block" on:click={() => insert('```\n', '\n```', 'code block')}>```</button>
-		<button type="button" title="Poetry Block" on:click={() => insert('<poetry>\n', '\n</poetry>', 'Your poem here')}>✒️</button>
+		<button type="button" title="Blockquote" on:click={() => insert('> ', '', 'quote')}>&gt;</button
+		>
+		<button type="button" title="Code Block" on:click={() => insert('```\n', '\n```', 'code block')}
+			>```</button
+		>
+		<button
+			type="button"
+			title="Poetry Block"
+			on:click={() => insert('<poetry>\n', '\n</poetry>', 'Your poem here')}>✒️</button
+		>
 	</div>
 
 	<!-- Layout Sections -->
@@ -61,11 +102,13 @@
 		<button
 			type="button"
 			title="Content Section (Float Left by Default)"
-			on:click={() => insert(
-				'<columns float="left" width="40%">\n<!-- Floated content (e.g., image, short text, list) -->\n',
-				'---\n\n<!-- Main content (e.g., long paragraph) -->\n</columns>',
-				''
-			)}>
+			on:click={() =>
+				insert(
+					'<columns float="left" width="40%">\n<!-- Floated content (e.g., image, short text, list) -->\n',
+					'---\n\n<!-- Main content (e.g., long paragraph) -->\n</columns>',
+					''
+				)}
+		>
 			<span style="font-size: 0.9em; line-height: 1;">◧</span>
 		</button>
 	</div>
@@ -176,20 +219,6 @@ Example usage in a parent Svelte component:
 		transform: translateY(0);
 	}
 
-	/* Specific button styles */
-	.markdown-toolbar button code {
-		font-size: 0.8em;
-		background: var(--color-toolbar-btn-code-bg);
-		padding: 0.1em 0.2em;
-		border-radius: 3px;
-	}
-
-	/* Specific symbol adjustments */
-	.markdown-toolbar button.justify-btn {
-		font-size: 1.1em;
-	}
-
-	/* New icon for section */
 	.markdown-toolbar button span {
 		display: inline-block;
 		vertical-align: middle;

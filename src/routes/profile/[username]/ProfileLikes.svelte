@@ -10,12 +10,10 @@
 
 	export let profile: ProfileType;
 
-	// Pagination
 	const ITEMS_PER_PAGE = 10;
 	let currentPage = 1;
 	let totalItems = 0;
 
-	// Data
 	let watchedStories: Story[] = [];
 	let likedStories: Story[] = [];
 	let watchedCharacters: any[] = [];
@@ -25,8 +23,6 @@
 	let loading = true;
 	let error: string | null = null;
 	let showBlogs = false;
-
-
 
 	// Authors cache
 	let authors: Record<string, string> = {};
@@ -40,7 +36,8 @@
 			// Fetch stories reactions
 			const { data: storyReactions, error: storyError } = await supabase
 				.from('stories_reactions')
-				.select(`
+				.select(
+					`
 					reaction,
 					stories (
 						id,
@@ -52,7 +49,8 @@
 						age_rating,
 						tags
 					)
-				`)
+				`
+				)
 				.eq('user_id', profile.account_id)
 				.in('reaction', ['0', '1']);
 
@@ -74,7 +72,8 @@
 			// Fetch character reactions
 			const { data: characterReactions, error: characterError } = await supabase
 				.from('characters_reactions')
-				.select(`
+				.select(
+					`
 					reaction,
 					characters (
 						id,
@@ -85,13 +84,13 @@
 						creator,
 						tags
 					)
-				`)
+				`
+				)
 				.eq('user_id', profile.account_id)
 				.in('reaction', ['0', '1']);
 
 			if (characterError) throw characterError;
 
-			// Separate characters by reaction type
 			watchedCharacters = [];
 			likedCharacters = [];
 			characterReactions?.forEach((r) => {
@@ -104,11 +103,11 @@
 				}
 			});
 
-			// Fetch blog reactions only if showBlogs is true
 			if (showBlogs) {
 				const { data: blogReactions, error: blogError } = await supabase
 					.from('microblogs_reactions')
-					.select(`
+					.select(
+						`
 						reaction,
 						microblogs (
 							post_id,
@@ -117,13 +116,13 @@
 							writer,
 							tags
 						)
-					`)
+					`
+					)
 					.eq('user_id', profile.account_id)
 					.in('reaction', ['0', '1']);
 
 				if (blogError) throw blogError;
 
-				// Separate blogs by reaction type
 				watchedBlogs = [];
 				likedBlogs = [];
 				blogReactions?.forEach((r) => {
@@ -141,14 +140,15 @@
 			}
 
 			// Fetch author usernames
-			const userIds = new Set([
-				...watchedStories.map((s) => s.user_id),
-				...likedStories.map((s) => s.user_id),
-				...(showBlogs ? [
-					...watchedBlogs.map((b) => b.writer),
-					...likedBlogs.map((b) => b.writer)
-				] : [])
-			].filter(Boolean));
+			const userIds = new Set(
+				[
+					...watchedStories.map((s) => s.user_id),
+					...likedStories.map((s) => s.user_id),
+					...(showBlogs
+						? [...watchedBlogs.map((b) => b.writer), ...likedBlogs.map((b) => b.writer)]
+						: [])
+				].filter(Boolean)
+			);
 
 			authors = {};
 			await Promise.all(
@@ -160,9 +160,12 @@
 				})
 			);
 
-			totalItems = watchedStories.length + likedStories.length + 
-				watchedCharacters.length + likedCharacters.length +
-				(showBlogs ? (watchedBlogs.length + likedBlogs.length) : 0);
+			totalItems =
+				watchedStories.length +
+				likedStories.length +
+				watchedCharacters.length +
+				likedCharacters.length +
+				(showBlogs ? watchedBlogs.length + likedBlogs.length : 0);
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to fetch reactions';
 		} finally {
@@ -199,15 +202,13 @@
 		{#if $user?.profile?.username === profile.username}
 			<div class="controls">
 				<label class="toggle">
-					<input type="checkbox" bind:checked={showBlogs} on:change|preventDefault={toggleBlogs}>
+					<input type="checkbox" bind:checked={showBlogs} on:change|preventDefault={toggleBlogs} />
 					<span class="toggle-label">Show Blog Posts</span>
 				</label>
 			</div>
 		{/if}
 
-		{#if watchedStories.length === 0 && watchedCharacters.length === 0 && 
-			likedStories.length === 0 && likedCharacters.length === 0 && 
-			(!showBlogs || (watchedBlogs.length === 0 && likedBlogs.length === 0))}
+		{#if watchedStories.length === 0 && watchedCharacters.length === 0 && likedStories.length === 0 && likedCharacters.length === 0 && (!showBlogs || (watchedBlogs.length === 0 && likedBlogs.length === 0))}
 			<div class="empty-state">
 				<p>It's empty here...</p>
 				{#if $user?.profile?.username === profile.username}
@@ -221,7 +222,7 @@
 			{#if watchedStories.length > 0 || watchedCharacters.length > 0 || (showBlogs && watchedBlogs.length > 0)}
 				<section class="reaction-section">
 					<h2>👀 Watching</h2>
-					
+
 					<!-- Watched Stories -->
 					{#if watchedStories.length > 0}
 						<div class="section-header">
@@ -229,7 +230,13 @@
 						</div>
 						<div class="stories-grid">
 							{#each getPaginatedItems(watchedStories) as story}
-								<a href={'/read/' + (story.user_id && authors[story.user_id] ? authors[story.user_id] + '/' + slugify(story.title) : story.id)} class="story-card">
+								<a
+									href={'/read/' +
+										(story.user_id && authors[story.user_id]
+											? authors[story.user_id] + '/' + slugify(story.title)
+											: story.id)}
+									class="story-card"
+								>
 									<h3>{story.title}</h3>
 									<p class="author">by {authors[story.user_id || ''] || 'Unknown'}</p>
 									{#if story.description}
@@ -281,7 +288,7 @@
 			{#if likedStories.length > 0 || likedCharacters.length > 0 || (showBlogs && likedBlogs.length > 0)}
 				<section class="reaction-section">
 					<h2>💖 Liked</h2>
-					
+
 					<!-- Liked Stories -->
 					{#if likedStories.length > 0}
 						<div class="section-header">
@@ -289,7 +296,13 @@
 						</div>
 						<div class="stories-grid">
 							{#each getPaginatedItems(likedStories) as story}
-								<a href={'/read/' + (story.user_id && authors[story.user_id] ? authors[story.user_id] + '/' + slugify(story.title) : story.id)} class="story-card">
+								<a
+									href={'/read/' +
+										(story.user_id && authors[story.user_id]
+											? authors[story.user_id] + '/' + slugify(story.title)
+											: story.id)}
+									class="story-card"
+								>
 									<h3>{story.title}</h3>
 									<p class="author">by {authors[story.user_id || ''] || 'Unknown'}</p>
 									{#if story.description}
@@ -341,10 +354,7 @@
 			{#if totalItems > ITEMS_PER_PAGE}
 				<div class="pagination">
 					{#each Array(Math.ceil(totalItems / ITEMS_PER_PAGE)) as _, i}
-						<button
-							class:active={currentPage === i + 1}
-							on:click={() => goToPage(i + 1)}
-						>
+						<button class:active={currentPage === i + 1} on:click={() => goToPage(i + 1)}>
 							{i + 1}
 						</button>
 					{/each}
@@ -397,7 +407,9 @@
 		box-shadow: 0 2px 4px var(--color-card-shadow);
 		text-decoration: none;
 		color: inherit;
-		transition: transform 0.2s, box-shadow 0.2s;
+		transition:
+			transform 0.2s,
+			box-shadow 0.2s;
 	}
 
 	.story-card:hover,
@@ -492,7 +504,9 @@
 		box-shadow: 0 2px 4px var(--color-card-shadow);
 		text-decoration: none;
 		color: inherit;
-		transition: transform 0.2s, box-shadow 0.2s;
+		transition:
+			transform 0.2s,
+			box-shadow 0.2s;
 	}
 
 	.blog-card:hover {
@@ -539,7 +553,7 @@
 		cursor: pointer;
 	}
 
-	.toggle input[type="checkbox"] {
+	.toggle input[type='checkbox'] {
 		width: 1.2rem;
 		height: 1.2rem;
 		cursor: pointer;

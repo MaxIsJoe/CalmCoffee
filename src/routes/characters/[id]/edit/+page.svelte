@@ -4,10 +4,7 @@
 	import { goto } from '$app/navigation';
 	import { user } from '$lib/stores/user';
 	import { get } from 'svelte/store';
-	import { coffeeMarkdown, defaultStyles } from '$lib/md/coffeeMarkdown';
-	import MarkdownToolbar from '$lib/comp/markdown/MarkdownToolbar.svelte';
 	import RelationshipGraphEditor from '$lib/comp/characters/RelationshipGraphEditor.svelte';
-	import { browser } from '$app/environment';
 	import CharacterProfile from '$lib/comp/characters/CharacterProfile.svelte';
 	import ZenMarkdownEditor from '$lib/comp/markdown/ZenMarkdownEditor.svelte';
 	import ArtUploadButton from '$lib/comp/characters/ArtUploadButton.svelte';
@@ -138,7 +135,6 @@
 				upsert: true
 			});
 			if (error) throw error;
-			// Get public URL
 			const { data: publicUrlData } = supabase.storage.from('avatars').getPublicUrl(fileName);
 			if (publicUrlData?.publicUrl) {
 				character_avatar = publicUrlData.publicUrl;

@@ -6,8 +6,9 @@
 		insert: { before: string; after: string; placeholder: string };
 	}>();
 
-	function handleInsert(event: CustomEvent<{ before: string; after: string; placeholder: string }>) {
-		// Forward the event with the image URL as the placeholder
+	function handleInsert(
+		event: CustomEvent<{ before: string; after: string; placeholder: string }>
+	) {
 		dispatch('insert', {
 			before: '',
 			after: '',
@@ -19,6 +20,9 @@
 <ImageToolbar on:insert={handleInsert} />
 
 <style>
+	/*
+		BAD. BAD. BAD
+	*/
 	:global(.image-btn) {
 		background: var(--color-bg-alt);
 		border: 1px solid var(--color-border);
@@ -34,4 +38,4 @@
 		border-color: var(--color-link);
 		transform: translateY(-1px);
 	}
-</style> 
+</style>

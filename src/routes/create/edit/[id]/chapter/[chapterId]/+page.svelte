@@ -15,7 +15,6 @@
 	let chapterId = '';
 	$: chapterId = $page.params.chapterId;
 
-	// Modes: 'preview', 'add', 'edit'
 	let mode: 'preview' | 'add' | 'edit' = 'preview';
 	let editingBlockId: string | null = null;
 	let editorContent = '';
@@ -32,7 +31,9 @@
 		if ($user?.usr?.id) {
 			userId = $user.usr.id;
 		} else {
-			const { data: userData } = await import('$lib/supabaseClient').then(m => m.supabase.auth.getUser());
+			const { data: userData } = await import('$lib/supabaseClient').then((m) =>
+				m.supabase.auth.getUser()
+			);
 			userId = userData.user?.id;
 		}
 		if (!userId) {
@@ -93,12 +94,14 @@
 		error = '';
 	}
 	function handleEditClick(blockId: string) {
-		const block = blocks.find(b => b.id === blockId);
+		const block = blocks.find((b) => b.id === blockId);
 		if (!block) return;
 		mode = 'edit';
 		editingBlockId = blockId;
 		editorContent = block.content;
-		editorStyles = block.styles ? JSON.stringify(block.styles, null, 2) : JSON.stringify(defaultStyles, null, 2);
+		editorStyles = block.styles
+			? JSON.stringify(block.styles, null, 2)
+			: JSON.stringify(defaultStyles, null, 2);
 		error = '';
 	}
 	function handleCancel() {
@@ -108,7 +111,7 @@
 		editorStyles = JSON.stringify(defaultStyles, null, 2);
 		error = '';
 	}
-	async function handleSave(e: CustomEvent<{ value: string, styles: string }>) {
+	async function handleSave(e: CustomEvent<{ value: string; styles: string }>) {
 		const value = e.detail.value;
 		let stylesObj = {};
 		try {
@@ -122,7 +125,9 @@
 		if ($user?.usr?.id) {
 			userId = $user.usr.id;
 		} else {
-			const { data: userData } = await import('$lib/supabaseClient').then(m => m.supabase.auth.getUser());
+			const { data: userData } = await import('$lib/supabaseClient').then((m) =>
+				m.supabase.auth.getUser()
+			);
 			userId = userData.user?.id;
 		}
 		if (!userId) {
@@ -151,7 +156,7 @@
 				blocks = blocks.map((b) =>
 					b.id === editingBlockId
 						? { ...b, content: value, styles: stylesObj, updated_at: nowIso }
-					: b
+						: b
 				);
 				editingBlockId = null;
 			}
@@ -184,7 +189,8 @@
 			<div class="block-wait-msg-info">
 				<span class="wait-icon" aria-hidden="true">⏳</span>
 				<span>
-					<span class="block-wait-title">You can add a new block every {timeLimit} minutes.</span><br />
+					<span class="block-wait-title">You can add a new block every {timeLimit} minutes.</span
+					><br />
 					{#if timeUntilNextBlock}
 						Next block available in <b>{timeUntilNextBlock}</b>
 					{/if}
@@ -198,7 +204,7 @@
 				on:save={handleSave}
 				on:cancel={handleCancel}
 				loading={editorLoading}
-				error={error}
+				{error}
 				draftKey={`block-editor-draft-${chapterId}-add`}
 				showDraftStatus={true}
 			/>
@@ -214,7 +220,7 @@
 							on:save={handleSave}
 							on:cancel={handleCancel}
 							loading={editorLoading}
-							error={error}
+							{error}
 							draftKey={`block-editor-draft-${chapterId}-${block.id}`}
 							showDraftStatus={true}
 						/>

@@ -14,7 +14,6 @@
 	let usernames: Record<string, string> = {};
 
 	onMount(async () => {
-		// Fetch usernames for all comments that don't have them
 		for (const comment of comments) {
 			if (!comment.username) {
 				const username = await usernameCache.getUsername(comment.commenter_id);
@@ -61,13 +60,12 @@
 				.order('created_at', { ascending: true });
 
 			if (data) {
-				comments = data.map(c => ({
+				comments = data.map((c) => ({
 					id: c.id,
 					commenter_id: c.commenter_id,
 					comment: c.comment
 				}));
 
-				// Fetch usernames for new comments
 				for (const comment of comments) {
 					if (!usernames[comment.commenter_id]) {
 						const username = await usernameCache.getUsername(comment.commenter_id);
@@ -78,7 +76,6 @@
 				}
 			}
 
-			// Send notification
 			const username = await usernameCache.getUsername(commenter_id);
 			if (username) {
 				await sendCommentNotification({
@@ -97,17 +94,15 @@
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div class="global-comments-panel-backdrop" on:click={onClose}></div>
 <div class="global-comments-panel">
-	<button class="close-comments-panel" on:click={onClose} aria-label="Close comments">&times;</button>
+	<button class="close-comments-panel" on:click={onClose} aria-label="Close comments"
+		>&times;</button
+	>
 	<h4>Comments</h4>
 	{#if comments?.length}
 		<ul>
 			{#each comments as c}
 				<li>
-					<a 
-						href="/profile/{c.username}" 
-						class="comment-user"
-						title="View profile"
-					>
+					<a href="/profile/{c.username}" class="comment-user" title="View profile">
 						{usernames[c.commenter_id] ?? c.username ?? c.commenter_id.slice(0, 8)}
 					</a>
 					<span class="comment-text">{c.comment}</span>
@@ -261,4 +256,4 @@
 			padding: 1.2em 0.5em 1em 0.5em;
 		}
 	}
-</style> 
+</style>

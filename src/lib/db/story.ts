@@ -9,7 +9,6 @@ export type Story = Database['public']['Tables']['stories']['Row'] & {
 export type Chapter = Database['public']['Tables']['chapters']['Row'];
 export type Block = Database['public']['Tables']['blocks']['Row'];
 
-// Add this type for the query result
 type StoryWithReactions = {
   id: string;
   title: string;
@@ -30,7 +29,7 @@ export async function fetchStories({ ageRating = '', sort = 'newest', currentPag
   is_published?: boolean;
   creator?: string
 }) {
-  // Get total count
+
   let countQuery = supabase
     .from('stories')
     .select('id', { count: 'exact', head: true })
@@ -42,7 +41,7 @@ export async function fetchStories({ ageRating = '', sort = 'newest', currentPag
   const totalItems = count || 0;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
-  // Fetch stories
+
   let query = supabase
     .from('stories')
     .select(`
@@ -206,9 +205,7 @@ export async function updateBlock(blockId: string, updateData: Partial<Block>) {
   return data as Block;
 }
 
-// Fetch a story by author username and slug (from title)
 export async function fetchStoryByAuthorAndSlug(username: string, slug: string) {
-  // Get the author's account_id from the username
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('account_id')
@@ -216,7 +213,6 @@ export async function fetchStoryByAuthorAndSlug(username: string, slug: string) 
     .single();
   if (profileError || !profile) throw new Error('Author not found');
 
-  // Get the story by user_id and slugified title
   const { data: stories, error: storyError } = await supabase
     .from('stories')
     .select('*')
@@ -225,7 +221,6 @@ export async function fetchStoryByAuthorAndSlug(username: string, slug: string) 
   if (storyError) throw new Error(storyError.message);
   if (!stories || stories.length === 0) throw new Error('Story not found');
 
-  // Find the story with the matching slug
   const story = stories.find((s) => slugify(s.title) === slug);
   if (!story) throw new Error('Story not found');
   return story as Story;

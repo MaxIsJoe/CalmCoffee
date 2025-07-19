@@ -1,10 +1,7 @@
 <script lang="ts">
-	// No props needed for now, but could add size/color in the future
-	// Add a minWidth prop (default 12px)
 	export let minSize: string = '6px';
 </script>
 
-<!-- Simple SVG avatar placeholder -->
 <svg
 	viewBox="0 0 40 40"
 	fill="none"
@@ -19,7 +16,6 @@
 <style>
 	svg {
 		display: block;
-
 		border-radius: 50%;
 		background: #e0e0e0;
 	}

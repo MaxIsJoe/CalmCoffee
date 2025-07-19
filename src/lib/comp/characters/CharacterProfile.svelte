@@ -82,7 +82,6 @@
 		return character.gender + gender_flags[character.gender] || '❓';
 	}
 
-	// Load creator username if not in preview mode
 	$: if (!previewMode && character?.creator) {
 		usernameCache.getUsername(character.creator).then((username) => {
 			creatorUsername = username;
@@ -256,13 +255,6 @@
 		margin-right: 0.7rem;
 		letter-spacing: 0.01em;
 	}
-	.info-fields ul {
-		margin: 0.2rem 0 0 0.7rem;
-		padding: 0;
-	}
-	.info-fields li {
-		margin-bottom: 0.15rem;
-	}
 	.info-fields a {
 		color: var(--color-link);
 		text-decoration: underline;
@@ -305,40 +297,6 @@
 		margin: 0;
 		color: var(--color-character-name, var(--color-text));
 		text-align: center;
-	}
-	.character-meta {
-		display: flex;
-		gap: 1.2rem;
-		font-size: 1.05rem;
-		color: var(--color-secondary);
-		justify-content: center;
-	}
-	.character-type {
-		background: var(--color-bg-alt);
-		border-radius: 4px;
-		padding: 0.1rem 0.7rem;
-		font-weight: 500;
-		color: var(--color-character-type, var(--color-link));
-	}
-	.character-dob {
-		background: var(--color-bg-alt);
-		border-radius: 4px;
-		padding: 0.1rem 0.7rem;
-		color: var(--color-link);
-	}
-	.character-creator {
-		background: var(--color-bg-alt);
-		border-radius: 4px;
-		padding: 0.1rem 0.7rem;
-		color: var(--color-link);
-		font-weight: 500;
-	}
-	.character-creator a {
-		color: var(--color-link);
-		text-decoration: underline;
-	}
-	.character-creator a:hover {
-		color: var(--color-link-hover);
 	}
 	.character-desc {
 		width: 100%;

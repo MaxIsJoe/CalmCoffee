@@ -17,7 +17,6 @@
 	let mobileMenuOpen = false;
 	let navLoading = true;
 
-	// Theme logic (sync with PreferencesSettings)
 	const THEME_VARIABLES = [
 		'--color-bg',
 		'--color-bg-alt',
@@ -98,14 +97,12 @@
 		}
 	}
 
-	// Subscribe to real-time notifications
 	onMount(() => {
 		async function setup() {
 			navLoading = true;
 			await RefreshStore();
 			navLoading = false;
 
-			// Listen for auth changes
 			supabase.auth.onAuthStateChange(async (_event, session) => {
 				const supaUser = session?.user ?? null;
 				if (supaUser) {
@@ -119,7 +116,7 @@
 		setup();
 	});
 
-	$userStore; // subscribe for reactivity
+	$userStore;
 
 	$: username = $userStore?.profile?.username ?? null;
 	$: avatarUrl = $userStore?.profile?.avatar_url ?? null;

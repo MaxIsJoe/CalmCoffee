@@ -9,16 +9,12 @@ export const load: PageServerLoad = async ({ params }) => {
 		throw kitError(404, 'Blog post not found');
 	}
 
-	// Ensure avatar URL is absolute
 	let avatarUrl = blog.profiles?.avatar_url;
 	if (avatarUrl && !avatarUrl.startsWith('http')) {
 		avatarUrl = `https://calm-coffee.vercel.app${avatarUrl}`;
 	}
 
-	// Process content and extract images
 	const { content: processedContent, images } = extractImages(blog.content);
-
-	// Ensure image URLs are absolute
 	const processedImages = images.map(img =>
 		img.startsWith('http') ? img : `https://calm-coffee.vercel.app${img}`
 	);
