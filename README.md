@@ -13,7 +13,6 @@ A platform for writers who easily get burnt-out while writing fiction, and rolep
 - [SvelteKit](https://kit.svelte.dev/) (frontend framework)
 - [Supabase](https://supabase.com/) (database & auth)
 
----
 
 ## Getting Started
 
@@ -35,7 +34,6 @@ A platform for writers who easily get burnt-out while writing fiction, and rolep
 5. **Open in your browser:**
    - Visit [http://localhost:5173](http://localhost:5173) (or the port shown in your terminal)
 
----
 
 ## Contributing
 
@@ -45,13 +43,10 @@ We welcome contributions! To get started:
 - Follow the [Community Rules](https://github.com/maxisjoe/CalmCoffee/blob/main/static/text/rules.md) and code of conduct.
 - Submit a pull request with a clear description of your changes.
 
----
 
 ## License
 
 This project is licensed under the [GNU General Public License v3.0 (GPL-3.0)](LICENSE).
-
----
 
 ## Links
 
