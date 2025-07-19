@@ -19,7 +19,7 @@ A platform for writers who easily get burnt-out while writing fiction, and rolep
 
 1. **Clone the repo:**
    ```bash
-   git clone https://github.com/maxisjoe/calm-coffee.git
+   git clone https://github.com/maxisjoe/CalmCoffee.git
    cd calm-coffee
    ```
 2. **Install dependencies:**
