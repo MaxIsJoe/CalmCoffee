@@ -12,7 +12,6 @@ A platform for writers who easily get burnt-out while writing fiction, and rolep
 
 - [SvelteKit](https://kit.svelte.dev/) (frontend framework)
 - [Supabase](https://supabase.com/) (database & auth)
-- Custom Markdown system for rich text and story blocks
 
 ---
 
