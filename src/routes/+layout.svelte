@@ -10,20 +10,53 @@
 	let { children } = $props();
 	let showBanner = $state(true);
 	let versionInfo = $state<{ hash: string; message: string; timestamp: string } | null>(null);
-	let wordPopup = $state<{ word: string, definition: string, synonyms: string[], x: number, y: number } | null>(null);
+	let wordPopup = $state<{
+		word: string;
+		definition: string;
+		synonyms: string[];
+		x: number;
+		y: number;
+	} | null>(null);
 
 	// Theme switching logic
 	let theme = $state('light');
 
-	function getCaretCoordinates(element: HTMLInputElement | HTMLTextAreaElement, selectionEnd: number) {
+	function getCaretCoordinates(
+		element: HTMLInputElement | HTMLTextAreaElement,
+		selectionEnd: number
+	) {
 		// Create a mirror div for accurate caret position
 		const isInput = element.nodeName === 'INPUT';
 		const div = document.createElement('div');
 		const style = getComputedStyle(element);
 		for (const prop of [
-			'boxSizing', 'width', 'height', 'overflowX', 'overflowY', 'borderTopWidth', 'borderRightWidth', 'borderBottomWidth', 'borderLeftWidth',
-			'paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft', 'fontStyle', 'fontVariant', 'fontWeight', 'fontStretch', 'fontSize',
-			'fontSizeAdjust', 'lineHeight', 'fontFamily', 'textAlign', 'textTransform', 'textIndent', 'textDecoration', 'letterSpacing', 'wordSpacing'
+			'boxSizing',
+			'width',
+			'height',
+			'overflowX',
+			'overflowY',
+			'borderTopWidth',
+			'borderRightWidth',
+			'borderBottomWidth',
+			'borderLeftWidth',
+			'paddingTop',
+			'paddingRight',
+			'paddingBottom',
+			'paddingLeft',
+			'fontStyle',
+			'fontVariant',
+			'fontWeight',
+			'fontStretch',
+			'fontSize',
+			'fontSizeAdjust',
+			'lineHeight',
+			'fontFamily',
+			'textAlign',
+			'textTransform',
+			'textIndent',
+			'textDecoration',
+			'letterSpacing',
+			'wordSpacing'
 		]) {
 			// @ts-ignore
 			div.style[prop] = style[prop];
@@ -87,7 +120,8 @@
 				if (selection && selection.rangeCount > 0) {
 					const text = selection.toString().trim();
 					if (text && /^\w+$/.test(text)) {
-						let x = 0, y = 0;
+						let x = 0,
+							y = 0;
 						if (e instanceof MouseEvent) {
 							x = e.clientX;
 							y = e.clientY;
@@ -122,7 +156,9 @@
 				}
 			};
 		})();
-		return () => { if (cleanup) cleanup(); };
+		return () => {
+			if (cleanup) cleanup();
+		};
 	});
 
 	async function fetchWordInfo(word: string, x: number, y: number) {
@@ -140,14 +176,18 @@
 		let definition = '';
 		let synonyms: string[] = [];
 		try {
-			const defRes = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`);
+			const defRes = await fetch(
+				`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`
+			);
 			if (defRes.ok) {
 				const defData = await defRes.json();
 				definition = defData[0]?.meanings?.[0]?.definitions?.[0]?.definition || '';
 			} else {
 				definition = '';
 			}
-			const synRes = await fetch(`https://api.datamuse.com/words?rel_syn=${encodeURIComponent(word)}`);
+			const synRes = await fetch(
+				`https://api.datamuse.com/words?rel_syn=${encodeURIComponent(word)}`
+			);
 			if (synRes.ok) {
 				const synData = await synRes.json();
 				synonyms = synData.map((s: any) => s.word);
@@ -189,7 +229,7 @@
 		synonyms={wordPopup.synonyms}
 		x={wordPopup.x}
 		y={wordPopup.y}
-		on:close={() => wordPopup = null}
+		on:close={() => (wordPopup = null)}
 	/>
 {/if}
 <main>
@@ -213,7 +253,10 @@
 		<div class="footer-section">
 			<h4>Connect</h4>
 			<ul>
-				<li><a href="https://github.com/maxisjoe/calm-coffee" target="_blank" rel="noopener">GitHub</a></li>
+				<li>
+					<a href="https://github.com/maxisjoe/calm-coffee" target="_blank" rel="noopener">GitHub</a
+					>
+				</li>
 				<li><a href="https://www.maxisjoe.xyz/maxfund">Donate</a></li>
 			</ul>
 		</div>
@@ -222,7 +265,11 @@
 		<p>&copy; {new Date().getFullYear()} MaxIsJoe. All rights reserved.</p>
 		{#if versionInfo}
 			<p class="version-info">
-				Version: <a href={`https://github.com/maxisjoe/calm-coffee/commit/${versionInfo.hash}`} target="_blank" rel="noopener">{versionInfo.hash}</a>
+				Version: <a
+					href={`https://github.com/maxisjoe/CalmCoffee/commit/${versionInfo.hash}`}
+					target="_blank"
+					rel="noopener">{versionInfo.hash}</a
+				>
 				- {versionInfo.message}
 				<br />
 				<span class="build-time">Built: {new Date(versionInfo.timestamp).toLocaleString()}</span>
@@ -241,7 +288,16 @@
 		flex-direction: column;
 		margin: 0;
 		padding: 0;
-		font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+		font-family:
+			'Inter',
+			-apple-system,
+			BlinkMacSystemFont,
+			'Segoe UI',
+			Roboto,
+			Oxygen,
+			Ubuntu,
+			Cantarell,
+			sans-serif;
 		-webkit-font-smoothing: antialiased;
 		-moz-osx-font-smoothing: grayscale;
 	}
