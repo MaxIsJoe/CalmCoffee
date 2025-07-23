@@ -206,7 +206,7 @@ function handleHeadings(html: string, mergedStyles: Required<CoffeeMarkdownStyle
 }
 
 function handleBlockquotes(html: string, mergedStyles: Required<CoffeeMarkdownStyles>): string {
-	return html.replace(/(^|\n)(>\N*(?:\n>\N*)*)/g, (match, sep, quoteBlock) => {
+	return html.replace(/(^|\n)(>[^\n]*(?:\n>[^\n]*)*)/g, (match, sep, quoteBlock) => {
 		const lines = quoteBlock.split('\n').map((line: string) => line.replace(/^>\s?/, '').trim());
 		const content = lines.join(' ');
 		return `${sep}<blockquote style="${mergedStyles.blockquote}">${content}</blockquote>`;
@@ -271,7 +271,7 @@ function handleParagraphs(html: string, mergedStyles: Required<CoffeeMarkdownSty
 	html = html.replace(/(?:\r?\n){2,}/g, '\n\n');
 
 	// Process paragraphs: look for blocks of text separated by two or more newlines, or at the start of the string.
-	return html.replace(/(^|(?:\n{2,}))(\N+(?:[\n]\N+)*)/g, (m, sep, lineContent) => {
+	return html.replace(/(^|(?:\n{2,}))([^\n]+(?:[\n][^\n]+)*)/g, (m, sep, lineContent) => {
 		// Replace single newlines with <br> within the paragraph
 		const processedLineContent = lineContent.trim().replace(/\n/g, '<br>');
 		return `${sep}<p style="${mergedStyles.p}">${processedLineContent}</p>`;
@@ -418,7 +418,7 @@ function handlePoetry(html: string, mergedStyles: Required<CoffeeMarkdownStyles>
 
 function handleTables(html: string, mergedStyles: Required<CoffeeMarkdownStyles>): string {
 	// Regex to match markdown tables (header, separator, at least one row)
-	const tableRegex = /(^|\n)(\|\N+\|[ \t]*\n\|[ \t]*(:?-+:?\|)+[ \t]*\n(?:\|\N+\|[ \t]*(?:\n|$))+)/gm;
+	const tableRegex = /(^|\n)(\|[^\n]+\|[ \t]*\n\|[ \t]*(:?-+:?\|)+[ \t]*\n(?:\|[^\n]+\|[ \t]*(?:\n|$))+)/gm;
 
 	return html.replace(tableRegex, (match: string, sep: string, tableBlock: string) => {
 		const lines: string[] = tableBlock.trim().split(/\n/).map((l: string) => l.trim());
