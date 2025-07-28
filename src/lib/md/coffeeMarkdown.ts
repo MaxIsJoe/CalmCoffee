@@ -112,7 +112,7 @@ function escapeHtml(md: string): string {
 	const allowedTags = ['u', 'b', 'i', 'code', 'pre', 'custom', 'bgc', 'url', 'br', 'align', 'columns', 'poetry', 'background'];
 
 	return md.replace(/<([^>]+)>/g, (match, tagContent) => {
-		const tagNameMatch = tagContent.match(/^\/?([a-zA-Z0-9-]+)/);
+		const tagNameMatch = tagContent.match(/^\/?(\w+)/);
 		if (tagNameMatch) {
 			const tagName = tagNameMatch[1].toLowerCase();
 			if (allowedTags.includes(tagName)) {
@@ -197,9 +197,9 @@ function handleInlineCode(html: string, mergedStyles: Required<CoffeeMarkdownSty
 
 function handleHeadings(html: string, mergedStyles: Required<CoffeeMarkdownStyles>): string {
 	return html
-		.replace(/^###### (.*)$/gm, `<h6 style="${mergedStyles.h6}">$1</h6>`)
-		.replace(/^##### (.*)$/gm, `<h5 style="${mergedStyles.h5}">$1</h5>`)
-		.replace(/^#### (.*)$/gm, `<h4 style="${mergedStyles.h4}">$1</h4>`)
+		.replace(/^#{6} (.*)$/gm, `<h6 style="${mergedStyles.h6}">$1</h6>`)
+		.replace(/^#{5} (.*)$/gm, `<h5 style="${mergedStyles.h5}">$1</h5>`)
+		.replace(/^#{4} (.*)$/gm, `<h4 style="${mergedStyles.h4}">$1</h4>`)
 		.replace(/^### (.*)$/gm, `<h3 style="${mergedStyles.h3}">$1</h3>`)
 		.replace(/^## (.*)$/gm, `<h2 style="${mergedStyles.h2}">$1</h2>`)
 		.replace(/^# (.*)$/gm, `<h1 style="${mergedStyles.h1}">$1</h1>`);
@@ -271,7 +271,7 @@ function handleParagraphs(html: string, mergedStyles: Required<CoffeeMarkdownSty
 	html = html.replace(/(?:\r?\n){2,}/g, '\n\n');
 
 	// Process paragraphs: look for blocks of text separated by two or more newlines, or at the start of the string.
-	return html.replace(/(^|(?:\n{2,}))([^\n][^\n]*([\n][^\n]+)*)/g, (m, sep, lineContent) => {
+	return html.replace(/(^|(?:\n{2,}))([^\n]+(?:[\n][^\n]+)*)/g, (m, sep, lineContent) => {
 		// Replace single newlines with <br> within the paragraph
 		const processedLineContent = lineContent.trim().replace(/\n/g, '<br>');
 		return `${sep}<p style="${mergedStyles.p}">${processedLineContent}</p>`;
