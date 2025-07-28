@@ -71,7 +71,7 @@ export function coffeeMarkdown(md: string, styles: CoffeeMarkdownStyles = {}): s
 		return '';
 	}
 
-	md = md.replace(/\r\n?/g, '\n');
+	md = md.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
 
 	let html = escapeHtml(md);
 
