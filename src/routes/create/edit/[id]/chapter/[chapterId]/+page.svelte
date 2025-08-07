@@ -177,14 +177,6 @@
 	<div class="modern-error">{error}</div>
 {:else}
 	<div class="chapter-blocks-layout">
-		<div class="chapter-blocks-header">
-			<h2>Blocks in Chapter</h2>
-			{#if mode === 'preview'}
-				<button class="add-block-btn" on:click={handleAddClick} disabled={!canCreateBlock}>
-					Add Block
-				</button>
-			{/if}
-		</div>
 		{#if !canCreateBlock && mode === 'preview'}
 			<div class="block-wait-msg-info">
 				<span class="wait-icon" aria-hidden="true">⏳</span>
@@ -197,6 +189,14 @@
 				</span>
 			</div>
 		{/if}
+		<div class="chapter-blocks-header">
+			<h2>Blocks in Chapter</h2>
+			{#if mode === 'preview'}
+				<button class="add-block-btn" on:click={handleAddClick} disabled={!canCreateBlock}>
+					Add Block
+				</button>
+			{/if}
+		</div>
 		{#if mode === 'add'}
 			<BlockEditor
 				value={editorContent}
@@ -253,14 +253,14 @@
 		margin: 0 auto;
 	}
 	.chapter-blocks-header {
-		width: 90%;
+		width: 95%;
 		background: var(--color-block-list-bg);
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
 		gap: 1.5rem;
-		padding: 2rem 2vw 1.2rem 2vw;
-		margin: 0;
+		padding: 2rem 1.2rem 1.2rem 2.2rem;
+		margin: 12px;
 		border-bottom: 1.5px solid var(--color-block-list-shadow);
 	}
 	.add-block-btn {
