@@ -236,6 +236,7 @@
 		border-left: 1px solid var(--color-editor-header-border);
 		overflow-y: auto;
 		transition: width 0.1s ease;
+		word-break: keep-all;
 	}
 
 	.resize-handle {
