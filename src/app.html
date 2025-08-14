@@ -7,6 +7,51 @@
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+		
+		<script>
+			(function() {
+				const savedTheme = localStorage.getItem('theme');
+				
+				if (savedTheme) {
+					if (savedTheme === 'Morning Coffee' || savedTheme === 'light') {
+						document.documentElement.setAttribute('data-theme', 'light');
+					} else if (savedTheme === 'Dark Chocolate' || savedTheme === 'dark') {
+						document.documentElement.setAttribute('data-theme', 'dark');
+					} else if (savedTheme === 'Blueberry Frost') {
+						document.documentElement.setAttribute('data-theme', 'caramel');
+					} else if (savedTheme === 'Strawberry Frab') {
+						document.documentElement.setAttribute('data-theme', 'strawberry-frap');
+					} else {
+						document.documentElement.setAttribute('data-theme', 'custom');
+						
+						const customThemesRaw = localStorage.getItem('customThemes');
+						if (customThemesRaw) {
+							try {
+								const customThemes = JSON.parse(customThemesRaw);
+								const customTheme = customThemes.find(t => t.name === savedTheme);
+								if (customTheme) {
+									// Apply custom theme variables
+									const style = document.createElement('style');
+									style.id = 'custom-theme-style';
+									let css = ':root {';
+									for (const [variable, value] of Object.entries(customTheme.variables)) {
+										css += `${variable}: ${value};`;
+									}
+									css += '}';
+									style.textContent = css;
+									document.head.appendChild(style);
+								}
+							} catch (e) {
+								document.documentElement.setAttribute('data-theme', 'light');
+							}
+						}
+					}
+				} else {
+					document.documentElement.setAttribute('data-theme', 'light');
+				}
+			})();
+		</script>
+		
 		%sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover">
