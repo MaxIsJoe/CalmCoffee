@@ -21,6 +21,16 @@
 	// Theme switching logic
 	let theme = $state('light');
 
+	// Check if banner was previously dismissed
+	function checkBannerDismissed() {
+		if (typeof window !== 'undefined') {
+			const dismissed = localStorage.getItem('banner-dismissed');
+			if (dismissed === 'true') {
+				showBanner = false;
+			}
+		}
+	}
+
 	function getCaretCoordinates(
 		element: HTMLInputElement | HTMLTextAreaElement,
 		selectionEnd: number
@@ -104,6 +114,9 @@
 	}
 
 	onMount(() => {
+		// Check if banner was previously dismissed
+		checkBannerDismissed();
+
 		let cleanup: (() => void) | undefined;
 		(async () => {
 			try {
@@ -207,6 +220,10 @@
 
 	function dismissBanner() {
 		showBanner = false;
+		// Save the preference to localStorage
+		if (typeof window !== 'undefined') {
+			localStorage.setItem('banner-dismissed', 'true');
+		}
 	}
 
 	function clearWordPopup() {
