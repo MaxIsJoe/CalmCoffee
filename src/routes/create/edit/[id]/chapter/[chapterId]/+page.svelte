@@ -23,7 +23,7 @@
 	let nextBlockTime: Date | null = null;
 	let timeUntilNextBlock = '';
 
-	const timeLimit: number = 25;
+	const timeLimit: number = 15;
 
 	onMount(async () => {
 		loading = true;
