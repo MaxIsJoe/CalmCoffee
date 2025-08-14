@@ -147,6 +147,12 @@
 				});
 				blocks = [...blocks, block];
 				canCreateBlock = false;
+				nextBlockTime = new Date(new Date().getTime() + timeLimit * 60 * 1000);
+				updateTimeUntilNextBlock();
+				if (timerInterval) {
+					clearInterval(timerInterval);
+				}
+				timerInterval = setInterval(updateTimeUntilNextBlock, 1000);
 			} else if (mode === 'edit' && editingBlockId) {
 				const block = await updateBlock(editingBlockId, {
 					content: value,
